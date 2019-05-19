@@ -62,6 +62,9 @@ function main() {
 		setTimeout(main, 2000); //Check every 3 seconds if ingame
 		return;
 	}
+	else {
+		errorCounter = 0;
+	}
 	
 	if(isDisconnect()) {
 		goToLobby();
@@ -71,15 +74,20 @@ function main() {
 	
 	if(operations == null || operations.length == 0) {
 		errorCounter++;
-		if(errorCounter > 60) { //2 minutes not own turn: Reload Page TODO:: Might restart when in Riichi
-			goToLobby();
+		if(getTilesLeft() == lastTilesLeft) { //1 minute no tile drawn
+			if(errorCounter > 30) {
+				goToLobby();
+			}
+		}
+		else {
+			lastTilesLeft = getTilesLeft();
+			errorCounter = 0;
 		}
 		checkForEnd();
 		log("Waiting for own turn, sleep 2 seconds.");
 		setTimeout(main, 2000);
 		return;
 	}
-	errorCounter = 0;
 	
 	log("");
 	log("##### OWN TURN #####");

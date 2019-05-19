@@ -176,6 +176,7 @@ function getTilePriorities(inputHand) {
 		return chiitoitsuPriorities();
 	}
 	
+	var callTriples = parseInt(getTriplesInHand(calls[0]).length/3);
 	
 	var tiles = [];
 	for (var i = 0; i < inputHand.length; i++){ //Create 13 Tile hands
@@ -186,17 +187,17 @@ function getTilePriorities(inputHand) {
 		var combinations = getTriplesAndPairsInHand(hand);
 		var triples = combinations.triples;
 		var pairs = combinations.pairs;
-		
-		var callTriples = getTriplesInHand(calls[0]);
-		
-		var baseEfficiency = parseInt((triples.length / 3));
+
+		var baseEfficiency = parseInt((triples.length / 3)) + callTriples;
 		baseEfficiency = baseEfficiency > 3.5 ? 3.5 : baseEfficiency;
 		baseEfficiency += (pairs.length / 2) > 0 ? PAIR_VALUE : 0; //TODO: Priorize Pairs when Triples >= 3 (When Pair: 4 Triples = 3.5)
-		efficiency = baseEfficiency + parseInt(callTriples.length/3);
+		efficiency = baseEfficiency;
 		var baseDora = getNumberOfDorasInHand(triples.concat(pairs, calls[0]));
 		var doraValue = baseDora;
 		var baseYaku = getYaku(hand);
 		var yaku = baseYaku;
+		
+		log(baseEfficiency);
 		
 		//More accurat but slower with triples in hand
 		var newHand = hand;//getHandWithoutTriples(hand, triples);
@@ -215,7 +216,7 @@ function getTilePriorities(inputHand) {
 			var triples2 = combinations2.triples;
 			var pairs2 = combinations2.pairs;
 			
-			var e2 = parseInt((triples2.length / 3));
+			var e2 = parseInt((triples2.length / 3)) + callTriples;
 			e2 = e2 > 3.5 ? 3.5 : e2;
 			e2 += (pairs2.length / 2) > 0 ? PAIR_VALUE : 0;
 			
@@ -289,7 +290,7 @@ function getTilePriorities(inputHand) {
 			var triples3 = combinations3.triples;
 			var pairs3 = combinations3.pairs;
 			
-			var e3 = parseInt((triples3.length / 3));
+			var e3 = parseInt((triples3.length / 3)) + callTriples;
 			e3 = e3 > 3.5 ? 3.5 : e3;
 			e3 += (pairs3.length / 2) > 0 ? PAIR_VALUE : 0;
 			

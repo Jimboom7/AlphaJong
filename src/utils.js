@@ -447,10 +447,6 @@ function getNameForType(type) {
 	}
 }
 
-function isInGame() {
-	return view.DesktopMgr.Inst != null;
-}
-
 function isDebug() {
 	return typeof DEBUG != "undefined";
 }

@@ -43,7 +43,7 @@ function runTestcase() {
 	strategy = STRATEGIES.GENERAL;
 	EFFICIENCY_VALUE = 1;
 	YAKU_VALUE = 1;
-	DORA_VALUE = 0.5;
+	DORA_VALUE = 0.3;
 	SAFETY_VALUE = 0.5;
 	TEST_DANGER_LEVEL = 1;
 	BIG_HAND_MODIFIER = 0;
@@ -157,7 +157,7 @@ function runTestcase() {
 		{index: 2, type: 1, dora: false}, {index: 3, type: 1, dora: false},
 		{index: 4, type: 1, dora: false}, {index: 6, type: 1, dora: false}, {index: 7, type: 1, dora: false},
 		{index: 3, type: 2, dora: false}, {index: 4, type: 2, dora: false}, {index: 5, type: 2, dora: false}];
-		var expected = "7m";
+		var expected = "6m";
 		break;
 	case 11:
 		log("Testcase 11: Check Chi Pair Overlap 2");
@@ -191,7 +191,7 @@ function runTestcase() {
 		{index: 2, type: 1, dora: false}, {index: 3, type: 1, dora: false}, {index: 4, type: 1, dora: false},
 		{index: 5, type: 1, dora: false}, {index: 6, type: 1, dora: false}, {index: 7, type: 1, dora: false},
 		{index: 3, type: 2, dora: false}, {index: 4, type: 2, dora: false}];
-		var expected = "7m";
+		var expected = "1m";
 		break;
 	case 14:
 		log("Testcase 14: Example 1");
@@ -316,6 +316,14 @@ function runTestcase() {
 		ownHand = getHandFromString("11189m13789p123s");
 		discards = [[],getHandFromString("1m"),getHandFromString("1m"),getHandFromString("1m")];
 		var expected = "9m";
+		break;
+	case 28:
+		log("Testcase 28: Open Hand");
+		dora = [{index: 1, type: 1, dora: false}];
+		ownHand = getHandFromString("2256p123s2p");
+		calls[0] = getHandFromString("111444m");
+
+		var expected = "2p";
 		break;
 	default:
 		testsRunning = false;

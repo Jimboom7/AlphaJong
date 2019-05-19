@@ -68,6 +68,7 @@ var tilesLeft = 0; //tileCounter
 var visibleTiles = []; //Tiles that are visible
 var isPlayerRiichi = [false, false, false, false];
 var errorCounter = 0; //Counter to check if bot is working
+var lastTilesLeft = 0;
 
 //TEST
 var testRunning = false;

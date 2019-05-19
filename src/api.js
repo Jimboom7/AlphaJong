@@ -89,3 +89,7 @@ function isDisconnect() {
 function isPlayerRiichi(player) { //Problem: Does not detect Riichi when it was just called by the previous player (Stick not visible yet)
 	return view.DesktopMgr.Inst.players[player].liqibang._activeInHierarchy || getDiscardsOfPlayer(player).last_is_liqi;
 }
+
+function isInGame() {
+	return view.DesktopMgr.Inst != null;
+}
