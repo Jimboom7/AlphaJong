@@ -180,6 +180,7 @@ function getTilePriorities(inputHand) {
 	
 	var tiles = [];
 	for (var i = 0; i < inputHand.length; i++){ //Create 13 Tile hands
+
 		var hand = [...inputHand];
 		var newTiles1 = getUsefulTilesForDouble(hand); //For all single tiles: Find tiles that make them doubles
 		hand.splice(i, 1);
@@ -197,25 +198,24 @@ function getTilePriorities(inputHand) {
 		var baseYaku = getYaku(hand);
 		var yaku = baseYaku;
 		
-		log(baseEfficiency);
-		
 		//More accurat but slower with triples in hand
 		var newHand = hand;//getHandWithoutTriples(hand, triples);
 
 		var valueForTile = []; //List of tiles and their value, for second step
 		var tileCombinations = []; //List of combinations for second step
 		for(var j = 0; j < newTiles1.length; j++) { //TODO: Ignore Pairs in second step?
+
 			var numberOfTiles1 = getNumberOfNonFuritenTilesAvailable(newTiles1[j].index, newTiles1[j].type);
 			if(numberOfTiles1 <= 0) {
 				continue;
 			}
 			
 			newHand.push(newTiles1[j]);
-			
+
 			var combinations2 = getTriplesAndPairsInHand(newHand);
 			var triples2 = combinations2.triples;
 			var pairs2 = combinations2.pairs;
-			
+
 			var e2 = parseInt((triples2.length / 3)) + callTriples;
 			e2 = e2 > 3.5 ? 3.5 : e2;
 			e2 += (pairs2.length / 2) > 0 ? PAIR_VALUE : 0;

@@ -29,6 +29,7 @@ if(!isDebug()) {
 
 //TODO LIST:
 
+//When Calling Chi: Check if discard is valid
 //Calls with Options
 //More value for pairs (see strategy guides)
 //Before Riichi: Check if Furiten
@@ -61,9 +62,6 @@ function main() {
 		}
 		setTimeout(main, 2000); //Check every 3 seconds if ingame
 		return;
-	}
-	else {
-		errorCounter = 0;
 	}
 	
 	if(isDisconnect()) {

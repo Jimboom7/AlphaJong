@@ -9,17 +9,17 @@ function getYaku(inputHand) {
 	var yakuOpen = 0;
 	var yakuClosed = 0;
 	
-	//1 Han
+	// ### 1 Han ###
 	
 	var triplesAndPairs = getTriplesAndPairsInHand(hand);
-	handWithoutTriples = getHandWithoutTriples(hand, triplesAndPairs.triples);
-	var doubles = getDoublesInHand(handWithoutTriples);
+	//handWithoutTriples = getHandWithoutTriples(hand, triplesAndPairs.triples);
+	handWithoutTriplesAndPairs = getHandWithoutTriples(hand, triplesAndPairs.triples.concat(triplesAndPairs.pairs));
+	var doubles = getDoublesInHand(handWithoutTriplesAndPairs);
 	var tenpai = isTenpai(triplesAndPairs, doubles);
-	
+
 	//Yakuhai
 	//Wind/Dragon Triples
 	//Open
-
 	if(strategy != STRATEGIES.CHIITOITSU) {
 		var yakuhai = getYakuhai(triplesAndPairs.triples);
 		yakuOpen += yakuhai.open;
@@ -40,6 +40,9 @@ function getYaku(inputHand) {
 	
 	//Pinfu (?)
 	//Closed
+	var pinfu = getPinfu(triplesAndPairs, doubles, tenpai);
+	yakuOpen += pinfu.open;
+	yakuClosed += pinfu.closed;
 	
 	//Iipeikou (Identical Sequences in same type)
 	//Closed
@@ -176,4 +179,17 @@ function getTanyao(hand, tenpai) {
 	return {open: tanyao, closed: tanyao};
 }
 
+function getPinfu(triplesAndPairs, doubles, tenpai) {
+	var pinfu = 0;
 
+	if(isClosed && tenpai && parseInt(triplesAndPairs.triples.length/3) == 3 && parseInt(triplesAndPairs.pairs.length/2) == 1 && getPonsInHand(triplesAndPairs.triples).length == 0) { //Should work to detect pinfu
+		doubles = sortHand(doubles);
+		for(var i = 0; i < doubles.length - 1; i++) {
+			if(doubles[i].index > 1 && doubles[i+1].index < 9 && Math.abs(doubles[0].index - doubles[1].index) == 1) {
+				pinfu = 1;
+				break;
+			}
+		}
+	}
+	return {open: 0, closed: pinfu};
+}

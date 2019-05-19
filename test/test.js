@@ -57,7 +57,7 @@ function runTestcase() {
 		{index: 4, type: 1, dora: false}, {index: 5, type: 1, dora: false}, {index: 6, type: 1, dora: false},
 		{index: 4, type: 2, dora: false}, {index: 4, type: 2, dora: false}, {index: 4, type: 2, dora: false},
 		{index: 6, type: 2, dora: false}, {index: 7, type: 2, dora: false}];
-		var expected = "9p";
+		var expected = ["9p"];
 		break;
 	case 2:
 		log("Testcase 2: Standard Hand 2");
@@ -68,7 +68,7 @@ function runTestcase() {
 		{index: 4, type: 2, dora: false}, {index: 4, type: 2, dora: false}, {index: 4, type: 2, dora: false},
 		{index: 6, type: 2, dora: false}, {index: 9, type: 2, dora: false}];
 		discards = [[{index: 9, type: 2, dora: false}],[],[],[]];
-		var expected = "9s";
+		var expected = ["9s"];
 		break;
 	case 3:
 		log("Testcase 3: Keep Pair");
@@ -79,7 +79,7 @@ function runTestcase() {
 		{index: 6, type: 1, dora: false}, {index: 4, type: 2, dora: false}, {index: 5, type: 2, dora: false},
 		{index: 7, type: 2, dora: false}, {index: 8, type: 2, dora: false}];
 
-		var expected = "8s";
+		var expected = ["7s", "8s"];
 		break;
 	case 4:
 		log("Testcase 4: Keep Bridge");
@@ -90,7 +90,7 @@ function runTestcase() {
 		{index: 6, type: 1, dora: false}, {index: 2, type: 2, dora: false}, {index: 3, type: 2, dora: false},
 		{index: 4, type: 2, dora: false}, {index: 6, type: 2, dora: false}];
 		discards = [[],[{index: 6, type: 2, dora: false}],[],[]];
-		var expected = "6s";
+		var expected = ["6s"];
 		break;
 	case 5:
 		log("Testcase 5: Throw away fake bridge");
@@ -101,7 +101,7 @@ function runTestcase() {
 		{index: 6, type: 1, dora: false}, {index: 2, type: 2, dora: false}, {index: 3, type: 2, dora: false},
 		{index: 4, type: 2, dora: false}, {index: 6, type: 2, dora: false}];
 
-		var expected = "9p";
+		var expected = ["9p"];
 		break;
 	case 6:
 		log("Testcase 6: Keep better straight");
@@ -112,7 +112,7 @@ function runTestcase() {
 		{index: 6, type: 1, dora: false}, {index: 2, type: 2, dora: false}, {index: 3, type: 2, dora: false},
 		{index: 4, type: 2, dora: false}, {index: 6, type: 2, dora: false}, {index: 7, type: 2, dora: false}];
 		discards = [[],[{index: 9, type: 0, dora: false}],[],[]];
-		var expected = "9p";
+		var expected = ["9p"];
 		break;
 	case 7:
 		log("Testcase 7: Keep dora for triple");
@@ -123,7 +123,7 @@ function runTestcase() {
 		{index: 4, type: 1, dora: false}, {index: 5, type: 1, dora: false},
 		{index: 6, type: 1, dora: false}, {index: 2, type: 2, dora: false}, {index: 3, type: 2, dora: false},
 		{index: 4, type: 2, dora: false}, {index: 6, type: 2, dora: false}, {index: 7, type: 2, dora: false}];
-		var expected = "5p";
+		var expected = ["5p"];
 		break;
 	case 8:
 		tilesLeft = 40;
@@ -135,7 +135,7 @@ function runTestcase() {
 		{index: 4, type: 1, dora: false}, {index: 5, type: 1, dora: false},
 		{index: 6, type: 1, dora: false}, {index: 2, type: 2, dora: false}, {index: 3, type: 2, dora: false},
 		{index: 4, type: 2, dora: false}, {index: 6, type: 2, dora: false}, {index: 7, type: 2, dora: false}];
-		var expected = "8p";
+		var expected = ["8p"];
 		break;
 	case 9:
 		log("Testcase 9: Keep dora for double");
@@ -146,7 +146,8 @@ function runTestcase() {
 		{index: 2, type: 1, dora: false}, {index: 3, type: 1, dora: false},
 		{index: 4, type: 1, dora: false}, {index: 6, type: 1, dora: false}, {index: 3, type: 2, dora: false},
 		{index: 4, type: 2, dora: false}, {index: 5, type: 2, dora: false}, {index: 8, type: 2, dora: false}];
-		var expected = "8s";
+		DORA_VALUE = 2;
+		var expected = ["8s"];
 		break;
 	case 10:
 		log("Testcase 10: Check Chi Pair Overlap");
@@ -157,7 +158,7 @@ function runTestcase() {
 		{index: 2, type: 1, dora: false}, {index: 3, type: 1, dora: false},
 		{index: 4, type: 1, dora: false}, {index: 6, type: 1, dora: false}, {index: 7, type: 1, dora: false},
 		{index: 3, type: 2, dora: false}, {index: 4, type: 2, dora: false}, {index: 5, type: 2, dora: false}];
-		var expected = "6m";
+		var expected = ["6m", "7m"];
 		break;
 	case 11:
 		log("Testcase 11: Check Chi Pair Overlap 2");
@@ -169,7 +170,7 @@ function runTestcase() {
 		{index: 5, type: 1, dora: false}, {index: 5, type: 1, dora: false}, {index: 6, type: 1, dora: false},
 		{index: 3, type: 2, dora: false}, {index: 4, type: 2, dora: false}, {index: 5, type: 2, dora: false},
 		{index: 6, type: 1, dora: false}];
-		var expected = "1m";
+		var expected = ["1m"];
 		break;
 	case 12:
 		log("Testcase 12: Check Chi Triple Overlap");
@@ -180,7 +181,7 @@ function runTestcase() {
 		{index: 2, type: 1, dora: false}, {index: 3, type: 1, dora: false},
 		{index: 5, type: 1, dora: false}, {index: 6, type: 1, dora: false}, {index: 7, type: 1, dora: false},
 		{index: 3, type: 2, dora: false}, {index: 4, type: 2, dora: false}, {index: 6, type: 2, dora: false}];
-		var expected = "6s";
+		var expected = ["6s"];
 		break;
 	case 13:
 		log("Testcase 13: Check Chi Triple Overlap 2");
@@ -191,7 +192,7 @@ function runTestcase() {
 		{index: 2, type: 1, dora: false}, {index: 3, type: 1, dora: false}, {index: 4, type: 1, dora: false},
 		{index: 5, type: 1, dora: false}, {index: 6, type: 1, dora: false}, {index: 7, type: 1, dora: false},
 		{index: 3, type: 2, dora: false}, {index: 4, type: 2, dora: false}];
-		var expected = "1m";
+		var expected = ["1m"];
 		break;
 	case 14:
 		log("Testcase 14: Example 1");
@@ -209,7 +210,7 @@ function runTestcase() {
 		{index: 1, type: 3, dora: false}, {index: 6, type: 3, dora: false}],
 		[{index: 3, type: 3, dora: false}, {index: 5, type: 1, dora: false},
 		{index: 5, type: 3, dora: false}, {index: 8, type: 2, dora: false}]];
-		var expected = "5z";
+		var expected = ["5z"];
 		break;
 	case 15:
 		log("Testcase 15: Example 2");
@@ -221,7 +222,7 @@ function runTestcase() {
 		{index: 2, type: 2, dora: false}, {index: 4, type: 2, dora: false}, {index: 4, type: 2, dora: false},
 		{index: 9, type: 2, dora: false}, {index: 6, type: 3, dora: false}];
 		
-		var expected = "6z";
+		var expected = ["6z"];
 		break;
 	case 16:
 		log("Testcase 16: Chiitoitsu");
@@ -230,7 +231,7 @@ function runTestcase() {
 		ownHand = getHandFromString("1122m5588p234s111z");
 		discards = [getHandFromString("1z"),[],[],[]];
 
-		var expected = "1z";
+		var expected = ["1z"];
 		break;
 	case 17:
 		log("Testcase 17: Fold");
@@ -239,7 +240,7 @@ function runTestcase() {
 		ownHand = getHandFromString("1122m5588p234s111z");
 		TEST_DANGER_LEVEL = 100;
 
-		var expected = "1z";
+		var expected = ["1z"];
 		break;
 	case 18:
 		log("Testcase 18: Fold 2");
@@ -248,7 +249,7 @@ function runTestcase() {
 		ownHand = getHandFromString("13579m224477p123z");
 		
 		discards = [[],getHandFromString("1122666m5588p234s"),getHandFromString("57m"),getHandFromString("4m2p")];
-		var expected = "2p";
+		var expected = ["2p"];
 		TEST_DANGER_LEVEL = 50;
 		determineStrategy();
 		break;
@@ -259,63 +260,63 @@ function runTestcase() {
 		
 		discards = [[],getHandFromString("5p"),getHandFromString("57m"),getHandFromString("4m2p")];
 
-		var expected = "5p";
+		var expected = ["5p"];
 		break;
 	case 20:
 		log("Testcase 20: Yaku: Tanyao");
 		dora = [{index: 1, type: 0, dora: false}];
-		ownHand = getHandFromString("23489m222488p345s");
+		ownHand = getHandFromString("23469m222488p345s");
 
-		var expected = "9m";
+		var expected = ["9m"];
 	break;
 	case 21:
 		log("Testcase 21: Finished Hand");
 		dora = [{index: 1, type: 0, dora: false}];
 		ownHand = getHandFromString("234789m22234888p");
 
-		var expected = "9m";
+		var expected = ["9m"];
 	break;
 	case 22:
 		log("Testcase 22: Example");
 		dora = [{index: 2, type: 2, dora: false}];
 		ownHand = getHandFromString("378p27m23466s347z8p");
 
-		var expected = "3z";
+		var expected = ["3z"];
 	break;
 	case 23:
 		log("Testcase 23: Yaku: Single Yakuhai");
 		dora = [{index: 7, type: 0, dora: false}];
 		ownHand = getHandFromString("111222m5588p39s37z");
 
-		var expected = "3z";
+		var expected = ["3z"];
 		break;
 	case 24:
 		log("Testcase 24: Yaku: Two from Tanyao");
 		dora = [{index: 1, type: 1, dora: false}];
 		ownHand = getHandFromString("222444m145679p33s");
 
-		var expected = "1p";
+		var expected = ["1p"];
 		break;
 	case 25:
 		log("Testcase 25: Yaku: One from Tanyao");
 		dora = [{index: 1, type: 1, dora: false}];
 		ownHand = getHandFromString("2224447m1255p336s");
 
-		var expected = "1p";
+		var expected = ["1p"];
 		break;
 	case 26:
 		log("Testcase 26: Keep Pair instead of triple");
 		dora = [{index: 1, type: 1, dora: false}];
 		ownHand = getHandFromString("111444m2256p123s2p");
 
-		var expected = "4m";
+		var expected = ["1m", "4m", "2p"];
 		break;
 	case 27:
 		log("Testcase 27: Bridge vs. Border Wait");
 		dora = [{index: 1, type: 1, dora: false}];
 		ownHand = getHandFromString("11189m13789p123s");
 		discards = [[],getHandFromString("1m"),getHandFromString("1m"),getHandFromString("1m")];
-		var expected = "9m";
+		var expected = ["9m"];
 		break;
 	case 28:
 		log("Testcase 28: Open Hand");
@@ -323,7 +324,7 @@ function runTestcase() {
 		ownHand = getHandFromString("2256p123s2p");
 		calls[0] = getHandFromString("111444m");
 
-		var expected = "2p";
+		var expected = ["2p"];
 		break;
 	default:
 		testsRunning = false;
@@ -332,16 +333,17 @@ function runTestcase() {
 	updateAvailableTiles();
 	
 	var tile = discard();
-	log("Expected Discard: " + expected);
-	if(expected == tile.index + getNameForType(tile.type)) {
-		log("TESTCASE " + currentTest + " PASSED!");
-		passes++;
+	log("Expected Discards:");
+	for(var i = 0; i < expected.length; i++) {
+		log(expected[i]);
+		if(expected[i] == tile.index + getNameForType(tile.type)) {
+			log("TESTCASE " + currentTest + " PASSED!");
+			passes++;
+			log(" ");
+			return;	
+		}
 	}
-	else {
-		log("<b>TESTCASE " + currentTest + " FAILED!</b>");
-	}
-	log(" ");
-	
+	log("<b>TESTCASE " + currentTest + " FAILED!</b>");	
 }
 
 //################################

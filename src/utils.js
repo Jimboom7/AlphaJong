@@ -57,13 +57,17 @@ function getDoublesInHand(hand) {
 }
 
 
-//Tile twice or 2 sequence or "bridge"
+//Tile twice or 2 sequence or "bridge". Might even be triple
 function isDouble(hand, tile) {
 	var tileNumber = getNumberOfTilesInHand(hand, tile.index, tile.type);
 	if(tile.type == 3) {
 		return tileNumber == 2;
 	}
-	return ((tileNumber == 2) || (((getNumberOfTilesInHand(hand, tile.index - 1, tile.type) >= 1) || (getNumberOfTilesInHand(hand, tile.index + 1, tile.type) >= 1)) && tileNumber >= 1));
+	return ((tileNumber == 2) ||
+	(((getNumberOfTilesInHand(hand, tile.index - 1, tile.type) >= 1) ||
+	  (getNumberOfTilesInHand(hand, tile.index + 1, tile.type) >= 1) ||
+	  (getNumberOfTilesInHand(hand, tile.index - 2, tile.type) >= 1) ||
+	  (getNumberOfTilesInHand(hand, tile.index + 2, tile.type) >= 1)) && tileNumber >= 1));
 }
 
 //Return all Pons/Chis in hand
@@ -535,7 +539,7 @@ function isTenpai(triplesAndPairs, doubles) {
 	if(strategy == STRATEGIES.CHIITOITSU) {
 		return parseInt(triplesAndPairs.pairs.length / 2) >= 6;
 	}
-	return ((parseInt(triplesAndPairs.triples.length/3) == 3 && parseInt(triplesAndPairs.pairs.length / 2) >= 1  && (doubles.length/2) >= 1 ) || parseInt(triplesAndPairs.triples.length/3) == 4);
+	return ((parseInt(triplesAndPairs.triples.length/3) == 3 && parseInt(triplesAndPairs.pairs.length / 2) >= 1 && (doubles.length/2) >= 1 ) || parseInt(triplesAndPairs.triples.length/3) == 4);
 }
 
 function shouldFold(tiles) {
