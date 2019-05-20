@@ -1,10 +1,12 @@
 //################################
 // YAKU
+// Contains the yaku calculations
 //################################
 
+//Returns the closed and open yaku value of the hand
 function getYaku(inputHand) {
 	hand = [...inputHand];
-	hand = getHandWithCalls(hand); //Add Calls to hand
+	hand = getHandWithCalls(hand); //Add calls to hand
 	
 	var yakuOpen = 0;
 	var yakuClosed = 0;
@@ -156,6 +158,7 @@ function getYaku(inputHand) {
 	return {open: yakuOpen, closed: yakuClosed};
 }
 
+//Yakuhai
 function getYakuhai(triples) {
 	var yakuhai = 0;
 	//TODO: Count Honor triples
@@ -163,6 +166,7 @@ function getYakuhai(triples) {
 	return {open: yakuhai, closed: yakuhai};
 }
 
+//Riichi
 function getRiichi(tenpai) {
 	if(tenpai) {
 		return {open: 0, closed: 1};
@@ -170,7 +174,7 @@ function getRiichi(tenpai) {
 	return {open: 0, closed: 0};
 }
 
-//Should actually check whole hand, but works better with triples/doubles in hand
+//Tanyao
 function getTanyao(hand, tenpai) {
 	var tanyao = 0;
 	if(hand.filter(tile => tile.type != 3 && tile.index > 1 && tile.index < 9).length >= 13) { //&& tenpai ?)
@@ -179,10 +183,11 @@ function getTanyao(hand, tenpai) {
 	return {open: tanyao, closed: tanyao};
 }
 
+//Pinfu (Does not detect all Pinfu)
 function getPinfu(triplesAndPairs, doubles, tenpai) {
 	var pinfu = 0;
 
-	if(isClosed && tenpai && parseInt(triplesAndPairs.triples.length/3) == 3 && parseInt(triplesAndPairs.pairs.length/2) == 1 && getPonsInHand(triplesAndPairs.triples).length == 0) { //Should work to detect pinfu
+	if(isClosed && tenpai && parseInt(triplesAndPairs.triples.length/3) == 3 && parseInt(triplesAndPairs.pairs.length/2) == 1 && getPonsInHand(triplesAndPairs.triples).length == 0) {
 		doubles = sortHand(doubles);
 		for(var i = 0; i < doubles.length - 1; i++) {
 			if(doubles[i].index > 1 && doubles[i+1].index < 9 && Math.abs(doubles[0].index - doubles[1].index) == 1) {

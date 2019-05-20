@@ -1,10 +1,7 @@
 //################################
 // AI DEFENSE
+// Defensive part of the AI
 //################################
-
-
-var RECENT_DISCARD_MODIFIER = 10; // Higher Value: Recent Discards have more impact
-var SUJI_MODIFIER = 1; //Higher Value: Suji is worth less
 
 //Get Dangerlevels for all tiles in hand
 function getHandDanger(hand) {
@@ -16,10 +13,8 @@ function getHandDanger(hand) {
 	return handDanger;
 }
 
-//TODO: Look for Flushes or Tanyao
-//Returns danger of tile for all player as a number from 0-100
+//Returns danger of tile for all players as a number from 0-100
 function getTileDanger(tile) {
-	//https://mahjong.guide/2018/02/04/mahjong-fundamentals-6-how-to-defend/  //0-10 -> A, 10-40 -> B, 40-80 -> C, 80-100 -> D
 	var dangerPerPlayer = [0,100,100,100];
 	for(var i = 1; i < 4; i++) { //Foreach Player
 		var dangerLevel = getPlayerDangerLevel(i);
@@ -40,19 +35,19 @@ function getTileDanger(tile) {
 				dangerPerPlayer[i] = 20;
 			}
 			else if(availableHonors == 3) {
-				dangerPerPlayer[i] = 40;
+				dangerPerPlayer[i] = 60;
 			}
-		} 
+		}
 		else if(tile.type != 3 && getPositionOfTileInDiscard(i, {index: tile.index + 3, type: tile.type}) > 0 || getPositionOfTileInDiscard(i, {index: tile.index - 3, type: tile.type}) > 0) { //Suji
 			if(tile.index < 4 || tile.index > 6) {
-				dangerPerPlayer[i] = 20 * SUJI_MODIFIER;
+				dangerPerPlayer[i] -= 40 * SUJI_MODIFIER;
 			}
 			else {
-				dangerPerPlayer[i] = 35 * SUJI_MODIFIER;
+				dangerPerPlayer[i] -= 20 * SUJI_MODIFIER;
 			}
 		}
 
-		//Recent Discards: Last turn: -50, ... -40, -30, -25, ... -5, -5...
+		//Recent Discards: Last turn: -50, -40, -30, -25, ... -5, -5...
 		var mostRecentDiscard = getMostRecentDiscard(tile);
 		if(mostRecentDiscard != 0 && mostRecentDiscard < 4) {
 			dangerPerPlayer[i] -= (6 - mostRecentDiscard) * RECENT_DISCARD_MODIFIER;
@@ -73,8 +68,17 @@ function getTileDanger(tile) {
 			dangerPerPlayer[i] -= 5;
 		}
 		
+		//Danger is at least 5
 		if(dangerPerPlayer[i] < 5) {
 			dangerPerPlayer[i] = 5;
+		}
+		
+		//Is Dora? -> 20% more dangerous
+		dangerPerPlayer[i] *= (1 + (getTileDoraValue(tile)/5));
+		
+		//Is the player going for a flush of that type? -> 50% more dangerous
+		if(isGoingForFlush(i, tile.type)) {
+			dangerPerPlayer[i] *= 1.5;
 		}
 		
 		//Multiply with Danger Level
@@ -83,14 +87,10 @@ function getTileDanger(tile) {
 	
 	var dangerNumber = ((dangerPerPlayer[1] + dangerPerPlayer[2] + dangerPerPlayer[3] + Math.max.apply(null, dangerPerPlayer)) / 4); //Most dangerous player counts twice
 	
-	//log("Danger for Tile " + getTileName(tile) + " is " + JSON.stringify(dangerPerPlayer) + " --- " + dangerNumber);
-	return dangerNumber; //TODO: Dangeroust Player counts extra ((all/3)+1)/4dangeroust)
+	return dangerNumber;
 }
 
 //Returns danger level for players. 100: Tenpai (Riichi)
-//TODO: Closed Hand more dangerous?
-//TODO: Number of Turns
-//TODO: count doras in calls -> more dangerous?
 function getPlayerDangerLevel(player) {
 	if(isDebug()) {
 		return TEST_DANGER_LEVEL;
@@ -108,19 +108,24 @@ function getPlayerDangerLevel(player) {
 	else {
 		var dangerLevel = 15 - tilesLeft; //Full hand without Riichi -> Nearly always safe
 	}
+	
+	dangerLevel += getNumberOfDorasInHand(calls[player]) * 10;
+	
 	if(dangerLevel < 0) {
 		return 0;
 	}
 	else if(dangerLevel > 100) {
-		return 0;
+		return 100;
 	}
 	return dangerLevel;
 }
 
+//Returns the current Danger level of the table
 function getCurrentDangerLevel() { //Dangeroust Player counts extra ((all/3)+1)/4dangeroust)
 	return ((getPlayerDangerLevel(1) + getPlayerDangerLevel(2) + getPlayerDangerLevel(3) + Math.max.apply(null, [getPlayerDangerLevel(1), getPlayerDangerLevel(2), getPlayerDangerLevel(3)])) / 4);
 }
 
+//Returns the number of turns ago when the tile was most recently discarded
 function getMostRecentDiscard(tile) {
 	var mostRecent = 99;
 	for(var i = 0; i < 4; i++) {
@@ -133,6 +138,7 @@ function getMostRecentDiscard(tile) {
 	return mostRecent;
 }
 
+//Returns the position of a tile in discards
 function getPositionOfTileInDiscard(player, tile) {
 	for(var i = 0; i < discards[player].length; i++) {
 		if(discards[player][i].index == tile.index && discards[player][i].type == tile.type) {
@@ -142,6 +148,18 @@ function getPositionOfTileInDiscard(player, tile) {
 	return 0;
 }
 
+//Returns the safety of a tile
 function getTileSafety(tile) {
 	return 1 - ((getTileDanger(tile)/100) * getCurrentDangerLevel()/100);
+}
+
+//Returns true if the player is going for a flush of a given type
+function isGoingForFlush(player, type) {
+	if(calls[player].length <= 3 || calls[player].some(tile => tile.type != type && tile.type != 3)) { //Not enough or different calls -> false
+		return false;
+	}
+	if(discards[player].filter(tile => tile.type == type).length >= (discards[player].length/6)) { //Many discards of that type -> false
+		return false;
+	}
+	return true;
 }

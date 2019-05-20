@@ -1,6 +1,19 @@
 //################################
 // API (MAHJONG SOUL)
+// Returns data from Mahjong Souls Javascript
 //################################
+
+
+//Prevent AFK warning, gets called every minute. Does not work -> Move Mouse?
+function sendHeatBeat() {
+	log("Sending Heatbeat");
+	app.NetAgent.sendReq2Lobby('Lobby', 'heatbeat', {no_operation_counter: 0});
+	//this.GameMgr.Inst._pre_mouse_point...
+}
+
+function searchForGame() {
+	app.NetAgent.sendReq2Lobby('Lobby', 'matchGame', {match_mode: ROOM});
+}
 
 function getOperationList() {
 	return view.DesktopMgr.Inst.oplist;
@@ -61,12 +74,12 @@ function declineCall() {
 	app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', {cancel_operation: true, timeuse: 2});
 }
 
-function sendRiichiCall(tile) {
-	app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', {type: mjcore.E_PlayOperation.liqi, tile: tile, moqie: false, timeuse: 2}); //Moqie: Throwing last drawn tile (Riichi -> false)
+function sendRiichiCall(tile, moqie) {
+	app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', {type: mjcore.E_PlayOperation.liqi, tile: tile, moqie: moqie, timeuse: 2}); //Moqie: Throwing last drawn tile (Riichi -> false)
 }
 
-function callDiscard(tile) {
-	view.DesktopMgr.Inst.players[0]._choose_pai = tile;
+function callDiscard(tileNumber) {
+	view.DesktopMgr.Inst.players[0]._choose_pai = view.DesktopMgr.Inst.players[0].hand[tileNumber];
 	view.DesktopMgr.Inst.players[0].DoDiscardTile();
 }
 

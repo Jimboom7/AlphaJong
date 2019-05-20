@@ -1,8 +1,9 @@
 //################################
 // UTILS
+// Contains utility functions
 //################################
 
-//Return Number of Doras in Hand
+//Return number of doras in hand
 function getNumberOfDorasInHand(hand) {
 	var dr = 0;
 	for(var i = 0; i < hand.length; i++) {
@@ -11,21 +12,18 @@ function getNumberOfDorasInHand(hand) {
 	return dr;
 }
 
+//Return a hand with only tiles of a specific type
 function getHandOfType(inputHand, type) {
 	var hand = [...inputHand];
-	if(type == 4) {
-		return hand;
-	}
 	if(type >= 0 && type <= 3) {
 		return hand.filter(tile => tile.type == type);
 	}
 	return hand;
 }
 
-//Pairs in Hand
-function getPairsInHand(input_hand) {
-	var hand = [...input_hand];
-	hand = sortHand(hand);
+//Pairs in hand
+function getPairsInHand(hand) {
+	var hand = sortHand(hand);
 	
 	var pairs = [];
 	var oldIndex = 0;
@@ -44,7 +42,7 @@ function getPairsInHand(input_hand) {
 	return pairs;
 }
 
-//Return Doubles in hand
+//Return doubles in hand
 function getDoublesInHand(hand) {
 	var doubles = [];
 	hand.forEach(function(tile) {
@@ -52,7 +50,6 @@ function getDoublesInHand(hand) {
 			doubles.push(tile);
 		}
 	});
-	//log("Number of Doubles in Hand: " + doubles);
 	return doubles;
 }
 
@@ -70,62 +67,88 @@ function isDouble(hand, tile) {
 	  (getNumberOfTilesInHand(hand, tile.index + 2, tile.type) >= 1)) && tileNumber >= 1));
 }
 
-//Return all Pons/Chis in hand
-function getTriplesInHand(hand) {
+//Return all triples/3-sequences in hand
+function getTriplesInHand(inputHand) {
+	var hand = sortHand(inputHand);
 	
-	var currentHand = [...hand];
-	
-	var triples = getPonsInHand(currentHand);
-	currentHand = getHandWithoutTriples(currentHand, triples);
-	var straights = getBestChisInHand(currentHand);
-	
-	currentHand = [...hand];
+	var trip = [];
+	var pa = [];
+	var lastTileIndex = 0;
+	for(var i = 0; i < hand.length; i++) {
+		if(i != hand.length - 1 && (hand[i].index >= hand[i+1].index - 1 && hand[i].type == hand[i+1].type)) { //Split if there is a gap between numbers
+			continue;
+		}
+		var currentHand = hand.slice(lastTileIndex, i + 1);
+		
+		var triples = getPonsInHand(currentHand);
+		currentHand = getHandWithoutTriples(currentHand, triples);
+		var straights = getBestChisInHand(currentHand);
+		
+		var currentHand = hand.slice(lastTileIndex, i + 1);
 
-	var straights2 = getBestChisInHand(currentHand);
-	currentHand = getHandWithoutTriples(currentHand, straights2);
-	var triples2 = getPonsInHand(currentHand);
-	
-	var t1 = triples.concat(straights);
-	var t2 = triples2.concat(straights2);
-	
-	if(t1.length > t2.length || (t1.length == t2.length && getNumberOfDorasInHand(t1) > getNumberOfDorasInHand(t2))) {
-		return t1; //If same: Priorize Chis -> Still double in hand. TODO: Sometimes priorize Pon is better
+		var straights2 = getBestChisInHand(currentHand);
+		currentHand = getHandWithoutTriples(currentHand, straights2);
+		var triples2 = getPonsInHand(currentHand);
+		
+		var t1 = triples.concat(straights);
+		var t2 = triples2.concat(straights2);
+		
+		if(t1.length > t2.length || (t1.length == t2.length && getNumberOfDorasInHand(t1) > getNumberOfDorasInHand(t2))) {
+			t2 = t1;
+		}
+		trip = trip.concat(t2);
+		
+		lastTileIndex = i + 1;
 	}
 
-	return t2;
+	return trip;
 }
 
-//Return all Pons/Chis and Pairs in Hand -> 4 and 1 result: Winning Hand
-function getTriplesAndPairsInHand(hand) {
+//Return all triples/3-sequences and pairs in hand -> 4 and 1 result: winning hand
+function getTriplesAndPairsInHand(inputHand) {
+	var hand = sortHand(inputHand);
 	
-	var currentHand = [...hand];
-	
-	var triples = getPonsInHand(currentHand);
-	currentHand = getHandWithoutTriples(currentHand, triples);
-	var p1 = getPairsInHand(currentHand);
-	currentHand = getHandWithoutTriples(currentHand, p1);
-	var straights = getBestChisInHand(currentHand);
-	
-	currentHand = [...hand];
+	var trip = [];
+	var pa = [];
+	var lastTileIndex = 0;
+	for(var i = 0; i < hand.length; i++) {
+		if(i != hand.length - 1 && (hand[i].index >= hand[i+1].index - 1 && hand[i].type == hand[i+1].type)) { //Split if there is a gap between numbers
+			continue;
+		}
+		
+		var currentHand = hand.slice(lastTileIndex, i + 1);
+		var triples = getPonsInHand(currentHand);
+		currentHand = getHandWithoutTriples(currentHand, triples);
+		var p1 = getPairsInHand(currentHand);
+		currentHand = getHandWithoutTriples(currentHand, p1);
+		var straights = getBestChisInHand(currentHand);
+		
+		var currentHand = hand.slice(lastTileIndex, i + 1);
 
-	var straights2 = getBestChisInHand(currentHand);
-	currentHand = getHandWithoutTriples(currentHand, straights2);
-	var triples2 = getPonsInHand(currentHand);
-	currentHand = getHandWithoutTriples(currentHand, triples2);
-	var p2 = getPairsInHand(currentHand);
-	
-	var t1 = triples.concat(straights);
-	var t2 = triples2.concat(straights2);
-	
-	if(t1.length > t2.length || (t1.length == t2.length && p1.length > p2.length) || (t1.length == t2.length && p1.length == p2.length && getNumberOfDorasInHand(t1) > getNumberOfDorasInHand(t2))) {
-		return {triples: t1, pairs: p1}; //If same: Priorize Chis -> Still double in hand. TODO: Sometimes priorize Pon is better
+		var straights2 = getBestChisInHand(currentHand);
+		currentHand = getHandWithoutTriples(currentHand, straights2);
+		var triples2 = getPonsInHand(currentHand);
+		currentHand = getHandWithoutTriples(currentHand, triples2);
+		var p2 = getPairsInHand(currentHand);
+		
+		var t1 = triples.concat(straights);
+		var t2 = triples2.concat(straights2);
+		
+		//If same: Priorize Chis -> Still double in hand. TODO: Sometimes priorize Pon is better
+		if(t1.length > t2.length || (t1.length == t2.length && p1.length > p2.length) || (t1.length == t2.length && p1.length == p2.length && getNumberOfDorasInHand(t1) > getNumberOfDorasInHand(t2))) {
+			t2 = t1;
+			p2 = p1;
+		}
+		trip = trip.concat(t2);
+		pa = pa.concat(p2);
+		
+		lastTileIndex = i + 1;
 	}
 
-	return {triples: t2, pairs: p2};
+	return {triples: trip, pairs: pa};
 }
 
-
-//Return Hand without given tiles
+//Return hand without given tiles
 function getHandWithoutTriples(inputHand, triples) {
 	var hand = [...inputHand];
 	
@@ -141,7 +164,7 @@ function getHandWithoutTriples(inputHand, triples) {
 	return hand;
 }
 
-//Return Hand without given tiles
+//Return hand without given tile
 function getHandWithoutTile(inputHand, tile) {
 	var hand = [...inputHand];
 	
@@ -155,7 +178,7 @@ function getHandWithoutTile(inputHand, tile) {
 	return hand;
 }
 
-//Return all Pons in Hand
+//Return all triples in hand
 function getPonsInHand(input_hand) {
 	var hand = [...input_hand];
 	hand = sortHand(hand);
@@ -178,6 +201,7 @@ function getPonsInHand(input_hand) {
 	return triples;
 }
 
+//Tries to find the best sequences with most dora
 function getBestChisInHand(inputHand) {
 	var straights = getChisInHand(inputHand, []);
 	var straightsB = getChisInHandDownward(inputHand, []);
@@ -187,7 +211,7 @@ function getBestChisInHand(inputHand) {
 	return straights;
 }
 
-//Return all 3-Sequences in Hand
+//Return all 3-sequences in hand
 function getChisInHand(inputHand, sequences) {
 	
 	var hand = [...inputHand];
@@ -228,7 +252,7 @@ function getChisInHand(inputHand, sequences) {
 	}
 }
 
-//Return all 3-Sequences in Hand
+//Return all 3-sequences in hand
 function getChisInHandDownward(inputHand, sequences) {
 	
 	var hand = [...inputHand];
@@ -269,10 +293,10 @@ function getChisInHandDownward(inputHand, sequences) {
 	}
 }
 
-//Sort Hand
+//Sort hand
 function sortHand(inputHand) {
 	var hand = [...inputHand];
-	hand = hand.sort(function (p1, p2) { //Sort by descending Dora value
+	hand = hand.sort(function (p1, p2) { //Sort dora value descending
 		return p2.doraValue - p1.doraValue;
 	});
 	hand = hand.sort(function (p1, p2) { //Sort index ascending
@@ -284,10 +308,10 @@ function sortHand(inputHand) {
 	return hand;
 }
 
-//Sort Hand Backwards (For Chi Search)
+//Sort hand backwards (For 3-sequences search)
 function sortHandBackwards(inputHand) {
 	var hand = [...inputHand];
-	hand = hand.sort(function (p1, p2) { //Sort by descending Dora value
+	hand = hand.sort(function (p1, p2) { //Sort dora value descending
 		return p2.doraValue - p1.doraValue;
 	});
 	hand = hand.sort(function (p1, p2) { //Sort index ascending
@@ -299,7 +323,7 @@ function sortHandBackwards(inputHand) {
 	return hand;
 }
 
-//Return Number of specific Tiles available
+//Return number of specific tiles available
 function getNumberOfTilesAvailable(index, type) {
 	if(index < 1 || index > 9) {
 			return 0;
@@ -308,7 +332,7 @@ function getNumberOfTilesAvailable(index, type) {
 	return 4 - visibleTiles.filter(tile => tile.index == index && tile.type == type).length;
 }
 
-//Return Number of specific Non Furiten Tiles available
+//Return number of specific non furiten tiles available
 function getNumberOfNonFuritenTilesAvailable(index, type) {
 	if(discards[0].some(tile => tile.index == index && tile.type == type)) {
 		return 0;
@@ -316,12 +340,12 @@ function getNumberOfNonFuritenTilesAvailable(index, type) {
 	return getNumberOfTilesAvailable(index, type);
 }
 
-//Return Number of specific Tile in Hand
+//Return number of specific tile in hand
 function getNumberOfTilesInHand(hand, index, type) {
 	return hand.filter(tile => tile.index == index && tile.type == type).length;
 }
 
-//Return specific Tiles in Hand
+//Return specific tiles in hand
 function getTilesInHand(inputHand, index, type) {
 	var hand = [...inputHand];
 	return hand.filter(tile => tile.index == index && tile.type == type);
@@ -351,7 +375,7 @@ function updateAvailableTiles() {
 	}
 }
 
-//Return Sum of Red Dora/Dora Indicators for tile
+//Return sum of red dora/dora indicators for tile
 function getTileDoraValue(tile) {
 	var dr = 0;
 	
@@ -369,7 +393,7 @@ function getTileDoraValue(tile) {
 	}
 }
 
-//Helper Function for Dora Indicators
+//Helper function for dora indicators
 function getHigherTileIndex(tile) {
 	if(tile.type == 3) {
 		if(tile.index == 4) {
@@ -383,83 +407,32 @@ function getHigherTileIndex(tile) {
 }
 
 //Returns 0 if not winning hand. Returns value of yaku/dora otherwise.
+//Only used for benchmark
 function checkWin(hand) {
 	var win = getTriplesAndPairsInHand(hand);
 	if(parseInt((win.triples.length/3)) >= 4 && parseInt((win.pairs.length/2)) >= 1) {
-		var value = getTilePriorities(hand.concat([{index: 0, type: 3, dora: false, doraValue: 0}])); //Hand with "useless" tile. TODO: Improve this
-		return value[0].doras + value[0].yaku;
+		if(isClosed) {
+			return getNumberOfDorasInHand(hand) + getYaku(hand).closed;
+		}
+		else {
+			return getNumberOfDorasInHand(hand) + getYaku(hand).open;
+		}
 	}
 	return 0;
 }
 
-
-
-//################
-//String Functions
-//################
-function getHandFromString(inputString) {
-	var numbers = [];
-	var tiles = [];
-	for(var i = 0; i < inputString.length; i++) {
-		var type = 4;
-		switch(inputString[i]) {
-			case "p":
-				type = 0;
-				break;
-			case "m":
-				type = 1;
-				break;
-			case "s":
-				type = 2;
-				break;
-			case "z":
-				type = 3;
-				break;
-			default:
-				numbers.push(inputString[i]);
-				break;
-		}
-		if(type != "4") {
-			for(var j = 0; j < numbers.length; j++) {
-				tiles.push({index: parseInt(numbers[j]), type: type, dora: false, doraValue: 0});
-			}
-			numbers = [];
-		}
-	}
-	return tiles;
-}
-
-
-function getTileName(tile) {
-	return tile.index + getNameForType(tile.type);
-}
-
-function getNameForType(type) {
-	switch(type) {
-		case 0:
-			return "p"
-			break;
-		case 1:
-			return "m"
-			break;
-		case 2:
-			return "s"
-			break;
-		case 3:
-			return "z"
-		break;
-	}
-}
-
+//Returns true if DEBUG flag is set
 function isDebug() {
 	return typeof DEBUG != "undefined";
 }
 
+//Adds calls of player 0 to the hand
 function getHandWithCalls(inputHand) {
 	var hand = inputHand.concat(calls[0]);
 	return hand;
 }
 
+//Adds a tile if not in array
 function pushTileIfNotExists(tiles, index, type) {
 	if(tiles.findIndex(t => t.index == index && t.type == type) === -1) {
 		var tile = {index: index, type: type, dora: false};
@@ -468,6 +441,7 @@ function pushTileIfNotExists(tiles, index, type) {
 	}
 }
 
+//Returns true if player can call riichi
 function canRiichi() {
 	if(!isDebug()) {
 		var operations = getOperationList();
@@ -479,7 +453,6 @@ function canRiichi() {
 	}
 	return false;
 }
-
 
 //Returns tiles that can form a triple in one turn for a given hand
 function getUsefulTilesForTriple(hand) {
@@ -535,6 +508,7 @@ function getUsefulTilesForDouble(hand) {
 	return tiles;
 }
 
+//Returns true if triples, pairs and doubles are valid for tenpai
 function isTenpai(triplesAndPairs, doubles) {
 	if(strategy == STRATEGIES.CHIITOITSU) {
 		return parseInt(triplesAndPairs.pairs.length / 2) >= 6;
@@ -542,6 +516,7 @@ function isTenpai(triplesAndPairs, doubles) {
 	return ((parseInt(triplesAndPairs.triples.length/3) == 3 && parseInt(triplesAndPairs.pairs.length / 2) >= 1 && (doubles.length/2) >= 1 ) || parseInt(triplesAndPairs.triples.length/3) == 4);
 }
 
+//Return true if the danger level is too high
 function shouldFold(tiles) {
 	if(getCurrentDangerLevel() > tiles[0].value * FOLD_CONSTANT) {
 		log("Danger Level " + getCurrentDangerLevel() + " is bigger than " + tiles[0].value * FOLD_CONSTANT + ". FOLD!");
@@ -549,3 +524,10 @@ function shouldFold(tiles) {
 	}
 	return false;
 }
+
+//Returns the binomialCoefficient for two numbers. Needed for chance to draw tile calculation. Fails if a faculty of > 134 is needed (should not be the case since there are 134 tiles)
+function binomialCoefficient(a, b) { 
+	numerator = facts[a]; 
+	denominator = facts[a-b] *  facts[b]; 
+	return numerator / denominator; 
+} 

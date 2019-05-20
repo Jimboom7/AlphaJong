@@ -1,5 +1,6 @@
 //################################
 // AI OFFENSE
+// Offensive part of the AI
 //################################
 
 //Look at Hand etc. and decide for a strategy.
@@ -50,12 +51,13 @@ function callTriple(combinations, operation) {
 		((((newHandValue[0].yaku.open + newHandValue[0].dora) / ((handValue[0].yaku.closed + handValue[0].dora) + 1)) > CALL_CONSTANT/100) ||
 		(!isClosed && (newHandValue[0].yaku.open + newHandValue[0].dora) >= (handValue[0].yaku.open + handValue[0].dora)))) {
 		if(combinations.length <= 1) {
+			log("Call accepted!");
 			makeCall(operation);
 		}
 		else {
+			log("Decision for combination is not yet implemented. Call declined!");
 			declineCall(); //TODO: Get Index from Combinations when multiple options - for now: Cancel
 		}
-		log("Call accepted!");
 		isClosed = false;
 	}
 	else { //Decline
@@ -89,7 +91,7 @@ function callAnkan() {
 	callKan(getOperations().an_gang);
 }
 
-//Needs a semi good hand to call Kans and other players not dangerous
+//Needs a semi good hand to call Kans and other players are not dangerous
 function callKan(operation) {
 	var tiles = getTilePriorities(getHandWithCalls(ownHand));
 	if(strategyAllowsCalls && tiles.efficiency >= 4 - (tilesLeft/30) - (1 - (CALL_KAN_CONSTANT/50)) && getCurrentDangerLevel() < 100 - CALL_KAN_CONSTANT) {
@@ -118,14 +120,14 @@ function callRiichi(tiles) {
 	}
 	for(var i = 0; i < tiles.length; i++) {
 		for(var j = 0; j < combination.length; j++) {
-			if(getTileName(tiles[i].tile) == combination[j]) {
-				sendRiichiCall(combination[j]);
+			if(getTileName(tiles[i].tile) == combination[j] && shouldRiichi(tiles[i].waits)) {
+				var moqie = i == 13 ? true : false; //Is last tile in hand?
+				sendRiichiCall(combination[j], moqie);
 				return;
 			}
 		}
 	}
-	discardTile(tiles[0].tile); //In case we are furiten/no tiles available
-	
+	discardTile(tiles[0].tile); //In case we are furiten(?)/no tiles available
 }
 
 //Discard the safest tile in hand
@@ -152,9 +154,7 @@ function discardTile(tile) {
 		if(ownHand[i].index == tile.index && ownHand[i].type == tile.type && ownHand[i].dora == tile.dora) {
 			discards[0].push(ownHand[i]);
 			if(!isDebug()) {
-				//callDiscard(getPlayerHand[i]);
-				view.DesktopMgr.Inst.players[0]._choose_pai = view.DesktopMgr.Inst.players[0].hand[i];
-				view.DesktopMgr.Inst.players[0].DoDiscardTile();
+				callDiscard(i);
 			}
 			else {
 				ownHand.splice(i, 1);
@@ -184,7 +184,7 @@ function getTilePriorities(inputHand) {
 		var hand = [...inputHand];
 		var newTiles1 = getUsefulTilesForDouble(hand); //For all single tiles: Find tiles that make them doubles
 		hand.splice(i, 1);
-
+		
 		var combinations = getTriplesAndPairsInHand(hand);
 		var triples = combinations.triples;
 		var pairs = combinations.pairs;
@@ -197,6 +197,7 @@ function getTilePriorities(inputHand) {
 		var doraValue = baseDora;
 		var baseYaku = getYaku(hand);
 		var yaku = baseYaku;
+		var waits = 0;
 		
 		//More accurat but slower with triples in hand
 		var newHand = hand;//getHandWithoutTriples(hand, triples);
@@ -251,6 +252,7 @@ function getTilePriorities(inputHand) {
 				if(y2.closed > 0) {
 					yaku.closed += y2.closed * chance;
 				}
+				waits += numberOfTiles1;
 			}
 			
 			valueForTile.push({tile: newTiles1[j], efficiency: e2, dora: d2, yaku: y2});
@@ -262,15 +264,20 @@ function getTilePriorities(inputHand) {
 		for(var j = 0; j < tileCombinations.length; j++) {
 			var numberOfTiles1 = getNumberOfNonFuritenTilesAvailable(tileCombinations[j].tile1.index, tileCombinations[j].tile1.type);
 			var numberOfTiles2 = getNumberOfNonFuritenTilesAvailable(tileCombinations[j].tile2.index, tileCombinations[j].tile2.type);
-			if(numberOfTiles1 <= 0) {
+			if(numberOfTiles1 <= 0 || numberOfTiles2 <= 0) {
 				continue;
 			}		
 			if(tileCombinations[j].tile1.index == tileCombinations[j].tile2.index && tileCombinations[j].tile1.type == tileCombinations[j].tile2.type) {
-				numberOfTiles2--;
+				if(numberOfTiles2 == 1) {
+					continue;
+				}
+				var chance = binomialCoefficient(numberOfTiles1, 2) / binomialCoefficient(availableTiles.length, 2);
 			}			
-			if(numberOfTiles2 <= 0) {
-				continue;
+			else {
+				var chance = (binomialCoefficient(numberOfTiles1, 1) * binomialCoefficient(numberOfTiles2, 1)) / binomialCoefficient(availableTiles.length, 2);
 			}
+			//Old (wrong) formula
+			//var chance = ((numberOfTiles1 + numberOfTiles2) / availableTiles.length) * ((numberOfTiles1 + numberOfTiles2) / (availableTiles.length - 1));
 			
 			newHand.push(tileCombinations[j].tile1);
 			newHand.push(tileCombinations[j].tile2);
@@ -283,9 +290,7 @@ function getTilePriorities(inputHand) {
 			var oldEfficiency = tile1Value.efficiency + tile2Value.efficiency;
 			var oldDora = tile1Value.dora + tile2Value.dora;
 			var oldYaku = {open : tile1Value.yaku.open + tile2Value.yaku.open, closed: tile1Value.yaku.closed + tile2Value.yaku.closed};
-						if(getTileName(tileCombinations[j].tile1) == "6p" && getTileName(tileCombinations[j].tile2) == "7p") {
-				var a = 0;
-			}
+
 			var combinations3 = getTriplesAndPairsInHand(newHand);
 			var triples3 = combinations3.triples;
 			var pairs3 = combinations3.pairs;
@@ -297,9 +302,7 @@ function getTilePriorities(inputHand) {
 			e3 -= baseEfficiency + oldEfficiency; //Only additional triples
 			var d3 = getNumberOfDorasInHand(triples3.concat(pairs3, calls[0])) - (baseDora + oldDora); //Check new triples and pairs for dora
 			
-
 			
-			var chance = ((numberOfTiles1 + numberOfTiles2) / availableTiles.length) * ((numberOfTiles1 + numberOfTiles2) / (availableTiles.length - 1));
 			if(d3 > 0) {
 				doraValue += d3 * chance;
 			}
@@ -321,7 +324,7 @@ function getTilePriorities(inputHand) {
 			newHand.pop();
 		}
 		var value = getTileValue(inputHand[i], efficiency, yaku, doraValue);
-		tiles.push({tile : inputHand[i], value: value, efficiency : efficiency, dora: doraValue, yaku: yaku});
+		tiles.push({tile : inputHand[i], value: value, efficiency : efficiency, dora: doraValue, yaku: yaku, waits: waits});
 	}
 	
 	tiles = tiles.sort(function (p1, p2) {
@@ -353,6 +356,7 @@ function chiitoitsuPriorities() {
 		var pairsValue = pairs.length/2;
 		var handWithoutPairs = getHandWithoutTriples(newHand, pairs);
 		var doraValue = getNumberOfDorasInHand(pairs);
+		var waits = 0;
 		
 		var efficiency = pairsValue;
 		var dora2 = 0;
@@ -381,12 +385,13 @@ function chiitoitsuPriorities() {
 					if(y2.closed > 0) {
 						yaku.closed += y2.closed * chance;
 					}
+					waits += numberOfTiles;
 				}
 			}
 			oldTile = tile;
 		});
 		var value = getTileValue(ownHand[i], efficiency, yaku, doraValue);
-		tiles.push({tile : ownHand[i], value:value, efficiency : efficiency, dora: doraValue, yaku: yaku});
+		tiles.push({tile : ownHand[i], value:value, efficiency : efficiency, dora: doraValue, yaku: yaku, waits: waits});
 	}
 	tiles = tiles.sort(function (p1, p2) {
 		return p2.value - p1.value;
@@ -401,16 +406,9 @@ function discard() {
 	
 	var tiles = getTilePriorities(ownHand);
 	
-	
 	if(shouldFold(tiles)) {
 		return discardFold();
 	}
-		
-	/*
-	bigHandValue = BIG_HAND_MODIFIER - ((18 - (tilesLeft/4)) * BIG_HAND_DECAY);
-	if(bigHandValue < 10) {
-		bigHandValue = 10;
-	}*/	
 	
 	log("Tile Priorities: ");
 	printTilePriority(tiles);
@@ -422,4 +420,11 @@ function discard() {
 		discardTile(tiles[0].tile);
 	}
 	return tiles[0].tile;
+}
+
+//Only Call Riichi if enough waits
+function shouldRiichi(waits) {
+	if(waits >= WAITS_FOR_RIICHI - (2 - (tilesLeft/35))) {
+		return true;
+	}
 }

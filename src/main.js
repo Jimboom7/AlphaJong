@@ -1,5 +1,6 @@
 //################################
 // MAIN
+// Main Class, starts the bot and sets up all necessary variables.
 //################################
 
 //Bot can be activated/deactivated by pressing Numpad +
@@ -29,21 +30,27 @@ if(!isDebug()) {
 
 //TODO LIST:
 
+//Check Call Value Calculation
+//Fold faster at end
+//Check Testcase: single valueless honors < single value honors
+//Calls: When already 3.5 efficiency -> check if wait gets better
+//Calls: Check if tile forms new triple -> check efficiency (so pairs dont get swapped out)
+//Calls: Check if tile forms new triple -> Pon/Chi difference
+//TypeError: view.DesktopMgr.player_link_state is undefined[Weitere Informationen] mahjongsoul.game.yo-star.com:87:43 - main https://mahjongsoul.game.yo-star.com/:93
+//Keep Yaku after call
+//Defense: Add Other Sujis (with low Prio)
+//Maybe Consider Calls that don't form an additional triple? (e.g. 4566 -> 6 is thrown (or dora 6))
 //When Calling Chi: Check if discard is valid
 //Calls with Options
-//More value for pairs (see strategy guides)
-//Before Riichi: Check if Furiten
-//Delay Riichi for better wait
-//More value to first pair? Maybe give value to second pair?
+//More value for pairs (see strategy guides) (?)
+//ShouldRiichi: Check if Furiten
+//ShouldRiichi: Consider Scores
 //9 Terminals -> Call Draw
 //Multiple Calls
 //Start Main Loop instantly, top of loop: check ingame or lobby is loaded
-//Calculate Doras/Yaku in dangerlevel
-//Look for Flush in Defense
 //Change the way how Safety-Value affects the normal discard
 //More Yaku
 //Use Scores for Calculating Strategy (Going for fast wins as first etc.)
-//Other Player Open Hands: How big (yaku/dora) are the hands -> calculate Dangerlevel
 //Fold better... before calls?
 //Riichi sometimes fails...
 //Better Log
@@ -57,10 +64,10 @@ function main() {
 	if(!isInGame()) {
 		log("Game is not running, sleep 2 seconds.");
 		errorCounter++;
-		if(errorCounter > 60) { //2 minutes no game found -> reload page
+		if(errorCounter > 90) { //3 minutes no game found -> reload page
 			goToLobby();
 		}
-		setTimeout(main, 2000); //Check every 3 seconds if ingame
+		setTimeout(main, 2000); //Check every 2 seconds if ingame
 		return;
 	}
 	
@@ -87,11 +94,11 @@ function main() {
 		return;
 	}
 	
+	setData(); //Get current state of the board
+	
 	log("");
 	log("##### OWN TURN #####");
 	log("Current Danger Level: " + getCurrentDangerLevel());
-	
-	setData(); //Get current state of the board
 	
 	determineStrategy(); //Get the Strategy for the current situation. After calls so it does not reset folds
 	
@@ -187,7 +194,7 @@ function setData() {
 function startGame() {
 	if(!isInGame()) {
 		log("Searching for Match in Room " + ROOM);
-		app.NetAgent.sendReq2Lobby('Lobby', 'matchGame', {match_mode: ROOM});
+		searchForGame();
 	}
 	log("Main Loop started.");
 	run = true;
@@ -198,7 +205,6 @@ function startGame() {
 function checkForEnd() {
 	if(isEndscreenShown() && AUTORUN) {
 		run = false;
-		log(JSON.stringify(view.DesktopMgr.Inst.gameEndResult));
 		setTimeout(goToLobby, 25000);
 	}
 }
@@ -206,12 +212,4 @@ function checkForEnd() {
 //Reload Page to get back to lobby
 function goToLobby() {
 	location.reload(1);
-}
-
-//Prevent AFK warning, gets called every minute
-//TODO: Does not work. Move Mouse?
-function sendHeatBeat() {
-	log("Sending Heatbeat");
-	app.NetAgent.sendReq2Lobby('Lobby', 'heatbeat', {no_operation_counter: 0});
-	//this.GameMgr.Inst._pre_mouse_point...
 }

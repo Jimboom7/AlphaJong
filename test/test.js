@@ -1,18 +1,17 @@
 //################################
 // TESTS
+// Contains some testcases and a benchmark test
 //################################
 
-
-
-
+//Only run if debug mode
 if(isDebug()) {
 	testsRunning = true;
 	startTime = new Date();
-	runTestcases();
-	//runBenchmarks();
+	//runTestcases();
+	runBenchmarks();
 }
 
-//Main
+//Test Main
 function runTestcases() {
 	
 	if(testsRunning) {
@@ -32,7 +31,7 @@ function runTestcases() {
 	}
 }
 
-
+//List of testcases
 function runTestcase() {
 	dora = [{index: 1, type: 0, dora: false}];
 	discards = [[],[],[],[]];
@@ -68,7 +67,7 @@ function runTestcase() {
 		{index: 4, type: 2, dora: false}, {index: 4, type: 2, dora: false}, {index: 4, type: 2, dora: false},
 		{index: 6, type: 2, dora: false}, {index: 9, type: 2, dora: false}];
 		discards = [[{index: 9, type: 2, dora: false}],[],[],[]];
-		var expected = ["9s"];
+		var expected = ["9p", "9s"];
 		break;
 	case 3:
 		log("Testcase 3: Keep Pair");
@@ -326,6 +325,28 @@ function runTestcase() {
 
 		var expected = ["2p"];
 		break;
+	case 29:
+		log("Testcase 29: Open Hand 2");
+		dora = [{index: 4, type: 0, dora: false}];
+		ownHand = getHandFromString("66734s");
+		calls[0] = getHandFromString("111333555m");
+
+		var expected = ["7s"];
+		break;
+	case 30:
+		log("Testcase 30: Chi Pair Overlap 2");
+		dora = [{index: 4, type: 0, dora: false}];
+		ownHand = getHandFromString("11123455m25677p7s");
+
+		var expected = ["2p", "7s"];
+		break;
+	case 31:
+		log("Testcase 31: Chi Pair Overlap 3");
+		dora = [{index: 4, type: 0, dora: false}];
+		ownHand = getHandFromString("1112345578999m2p");
+
+		var expected = ["2p"];
+		break;
 	default:
 		testsRunning = false;
 		return;
@@ -346,21 +367,15 @@ function runTestcase() {
 	log("<b>TESTCASE " + currentTest + " FAILED!</b>");	
 }
 
+
 //################################
 // BENCHMARK/SIMULATION
 //################################
 
 
-
-
 //Main benchmark
 function runBenchmarks() {
 		
-	EFFICIENCY_VALUE = 1;
-	DORA_VALUE = 0.5;
-	YAKU_VALUE = 0.5;
-	SAFETY_VALUE = 0;
-	
 	var NUMBER_OF_RUNS = 30;
 	
 	if(currentTest< (NUMBER_OF_RUNS*50)) {
@@ -385,6 +400,7 @@ function runBenchmarks() {
 	}
 }
 
+//Simulates turns and check if tenpai
 function runBenchmark() {
 	
 	log(" ");
@@ -425,6 +441,7 @@ function runBenchmark() {
 	
 }
 
+//Set testdata for benchmark
 function setTestData() {
 	log("Set Test Data.");
 
@@ -437,9 +454,9 @@ function setTestData() {
 	roundWind = 1;
 	tilesLeft = 70;
 	strategy = STRATEGIES.GENERAL;
-	EFFICIENCY_VALUE = 100; // 0 -> ignore Efficiency (lol). Default: 1
-    YAKU_VALUE = 1; // 0 -> ignore Yaku. Default: 1
-    DORA_VALUE = 0.5; // 0 -> ignore Dora. Default: 0.5
+	EFFICIENCY_VALUE = 1; // 0 -> ignore Efficiency (lol). Default: 1
+    YAKU_VALUE = 2; // 0 -> ignore Yaku. Default: 1
+    DORA_VALUE = 1; // 0 -> ignore Dora. Default: 0.5
     SAFETY_VALUE = 0.5; // 0 -> Ignore Safety. Default: 0.5
 	TEST_DANGER_LEVEL = 0;
 	BIG_HAND_MODIFIER = 0; //Go for maximum efficiency
@@ -451,6 +468,7 @@ function setTestData() {
 	tilesLeft = 68;
 }
 
+//Simulates a turn
 function simulateTurn() {
 	updateAvailableTiles();
 	
@@ -479,6 +497,7 @@ function simulateTurn() {
 	ownHand = drawTile(ownHand);
 }
 
+//Simulate draw of tile
 function drawTile(hand) {
 	updateAvailableTiles();
 	var randomTile = availableTiles[Math.floor(Math.random() * availableTiles.length)];
