@@ -30,23 +30,15 @@ if(!isDebug()) {
 
 //TODO LIST:
 
-//Check Call Value Calculation
-//Fold faster at end
-//Check Testcase: single valueless honors < single value honors
-//Calls: When already 3.5 efficiency -> check if wait gets better
-//Calls: Check if tile forms new triple -> check efficiency (so pairs dont get swapped out)
-//Calls: Check if tile forms new triple -> Pon/Chi difference
-//TypeError: view.DesktopMgr.player_link_state is undefined[Weitere Informationen] mahjongsoul.game.yo-star.com:87:43 - main https://mahjongsoul.game.yo-star.com/:93
-//Keep Yaku after call
+//Defense: Last tile from left player has priority for discard (-> is safe for this turn)
+//Check isTenpai()
+//Calls: Check if tile forms new triple -> check efficiency (so pairs dont get swapped out) (kinda done)
 //Defense: Add Other Sujis (with low Prio)
 //Maybe Consider Calls that don't form an additional triple? (e.g. 4566 -> 6 is thrown (or dora 6))
 //When Calling Chi: Check if discard is valid
-//Calls with Options
 //More value for pairs (see strategy guides) (?)
-//ShouldRiichi: Check if Furiten
 //ShouldRiichi: Consider Scores
 //9 Terminals -> Call Draw
-//Multiple Calls
 //Start Main Loop instantly, top of loop: check ingame or lobby is loaded
 //Change the way how Safety-Value affects the normal discard
 //More Yaku
@@ -104,7 +96,7 @@ function main() {
 	
 	for(var i = 0; i < operations.length; i++) { //Priority Operations: Should be done before discard on own turn
 		switch(operations[i].type) {
-		case getOperations().an_gang: // From Hand
+		case getOperations().an_gang: //From Hand
 			callAnkan();
 			break;
 		case getOperations().add_gang: //Add from Hand to Pon
@@ -135,6 +127,7 @@ function main() {
 			break;
 		}
 	}
+
 	log(" ");
 	setTimeout(main, 2000);
 }
@@ -183,7 +176,7 @@ function setData() {
 	tilesLeft = getTilesLeft();
 	
 	if(!isDebug()) {
-		seatWind = getSeatWind(0); //TODO: FIX 
+		seatWind = getSeatWind(0);
 		roundWind = getRoundWind();
 	}
 	

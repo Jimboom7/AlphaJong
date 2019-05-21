@@ -150,7 +150,7 @@ function getPositionOfTileInDiscard(player, tile) {
 
 //Returns the safety of a tile
 function getTileSafety(tile) {
-	return 1 - ((getTileDanger(tile)/100) * getCurrentDangerLevel()/100);
+	return 1 - ((getTileDanger(tile)/100) * Math.pow(getCurrentDangerLevel()/100, 2));
 }
 
 //Returns true if the player is going for a flush of a given type

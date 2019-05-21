@@ -7,8 +7,8 @@
 if(isDebug()) {
 	testsRunning = true;
 	startTime = new Date();
-	//runTestcases();
-	runBenchmarks();
+	runTestcases();
+	//runBenchmarks();
 }
 
 //Test Main
@@ -46,6 +46,7 @@ function runTestcase() {
 	SAFETY_VALUE = 0.5;
 	TEST_DANGER_LEVEL = 1;
 	BIG_HAND_MODIFIER = 0;
+	isClosed = true;
 	
 	switch(currentTest) {
 	case 1:
@@ -272,7 +273,6 @@ function runTestcase() {
 		log("Testcase 21: Finished Hand");
 		dora = [{index: 1, type: 0, dora: false}];
 		ownHand = getHandFromString("234789m22234888p");
-
 		var expected = ["9m"];
 	break;
 	case 22:
@@ -285,7 +285,7 @@ function runTestcase() {
 	case 23:
 		log("Testcase 23: Yaku: Single Yakuhai");
 		dora = [{index: 7, type: 0, dora: false}];
-		ownHand = getHandFromString("111222m5588p39s37z");
+		ownHand = getHandFromString("111222m5588p39s13z");
 
 		var expected = ["3z"];
 		break;
@@ -346,6 +346,58 @@ function runTestcase() {
 		ownHand = getHandFromString("1112345578999m2p");
 
 		var expected = ["2p"];
+		break;
+	case 32:
+		log("Testcase 32: Test Pon Call");
+		dora = [{index: 1, type: 1, dora: false}];
+		ownHand = getHandFromString("222444m222367p3s");
+		updateAvailableTiles();
+		testCallTile = {index: 8, type: 0, dora: false, doraValue: 0};
+		callTriple(["6p|7p"], 0);
+
+		var expected = ["3s"];
+		break;
+	case 33:
+		log("Testcase 33: Test Chi Call with Options");
+		dora = [{index: 1, type: 1, dora: false}];
+		ownHand = getHandFromString("222444m222357p3s");
+		updateAvailableTiles();
+		testCallTile = {index: 4, type: 0, dora: false, doraValue: 0};
+		callTriple(["2p|3p", "3p|5p"], 0);
+
+		var expected = ["3s"];
+		break;
+	case 34:
+		log("Testcase 34: Test Furiten");
+		dora = [{index: 1, type: 1, dora: false}];
+		ownHand = getHandFromString("11122233344m45p5s");
+		discards = [[{index: 6, type: 0, dora: false, doraValue: 0}], [], [], []];
+
+		var expected = ["4p", "5p"];
+		break;
+	case 35:
+		log("Testcase 35: Test Iipeikou");
+		dora = [{index: 1, type: 1, dora: false}];
+		ownHand = getHandFromString("111222m4455667p5s");
+		discards = [[{index: 6, type: 0, dora: false, doraValue: 0}], [], [], []];
+
+		var expected = ["7p"];
+		break;
+	case 36:
+		log("Testcase 36: Test Honitsu");
+		dora = [{index: 1, type: 1, dora: false}];
+		ownHand = getHandFromString("111222555789m5s7z");
+		discards = [[{index: 6, type: 0, dora: false, doraValue: 0}], [], [], []];
+
+		var expected = ["5s"];
+		break;
+	case 37:
+		log("Testcase 37: Test Ittsuu");
+		dora = [{index: 1, type: 1, dora: false}];
+		ownHand = getHandFromString("12345689m67s777z");
+		discards = [[{index: 6, type: 0, dora: false, doraValue: 0}], [], [], []];
+
+		var expected = ["6s"];
 		break;
 	default:
 		testsRunning = false;

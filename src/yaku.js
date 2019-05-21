@@ -30,9 +30,9 @@ function getYaku(inputHand) {
 	
 	//Riichi
 	//Closed
-	var riichi = getRiichi(tenpai);
-	yakuOpen += riichi.open;
-	yakuClosed += riichi.closed;
+	//var riichi = getRiichi(tenpai);
+	//yakuOpen += riichi.open;
+	//yakuClosed += riichi.closed;
 	
 	//Tanyao
 	//Open
@@ -42,14 +42,17 @@ function getYaku(inputHand) {
 	
 	//Pinfu (?)
 	//Closed
-	var pinfu = getPinfu(triplesAndPairs, doubles, tenpai);
-	yakuOpen += pinfu.open;
-	yakuClosed += pinfu.closed;
+	//var pinfu = getPinfu(triplesAndPairs, doubles, tenpai);
+	//yakuOpen += pinfu.open;
+	//yakuClosed += pinfu.closed;
 	
 	//Iipeikou (Identical Sequences in same type)
 	//Closed
-	
-	//2 Han
+	var iipeikou = getIipeikou(triplesAndPairs.triples);
+	yakuOpen += iipeikou.open;
+	yakuClosed += iipeikou.closed;
+
+	// ### 2 Han ###
 	
 	//Chiitoitsu
 	//7 Pairs
@@ -60,7 +63,7 @@ function getYaku(inputHand) {
 	//3 concealed triplets (Open auch ok!)
 	//Open*
 	
-	//Sankantsu - -ater
+	//Sankantsu
 	//3 Kans
 	//Open
 	
@@ -87,6 +90,9 @@ function getYaku(inputHand) {
 	//Ittsuu
 	//Pure Straight
 	//Open/-1 Han after call
+	var ittsuu = getIttsuu(triplesAndPairs.triples);
+	yakuOpen += ittsuu.open;
+	yakuClosed += ittsuu.closed;
 	
 	//Sanshoku
 	//3 same index straights in all types
@@ -95,7 +101,7 @@ function getYaku(inputHand) {
 	//3 Han
 	
 	//Ryanpeikou
-	//2 times identical sequences
+	//2 times identical sequences (2 Iipeikou)
 	//Closed
 	
 	//Junchan
@@ -105,6 +111,9 @@ function getYaku(inputHand) {
 	//Honitsu
 	//Half Flush
 	//Open/-1 Han after call
+	var honitsu = getHonitsu(hand, tenpai);
+	yakuOpen += honitsu.open;
+	yakuClosed += honitsu.closed;
 	
 	//6 Han
 	
@@ -177,7 +186,7 @@ function getRiichi(tenpai) {
 //Tanyao
 function getTanyao(hand, tenpai) {
 	var tanyao = 0;
-	if(hand.filter(tile => tile.type != 3 && tile.index > 1 && tile.index < 9).length >= 13) { //&& tenpai ?)
+	if(hand.filter(tile => tile.type != 3 && tile.index > 1 && tile.index < 9).length >= 13) { //&& tenpai ?
 		tanyao = 1;
 	}
 	return {open: tanyao, closed: tanyao};
@@ -197,4 +206,43 @@ function getPinfu(triplesAndPairs, doubles, tenpai) {
 		}
 	}
 	return {open: 0, closed: pinfu};
+}
+
+//Iipeikou
+function getIipeikou(triples) {
+	var iipeikou = 0;
+	for(var i = 0; i < triples.length; i++) {
+		var tiles1 = getNumberOfTilesInHand(triples, triples[i].index, triples[i].type);
+		var tiles2 = getNumberOfTilesInHand(triples, triples[i].index + 1, triples[i].type);
+		var tiles3 = getNumberOfTilesInHand(triples, triples[i].index + 2, triples[i].type);
+		if(tiles1 == 2 && tiles2 == 2 && tiles3 == 2) {
+			iipeikou = 1;
+		}
+	}
+	return {open: 0, closed: iipeikou};
+}
+
+//Ittsuu
+function getIttsuu(triples) {
+	for(var j = 0; j <= 2; j++) {
+		for(var i = 1; i <= 9; i++) {
+			if(!triples.some(tile => tile.type == j && tile.index == i)) {
+				i=10;
+				continue;
+			}
+			if(i == 9) {
+				return {open: 1, closed: 2};
+			}
+		}
+	}
+	return {open: 0, closed: 0};
+}
+
+
+//Honitsu
+function getHonitsu(hand, tenpai) {
+	if(hand.filter(tile => tile.type == 3 || tile.type == 0).length >= 13 || hand.filter(tile => tile.type == 3 || tile.type == 1).length >= 13 || hand.filter(tile => tile.type == 3 || tile.type == 2).length >= 13) { //&& tenpai ?
+		return {open: 2, closed: 3};
+	}
+	return {open: 0, closed: 0};
 }

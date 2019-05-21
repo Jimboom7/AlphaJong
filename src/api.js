@@ -48,7 +48,7 @@ function localPosition2Seat(player) {
 }
 
 function getSeatWind(player) {
-	return ((4 + localPosition2Seat(player) - view.DesktopMgr.Inst.index_ju) % 4) + 1
+	return ((4 + localPosition2Seat(player) - view.DesktopMgr.Inst.index_ju) % 4) + 1;
 }
 
 function getRoundWind() {
@@ -68,6 +68,10 @@ function getTileForCall() {
 
 function makeCall(type) {
 	app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', {type: type, index: 0, timeuse: 2});
+}
+
+function makeCallWithOption(type, option) {
+	app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', {type: type, index: option, timeuse: 2});
 }
 
 function declineCall() {
@@ -99,10 +103,10 @@ function isDisconnect() {
 	return uiscript.UI_Hanguplogout.Inst != null && uiscript.UI_Hanguplogout.Inst._me.visible;
 }
 
-function isPlayerRiichi(player) { //Problem: Does not detect Riichi when it was just called by the previous player (Stick not visible yet)
+function isPlayerRiichi(player) {
 	return view.DesktopMgr.Inst.players[player].liqibang._activeInHierarchy || getDiscardsOfPlayer(player).last_is_liqi;
 }
 
 function isInGame() {
-	return view.DesktopMgr.Inst != null;
+	return view.DesktopMgr != null && view.DesktopMgr.Inst != null && view.DesktopMgr.player_link_state != null;
 }

@@ -333,8 +333,23 @@ function getNumberOfTilesAvailable(index, type) {
 }
 
 //Return number of specific non furiten tiles available
-function getNumberOfNonFuritenTilesAvailable(index, type) {
-	if(discards[0].some(tile => tile.index == index && tile.type == type)) {
+function getNumberOfNonFuritenTilesAvailable(index, type, lastTiles) {
+	if(typeof lastTiles != "undefined" && lastTiles.length == 2) { // Sequence furiten
+		lastTiles = sortHand(lastTiles);
+		if(lastTiles[0].type == lastTiles[1].type && lastTiles[1].index - lastTiles[0].index == 1) { //Is it a 2-tile sequence
+			if(index == lastTiles[1].index + 1 && type == lastTiles[1].type) { //Upper Tile -> Check if lower tile is furiten
+				if(discards[0].some(tile => tile.index == lastTiles[0].index - 1 && tile.type == type)) {
+					return 0;
+				}
+			}
+			else if(index == lastTiles[0].index - 1 && type == lastTiles[0].type) { //Upper Tile -> Check if lower tile is furiten
+				if(discards[0].some(tile => tile.index == lastTiles[1].index + 1 && tile.type == type)) {
+					return 0;
+				}
+			}
+		}
+	}
+	if(discards[0].some(tile => tile.index == index && tile.type == type)) { //Same tile furiten
 		return 0;
 	}
 	return getNumberOfTilesAvailable(index, type);
@@ -509,11 +524,39 @@ function getUsefulTilesForDouble(hand) {
 }
 
 //Returns true if triples, pairs and doubles are valid for tenpai
+//Not 100% accurate
 function isTenpai(triplesAndPairs, doubles) {
 	if(strategy == STRATEGIES.CHIITOITSU) {
-		return parseInt(triplesAndPairs.pairs.length / 2) >= 6;
+		return parseInt(triplesAndPairs.pairs.length / 2) >= 6; //Should be enough
 	}
-	return ((parseInt(triplesAndPairs.triples.length/3) == 3 && parseInt(triplesAndPairs.pairs.length / 2) >= 1 && (doubles.length/2) >= 1 ) || parseInt(triplesAndPairs.triples.length/3) == 4);
+	var tenpai = ((parseInt(triplesAndPairs.triples.length/3) == 3 && parseInt(triplesAndPairs.pairs.length / 2) >= 1 && ((parseInt(doubles.length/2) >= 1 ) || parseInt(triplesAndPairs.pairs.length / 2) >= 2)) || parseInt(triplesAndPairs.triples.length/3) == 4);
+	//if(tenpai) {
+		//TODO: Check for Furiten
+	//}
+	return tenpai;
+}
+
+//Return number of specific non furiten tiles available
+function getNumberOfNonFuritenTilesAvailable(index, type, lastTiles) {
+	if(typeof lastTiles != "undefined" && lastTiles.length == 2) { // Sequence furiten
+		lastTiles = sortHand(lastTiles);
+		if(lastTiles[0].type == lastTiles[1].type && lastTiles[1].index - lastTiles[0].index == 1) { //Is it a 2-tile sequence
+			if(index == lastTiles[1].index + 1 && type == lastTiles[1].type) { //Upper Tile -> Check if lower tile is furiten
+				if(discards[0].some(tile => tile.index == lastTiles[0].index - 1 && tile.type == type)) {
+					return 0;
+				}
+			}
+			else if(index == lastTiles[0].index - 1 && type == lastTiles[0].type) { //Upper Tile -> Check if lower tile is furiten
+				if(discards[0].some(tile => tile.index == lastTiles[1].index + 1 && tile.type == type)) {
+					return 0;
+				}
+			}
+		}
+	}
+	if(discards[0].some(tile => tile.index == index && tile.type == type)) { //Same tile furiten
+		return 0;
+	}
+	return getNumberOfTilesAvailable(index, type);
 }
 
 //Return true if the danger level is too high
