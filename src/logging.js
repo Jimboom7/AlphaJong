@@ -33,12 +33,7 @@ function printHand(hand) {
 
 //Print tile name
 function printTile(tile) {
-	if(tile.dora == 0) {
-		log(tile.index + getNameForType(tile.type));
-	}
-	else {
-		log(tile.index + "!" + getNameForType(tile.type));
-	}
+	log(getTileName(tile));
 }
 
 //Print given tile priorities
@@ -83,6 +78,9 @@ function getHandFromString(inputString) {
 
 //Returns the name for a tile
 function getTileName(tile) {
+	if(tile.dora == true) {
+		return "0" + getNameForType(tile.type);
+	}
 	return tile.index + getNameForType(tile.type);
 }
 
