@@ -30,6 +30,9 @@ if(!isDebug()) {
 
 //TODO LIST:
 
+//Kan: Log
+//"Crash" when Riichi? -> Moqie...
+//Fold later as Dealer
 //Defense: Last tile from left player has priority for discard (-> is safe for this turn)
 //Check isTenpai()
 //Calls: Check if tile forms new triple -> check efficiency (so pairs dont get swapped out) (kinda done)

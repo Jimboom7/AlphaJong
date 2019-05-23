@@ -5,10 +5,10 @@
 
 //AI PARAMETERS
 var AUTORUN = true; //Automatically start new Games 
-var ROOM = 2; //2 = Bronze, 4 = Silver, ...
+var ROOM = 5; //2 = Bronze East, 3 = Bronze South, 5 = Silver East, ...
 
 //DEFENSE CONSTANTS
-var FOLD_CONSTANT = 50; //Higher -> Earlier Fold. Default: 50
+var FOLD_CONSTANT = 50; //Lower -> Earlier Fold. Default: 50
 var RECENT_DISCARD_MODIFIER = 10; // Higher Value: Recent Discards have more impact
 var SUJI_MODIFIER = 1; //Higher Value: Suji is worth more
 

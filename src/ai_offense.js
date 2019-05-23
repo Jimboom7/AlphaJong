@@ -54,7 +54,7 @@ function callTriple(combinations, operation) {
 		var newTriple = getHandWithoutTriples(newHandTriples.triples, currentHandTriples.triples.concat(getTileForCall())); 
 		newTriple = sortHand(newTriple);
 		for(var i = 0; i < combinations.length; i++) {
-			if(combinations[i] == getTileName(newTriple[0]) + "|" + getTileName(newTriple[1])) {
+			if(combinations[i] == getTileName(newTriple[0]) + "|" + getTileName(newTriple[1]) || combinations[i] == getTileName(newTriple[1]) + "|" + getTileName(newTriple[0])) {
 				log("Combination found: " + combinations[i] + ". Call accepted!");
 				makeCallWithOption(operation, i);
 				isClosed = false;
@@ -132,7 +132,7 @@ function callRiichi(tiles) {
 	for(var i = 0; i < tiles.length; i++) {
 		for(var j = 0; j < combination.length; j++) {
 			if(getTileName(tiles[i].tile) == combination[j] && shouldRiichi(tiles[i].waits)) {
-				var moqie = i == 13 ? true : false; //Is last tile in hand?
+				var moqie = i == 13 ? true : false; //Is last tile in hand? TODO: i != ownHand position!!!
 				sendRiichiCall(combination[j], moqie);
 				return;
 			}

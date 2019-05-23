@@ -32,10 +32,10 @@ function getTileDanger(tile) {
 				dangerPerPlayer[i] = 5;
 			}
 			else if(availableHonors == 2) {
-				dangerPerPlayer[i] = 20;
+				dangerPerPlayer[i] = 30;
 			}
 			else if(availableHonors == 3) {
-				dangerPerPlayer[i] = 60;
+				dangerPerPlayer[i] = 80;
 			}
 		}
 		else if(tile.type != 3 && getPositionOfTileInDiscard(i, {index: tile.index + 3, type: tile.type}) > 0 || getPositionOfTileInDiscard(i, {index: tile.index - 3, type: tile.type}) > 0) { //Suji
@@ -110,6 +110,10 @@ function getPlayerDangerLevel(player) {
 	}
 	
 	dangerLevel += getNumberOfDorasInHand(calls[player]) * 10;
+	
+	if(getSeatWind(player) == 1) { //Is Dealer
+		dangerLevel += 10;
+	}
 	
 	if(dangerLevel < 0) {
 		return 0;
