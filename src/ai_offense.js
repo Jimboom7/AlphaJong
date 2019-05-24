@@ -61,9 +61,8 @@ function callTriple(combinations, operation) {
 				return true;
 			}
 		}
-		if(operation != getOperationList()[getOperationList().length - 1]) { //Is not last operation?
+		if(operation != getOperationList()[getOperationList().length - 1].type) { //Is not last operation?
 			log("Could not find combination for operation " + operation + ". Trying next operation.");
-			log(JSON.stringify(getOperationList()));
 			return false;
 		}
 		declineCall(); 
@@ -104,12 +103,15 @@ function callAnkan() {
 
 //Needs a semi good hand to call Kans and other players are not dangerous
 function callKan(operation) {
+	log("Consider Kan.");
 	var tiles = getTilePriorities(getHandWithCalls(ownHand));
 	if(strategyAllowsCalls && tiles.efficiency >= 4 - (tilesLeft/30) - (1 - (CALL_KAN_CONSTANT/50)) && getCurrentDangerLevel() < 100 - CALL_KAN_CONSTANT) {
 		makeCall(operation);
+		log("Kan accepted!");
 	}
 	else {
 		declineCall();
+		log("Kan declined!");
 	}
 }
 
@@ -131,8 +133,11 @@ function callRiichi(tiles) {
 	}
 	for(var i = 0; i < tiles.length; i++) {
 		for(var j = 0; j < combination.length; j++) {
-			if(getTileName(tiles[i].tile) == combination[j] && shouldRiichi(tiles[i].waits)) {
-				var moqie = i == 13 ? true : false; //Is last tile in hand? TODO: i != ownHand position!!!
+			if(getTileName(tiles[i].tile) == combination[j] && shouldRiichi(tiles[i].waits, tiles[i].yaku)) {
+				var moqie = false;
+				if(getTileName(tiles[i].tile) == getTileName(ownHand[ownHand.length - 1])) { //Is last tile?
+					moqie = true;
+				}
 				sendRiichiCall(combination[j], moqie);
 				return;
 			}
@@ -260,6 +265,12 @@ function getHandValues(hand, tile) {
 		}
 		
 		var chance = (numberOfTiles1 / availableTiles.length);
+		
+		if(!isClosed && getNumberOfTilesInHand(newHand, newTiles1[j].index, newTiles1[j].type) == 3) {
+			chance *= 2; //More value to possible triples when hand is open (can call pons from all players)
+		}
+		
+		
 		if(d2 > 0) { //If this tile incorporates a new dora into the hand. Either by forming a triple or by extending a straight etc.
 			doraValue += d2 * chance;
 		}
@@ -366,7 +377,7 @@ function getTileValue(hand, tile, efficiency, yakus, doraValue, waits) {
 	}
 	
 	//If Tenpai: Add number of waits to efficiency
-	var triplesAndPairs = getTriplesAndPairsInHand(hand);
+	var triplesAndPairs = getTriplesAndPairsInHand(hand.concat(calls[0]));
 	handWithoutTriplesAndPairs = getHandWithoutTriples(hand, triplesAndPairs.triples.concat(triplesAndPairs.pairs));
 	var doubles = getDoublesInHand(handWithoutTriplesAndPairs);
 	if(isTenpai(triplesAndPairs, doubles)) {
@@ -464,11 +475,4 @@ function discard() {
 	}
 	
 	return tile;
-}
-
-//Only Call Riichi if enough waits
-function shouldRiichi(waits) {
-	if(waits >= WAITS_FOR_RIICHI - (2 - (tilesLeft/35))) {
-		return true;
-	}
 }

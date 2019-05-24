@@ -559,13 +559,39 @@ function getNumberOfNonFuritenTilesAvailable(index, type, lastTiles) {
 	return getNumberOfTilesAvailable(index, type);
 }
 
-//Return true if the danger level is too high
+//Return true if: Not last place and the danger level is too high
 function shouldFold(tiles) {
-	if(getCurrentDangerLevel() > tiles[0].value * FOLD_CONSTANT) {
+	var factor = FOLD_CONSTANT;
+	factor += getDistanceToFirst() / 1000; //Fold earlier when first
+	factor += seatWind == 1 ? 5 : 0; //Fold later as dealer
+	if(getDistanceToLast() > 0 && getCurrentDangerLevel() > tiles[0].value * factor) {
 		log("Danger Level " + getCurrentDangerLevel() + " is bigger than " + tiles[0].value * FOLD_CONSTANT + ". FOLD!");
 		return true;
 	}
 	return false;
+}
+
+//Only Call Riichi if enough waits and not first with yaku
+function shouldRiichi(waits, yaku) {
+	if(waits < WAITS_FOR_RIICHI - (2 - (tilesLeft/35))) { //Not enough waits? -> No Riichi
+		return false;
+	}
+	if((isClosed && yaku.closed >= 1 || !isClosed && yaku.open >= 1 ) && getDistanceToFirst() < 0) { //First place and other yaku? -> No Riichi
+		return false;
+	}
+	return true;
+}
+
+//Negative number: Distance to second
+//Positive number: Distance to first
+function getDistanceToFirst() {
+	return Math.max(getPlayerScore(1), getPlayerScore(2), getPlayerScore(3)) - getPlayerScore(0);
+}
+
+//Negative number: Distance to last
+//Positive number: Distance to third
+function getDistanceToLast() {
+	return Math.min(getPlayerScore(1), getPlayerScore(2), getPlayerScore(3)) - getPlayerScore(0);
 }
 
 //Returns the binomialCoefficient for two numbers. Needed for chance to draw tile calculation. Fails if a faculty of > 134 is needed (should not be the case since there are 134 tiles)

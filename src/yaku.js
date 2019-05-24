@@ -5,8 +5,8 @@
 
 //Returns the closed and open yaku value of the hand
 function getYaku(inputHand) {
-	hand = [...inputHand];
-	hand = getHandWithCalls(hand); //Add calls to hand
+	
+	hand = getHandWithCalls(inputHand); //Add calls to hand
 	
 	var yakuOpen = 0;
 	var yakuClosed = 0;
@@ -57,19 +57,26 @@ function getYaku(inputHand) {
 	//Chiitoitsu
 	//7 Pairs
 	//Closed
-	// -> Not necessary
+	// -> Not necessary, because own strategy
 	
 	//Sanankou
 	//3 concealed triplets (Open auch ok!)
 	//Open*
+	var sanankou = getSanankou(inputHand);
+	yakuOpen += sanankou.open;
+	yakuClosed += sanankou.closed;
 	
 	//Sankantsu
 	//3 Kans
 	//Open
+	//-> Should not influence score, but Kan calling
 	
 	//Toitoi
 	//All Triplets
 	//Open
+	var toitoi = getToitoi(hand);
+	yakuOpen += toitoi.open;
+	yakuClosed += toitoi.closed;
 	
 	//Sanshoku Doukou
 	//3 same index triplets in all 3 types
@@ -120,6 +127,9 @@ function getYaku(inputHand) {
 	//Chinitsu
 	//Full Flush
 	//Open/-1 Han after call
+	var chinitsu = getChinitsu(hand, tenpai);
+	yakuOpen += chinitsu.open;
+	yakuClosed += chinitsu.closed;
 	
 	//Yakuman
 	
@@ -170,8 +180,8 @@ function getYaku(inputHand) {
 //Yakuhai
 function getYakuhai(triples) {
 	var yakuhai = 0;
-	//TODO: Count Honor triples
 	yakuhai = triples.filter(tile => tile.type == 3 && (tile.index > 4 || tile.index == seatWind || tile.index == roundWind)).length/3;
+	yakuhai += triples.filter(tile => tile.type == 3 && tile.index == seatWind && tile.index == roundWind).length/3;
 	return {open: yakuhai, closed: yakuhai};
 }
 
@@ -185,41 +195,60 @@ function getRiichi(tenpai) {
 
 //Tanyao
 function getTanyao(hand, tenpai) {
-	var tanyao = 0;
 	if(hand.filter(tile => tile.type != 3 && tile.index > 1 && tile.index < 9).length >= 13) { //&& tenpai ?
-		tanyao = 1;
+		return {open: 1, closed: 1};
 	}
-	return {open: tanyao, closed: tanyao};
+	return {open: 0, closed: 0};
 }
 
 //Pinfu (Does not detect all Pinfu)
 function getPinfu(triplesAndPairs, doubles, tenpai) {
-	var pinfu = 0;
 
 	if(isClosed && tenpai && parseInt(triplesAndPairs.triples.length/3) == 3 && parseInt(triplesAndPairs.pairs.length/2) == 1 && getPonsInHand(triplesAndPairs.triples).length == 0) {
 		doubles = sortHand(doubles);
 		for(var i = 0; i < doubles.length - 1; i++) {
 			if(doubles[i].index > 1 && doubles[i+1].index < 9 && Math.abs(doubles[0].index - doubles[1].index) == 1) {
-				pinfu = 1;
+				return {open: 1, closed: 1};
 				break;
 			}
 		}
 	}
-	return {open: 0, closed: pinfu};
+	return {open: 0, closed: 0};
 }
 
 //Iipeikou
 function getIipeikou(triples) {
-	var iipeikou = 0;
 	for(var i = 0; i < triples.length; i++) {
 		var tiles1 = getNumberOfTilesInHand(triples, triples[i].index, triples[i].type);
 		var tiles2 = getNumberOfTilesInHand(triples, triples[i].index + 1, triples[i].type);
 		var tiles3 = getNumberOfTilesInHand(triples, triples[i].index + 2, triples[i].type);
 		if(tiles1 == 2 && tiles2 == 2 && tiles3 == 2) {
-			iipeikou = 1;
+			return {open: 0, closed: 1};
 		}
 	}
-	return {open: 0, closed: iipeikou};
+	return {open: 0, closed: 0};
+}
+
+//Sanankou
+function getSanankou(hand) {
+	if(!isConsideringCall) {
+		var concealedTriples = getPonsInHand(hand);
+		if(parseInt(concealedTriples.length/3) >= 3) {
+			return {open: 2, closed: 2};
+		}
+	}
+	
+	return {open: 0, closed: 0};
+}
+
+//Toitoi
+function getToitoi(hand) {
+	var pons = getPonsInHand(hand);
+	if(parseInt(pons.length/3) >= 4) {
+		return {open: 2, closed: 2};
+	}
+	
+	return {open: 0, closed: 0};
 }
 
 //Ittsuu
@@ -238,11 +267,18 @@ function getIttsuu(triples) {
 	return {open: 0, closed: 0};
 }
 
-
 //Honitsu
 function getHonitsu(hand, tenpai) {
 	if(hand.filter(tile => tile.type == 3 || tile.type == 0).length >= 13 || hand.filter(tile => tile.type == 3 || tile.type == 1).length >= 13 || hand.filter(tile => tile.type == 3 || tile.type == 2).length >= 13) { //&& tenpai ?
 		return {open: 2, closed: 3};
+	}
+	return {open: 0, closed: 0};
+}
+
+//Chinitsu
+function getChinitsu(hand, tenpai) {
+	if(hand.filter(tile => tile.type == 0).length >= 13 || hand.filter(tile => tile.type == 1).length >= 13 || hand.filter(tile => tile.type == 2).length >= 13) { //&& tenpai ?
+		return {open: 3, closed: 3}; //Score gets added to honitsu -> 5/6 han
 	}
 	return {open: 0, closed: 0};
 }

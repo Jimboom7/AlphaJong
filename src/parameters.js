@@ -20,10 +20,10 @@ var CALL_KAN_CONSTANT = 50; //Higher Value: Higher Threshold for calling Kans. D
 //HAND EVALUATION CONSTANTS
 var EFFICIENCY_VALUE = 1; // 0 -> ignore Efficiency (lol). Default: 1
 var YAKU_VALUE = 1; // 0 -> ignore Yaku. Default: 1
-var DORA_VALUE = 0.5; // 0 -> ignore Dora. Default: 0.5
-var SAFETY_VALUE = 0.5; // 0 -> Ignore Safety. Default: 0.5
+var DORA_VALUE = 0.3; // 0 -> ignore Dora. Default: 0.3
+var SAFETY_VALUE = 0.5; // 0 -> Ignore Safety. Default: 0.2
 var PAIR_VALUE = 0.5; //Value for the first pair when evaluating the hand (Triples are 1). Default: 0.5
-var WAIT_VALUE = 0.5; //Value for good waits when tenpai. Maximum: 1. Default: 0.5
+var WAIT_VALUE = 0.3; //Value for good waits when tenpai. Maximum: 1. Default: 0.3
 
 //STRATEGY CONSTANTS
 var CHIITOITSU = 5; //Number of Pairs in Hand to go for chiitoitsu
@@ -58,6 +58,7 @@ var visibleTiles = []; //Tiles that are visible
 var isPlayerRiichi = [false, false, false, false];
 var errorCounter = 0; //Counter to check if bot is working
 var lastTilesLeft = 0; //Counter to check if bot is working
+var isConsideringCall = false;
 
 //TEST
 var testRunning = false;

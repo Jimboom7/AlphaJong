@@ -30,8 +30,7 @@ if(!isDebug()) {
 
 //TODO LIST:
 
-//Kan: Log
-//"Crash" when Riichi? -> Moqie...
+//Fix calls for dora tiles
 //Fold later as Dealer
 //Defense: Last tile from left player has priority for discard (-> is safe for this turn)
 //Check isTenpai()
@@ -97,6 +96,7 @@ function main() {
 	
 	determineStrategy(); //Get the Strategy for the current situation. After calls so it does not reset folds
 	
+	isConsideringCall = true;
 	for(var i = 0; i < operations.length; i++) { //Priority Operations: Should be done before discard on own turn
 		switch(operations[i].type) {
 		case getOperations().an_gang: //From Hand
@@ -117,6 +117,7 @@ function main() {
 	for(var i = 0; i < operations.length; i++) {
 		switch(operations[i].type) {
 		case getOperations().dapai:
+			isConsideringCall = false;
 			discard();
 			break;
 		case getOperations().eat:

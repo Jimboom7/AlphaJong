@@ -306,9 +306,9 @@ function runTestcase() {
 	case 26:
 		log("Testcase 26: Keep Pair instead of triple");
 		dora = [{index: 1, type: 1, dora: false}];
-		ownHand = getHandFromString("111444m2256p123s2p");
+		ownHand = getHandFromString("111456m2256p123s2p");
 
-		var expected = ["1m", "4m", "2p"];
+		var expected = ["1m", "2p"];
 		break;
 	case 27:
 		log("Testcase 27: Bridge vs. Border Wait");
@@ -399,6 +399,31 @@ function runTestcase() {
 
 		var expected = ["6s"];
 		break;
+	case 38:
+		log("Testcase 38: Test Sanankou");
+		dora = [{index: 1, type: 1, dora: false}];
+		ownHand = getHandFromString("22233367m3488p88s");
+		discards = [[{index: 2, type: 0, dora: false, doraValue: 0}], [], [], []];
+		
+		var expected = ["3p"];
+		break;
+	case 39:
+		isClosed = false;
+		log("Testcase 39: Test Toitoi");
+		dora = [{index: 1, type: 1, dora: false}];
+		ownHand = getHandFromString("333666m788p88s");
+		discards = [[], [{index: 6, type: 0, dora: false, doraValue: 0}, {index: 6, type: 0, dora: false, doraValue: 0}], [{index: 9, type: 0, dora: false, doraValue: 0}], []];
+		calls = [[{index: 1, type: 1, dora: false, doraValue: 0}, {index: 1, type: 1, dora: false, doraValue: 0}, {index: 1, type: 1, dora: false, doraValue: 0}], [], [], []];
+
+		var expected = ["7p"];
+		break;
+	case 40:
+		log("Testcase 40: Test Chinitsu");
+		dora = [{index: 1, type: 1, dora: false}];
+		ownHand = getHandFromString("111222568899m33z");
+
+		var expected = ["3z"];
+		break;
 	default:
 		testsRunning = false;
 		return;
@@ -428,9 +453,9 @@ function runTestcase() {
 //Main benchmark
 function runBenchmarks() {
 		
-	var NUMBER_OF_RUNS = 30;
+	var NUMBER_OF_RUNS = 50;
 	
-	if(currentTest< (NUMBER_OF_RUNS*50)) {
+	if(currentTest < (NUMBER_OF_RUNS*50)) {
 		setTimeout(runBenchmark, 5000); //Loop needs to be delayed, otherwise browser crashes
 	}
 	else {
@@ -466,10 +491,10 @@ function runBenchmark() {
 		handWithoutTriples = getHandWithoutTriples(ownHand, triplesAndPairs.triples);
 		var doubles = getDoublesInHand(handWithoutTriples);
 		if(isTenpai(triplesAndPairs, doubles)) {
-			log("<h2>TENPAI!</h2>");
+			log("<h2>Tenpai</h2>");
 			passes++;
 			var value = getTilePriorities(ownHand);
-			log("Time: " + (currentTest % 50));
+			log("Turns: " + (currentTest % 50));
 			log("Value: " + (value[0].dora + value[0].yaku.closed));
 			winValues.push({time: (currentTest % 50), value: (value[0].dora + value[0].yaku.closed)});
 			currentTest += 50 - (currentTest % 50);
@@ -485,7 +510,7 @@ function runBenchmark() {
 		currentTest++;
 	}
 	
-	log("No Tenpai.");
+	log("<h2>No Ten</h2>");
 	var value = getTilePriorities(ownHand);
 	winValues.push({time: 0, value: (value[0].dora + value[0].yaku.closed)});
 	currentTest += 50 - (currentTest % 50);
@@ -506,12 +531,13 @@ function setTestData() {
 	roundWind = 1;
 	tilesLeft = 70;
 	strategy = STRATEGIES.GENERAL;
-	EFFICIENCY_VALUE = 1; // 0 -> ignore Efficiency (lol). Default: 1
-    YAKU_VALUE = 2; // 0 -> ignore Yaku. Default: 1
-    DORA_VALUE = 1; // 0 -> ignore Dora. Default: 0.5
-    SAFETY_VALUE = 0.5; // 0 -> Ignore Safety. Default: 0.5
-	TEST_DANGER_LEVEL = 0;
-	BIG_HAND_MODIFIER = 0; //Go for maximum efficiency
+	EFFICIENCY_VALUE = 1;
+	YAKU_VALUE = 2;
+	DORA_VALUE = 1;
+	SAFETY_VALUE = 0.5;
+	PAIR_VALUE = 0.5;
+	WAIT_VALUE = 0.3;
+	FOLD_CONSTANT = 1000;
 	
 	dora = drawTile(dora);
 	for(var i = 0; i < 13; i++) {

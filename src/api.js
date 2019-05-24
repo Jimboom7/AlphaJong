@@ -110,3 +110,7 @@ function isPlayerRiichi(player) {
 function isInGame() {
 	return view.DesktopMgr != null && view.DesktopMgr.Inst != null && view.DesktopMgr.player_link_state != null;
 }
+
+function getPlayerScore(player) {
+	return view.DesktopMgr.Inst.players[player].score;
+}
