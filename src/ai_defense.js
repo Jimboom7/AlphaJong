@@ -109,7 +109,7 @@ function getPlayerDangerLevel(player) {
 		var dangerLevel = 15 - tilesLeft; //Full hand without Riichi -> Nearly always safe
 	}
 	
-	dangerLevel += getNumberOfDorasInHand(calls[player]) * 10;
+	dangerLevel += getNumberOfDorasInHand(calls[player]) * 10; //TODO: Does not account for non-red dora. Fix!
 	
 	if(getSeatWind(player) == 1) { //Is Dealer
 		dangerLevel += 10;

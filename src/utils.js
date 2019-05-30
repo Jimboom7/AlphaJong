@@ -562,9 +562,16 @@ function getNumberOfNonFuritenTilesAvailable(index, type, lastTiles) {
 //Return true if: Not last place and the danger level is too high
 function shouldFold(tiles) {
 	var factor = FOLD_CONSTANT;
-	factor += getDistanceToFirst() / 1000; //Fold earlier when first
+	if(isLastGame()) { //Fold earlier when first/later when last in last game
+		if(getDistanceToLast() > 0) {
+			factor += 1000; //Last Place -> Never Fold
+		}
+		else if(getDistanceToFirst() < 0) {
+			factor += getDistanceToFirst() / 1000; //First Place -> Easier Fold
+		}
+	}
 	factor += seatWind == 1 ? 5 : 0; //Fold later as dealer
-	if(getDistanceToLast() > 0 && getCurrentDangerLevel() > tiles[0].value * factor) {
+	if(getCurrentDangerLevel() > tiles[0].value * factor) {
 		log("Danger Level " + getCurrentDangerLevel() + " is bigger than " + tiles[0].value * FOLD_CONSTANT + ". FOLD!");
 		return true;
 	}
@@ -576,7 +583,7 @@ function shouldRiichi(waits, yaku) {
 	if(waits < WAITS_FOR_RIICHI - (2 - (tilesLeft/35))) { //Not enough waits? -> No Riichi
 		return false;
 	}
-	if((isClosed && yaku.closed >= 1 || !isClosed && yaku.open >= 1 ) && getDistanceToFirst() < 0) { //First place and other yaku? -> No Riichi
+	if((isClosed && yaku.closed >= 1 || !isClosed && yaku.open >= 1 ) && isLastGame() && (getDistanceToFirst() < 0 || (getDistanceToLast() < 0 && getDistanceToLast() >= -1000))) { //First place (or < 1000 before last) and other yaku? -> No Riichi
 		return false;
 	}
 	return true;
@@ -592,6 +599,16 @@ function getDistanceToFirst() {
 //Positive number: Distance to third
 function getDistanceToLast() {
 	return Math.min(getPlayerScore(1), getPlayerScore(2), getPlayerScore(3)) - getPlayerScore(0);
+}
+
+function isLastGame() {
+	if(ROOM % 3 == 2) { // Hanchan (East Round)
+		return getRound() == 3 || getRoundWind() > 1; //East 4 or South X
+	}
+	else { // South Game
+		return (getRound() == 3 && getRoundWind() > 1) || getRoundWind() > 2; //South 4 or West X
+	}
+	return false; //TODO: South Round
 }
 
 //Returns the binomialCoefficient for two numbers. Needed for chance to draw tile calculation. Fails if a faculty of > 134 is needed (should not be the case since there are 134 tiles)

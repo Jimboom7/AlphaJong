@@ -4,9 +4,9 @@
 //################################
 
 //Returns the closed and open yaku value of the hand
-function getYaku(inputHand) {
+function getYaku(inputHand, inputCalls) {
 	
-	hand = getHandWithCalls(inputHand); //Add calls to hand
+	var hand = inputHand.concat(inputCalls); //Add calls to hand
 	
 	var yakuOpen = 0;
 	var yakuClosed = 0;
@@ -36,7 +36,7 @@ function getYaku(inputHand) {
 	
 	//Tanyao
 	//Open
-	var tanyao = getTanyao(hand, tenpai);
+	var tanyao = getTanyao(hand, inputCalls);
 	yakuOpen += tanyao.open;
 	yakuClosed += tanyao.closed;
 	
@@ -118,7 +118,7 @@ function getYaku(inputHand) {
 	//Honitsu
 	//Half Flush
 	//Open/-1 Han after call
-	var honitsu = getHonitsu(hand, tenpai);
+	var honitsu = getHonitsu(hand);
 	yakuOpen += honitsu.open;
 	yakuClosed += honitsu.closed;
 	
@@ -127,7 +127,7 @@ function getYaku(inputHand) {
 	//Chinitsu
 	//Full Flush
 	//Open/-1 Han after call
-	var chinitsu = getChinitsu(hand, tenpai);
+	var chinitsu = getChinitsu(hand);
 	yakuOpen += chinitsu.open;
 	yakuClosed += chinitsu.closed;
 	
@@ -194,8 +194,8 @@ function getRiichi(tenpai) {
 }
 
 //Tanyao
-function getTanyao(hand, tenpai) {
-	if(hand.filter(tile => tile.type != 3 && tile.index > 1 && tile.index < 9).length >= 13) { //&& tenpai ?
+function getTanyao(hand, inputCalls) {
+	if(hand.filter(tile => tile.type != 3 && tile.index > 1 && tile.index < 9).length >= 13 && inputCalls.filter(tile => tile.type == 3 || tile.index == 1 || tile.index == 9).length == 0) {
 		return {open: 1, closed: 1};
 	}
 	return {open: 0, closed: 0};
@@ -268,7 +268,7 @@ function getIttsuu(triples) {
 }
 
 //Honitsu
-function getHonitsu(hand, tenpai) {
+function getHonitsu(hand) {
 	if(hand.filter(tile => tile.type == 3 || tile.type == 0).length >= 13 || hand.filter(tile => tile.type == 3 || tile.type == 1).length >= 13 || hand.filter(tile => tile.type == 3 || tile.type == 2).length >= 13) { //&& tenpai ?
 		return {open: 2, closed: 3};
 	}
@@ -276,7 +276,7 @@ function getHonitsu(hand, tenpai) {
 }
 
 //Chinitsu
-function getChinitsu(hand, tenpai) {
+function getChinitsu(hand) {
 	if(hand.filter(tile => tile.type == 0).length >= 13 || hand.filter(tile => tile.type == 1).length >= 13 || hand.filter(tile => tile.type == 2).length >= 13) { //&& tenpai ?
 		return {open: 3, closed: 3}; //Score gets added to honitsu -> 5/6 han
 	}

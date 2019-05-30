@@ -45,7 +45,7 @@ function runTestcase() {
 	DORA_VALUE = 0.3;
 	SAFETY_VALUE = 0.5;
 	TEST_DANGER_LEVEL = 1;
-	BIG_HAND_MODIFIER = 0;
+	WAIT_VALUE = 0.3;
 	isClosed = true;
 	
 	switch(currentTest) {
@@ -106,7 +106,7 @@ function runTestcase() {
 	case 6:
 		log("Testcase 6: Keep better straight");
 		ownHand = [
-		{index: 4, type: 0, dora: false}, {index: 5, type: 0, dora: false}, {index: 8, type: 0, dora: false},
+		{index: 2, type: 0, dora: false}, {index: 3, type: 0, dora: false}, {index: 8, type: 0, dora: false},
 		{index: 9, type: 0, dora: false}, {index: 2, type: 1, dora: false}, {index: 2, type: 1, dora: false},
 		{index: 4, type: 1, dora: false}, {index: 5, type: 1, dora: false},
 		{index: 6, type: 1, dora: false}, {index: 2, type: 2, dora: false}, {index: 3, type: 2, dora: false},
@@ -256,7 +256,7 @@ function runTestcase() {
 	case 19:
 		log("Testcase 19: Yaku: Yakuhai");
 		dora = [{index: 7, type: 0, dora: false}];
-		ownHand = getHandFromString("111222m5588p23s11z");
+		ownHand = getHandFromString("111234m5688p23s11z");
 		
 		discards = [[],getHandFromString("5p"),getHandFromString("57m"),getHandFromString("4m2p")];
 

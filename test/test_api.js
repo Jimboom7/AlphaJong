@@ -64,6 +64,10 @@ function makeCall(type) {
 
 }
 
+function getRound() {
+	return 1;
+}
+
 function makeCallWithOption(type, option) {
 
 }

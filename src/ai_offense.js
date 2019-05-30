@@ -24,50 +24,89 @@ function determineStrategy() {
 //Call a Chi/Pon
 //combination example: Array ["6s|7s", "7s|9s"]
 function callTriple(combinations, operation) {
+	
+	log("Consider call on " + getTileName(getTileForCall()));
 
 	var handValue = getHandValues(ownHand);
 	var newHand = ownHand.concat([getTileForCall()]);
-	var newHandValue = getTilePriorities(newHand);
 	
 	var currentHandTriples = getTriplesAndPairsInHand(ownHand);
 	var newHandTriples = getTriplesAndPairsInHand(newHand);
 	
-	if(shouldFold(newHandValue)) {
+	//Find best Combination
+	var comb = -1;
+	var newTriple = getHandWithoutTriples(newHandTriples.triples, currentHandTriples.triples.concat(getTileForCall())); 
+	newTriple = sortHand(newTriple);
+	
+	if(newHandTriples.triples.length <= currentHandTriples.triples.length || typeof newTriple[0] == undefined || typeof newTriple[1] == undefined) { //No new triple
+		log("Call would form no new triple! Declined!");
+		declineCall(operation); 
+		return false;
+	}
+	
+	for(var i = 0; i < combinations.length; i++) {
+		if(combinations[i] == getTileName(newTriple[0]) + "|" + getTileName(newTriple[1]) || combinations[i] == getTileName(newTriple[1]) + "|" + getTileName(newTriple[0])) {
+			
+			calls[0].push(newTriple[0]); //Simulate "Call" for hand value calculation
+			calls[0].push(newTriple[1]);
+			calls[0].push(getTileForCall());
+			newHand = getHandWithoutTriples(ownHand, [newTriple[0], newTriple[1]]); //Remove called tiles from hand
+			var nextDiscard = getDiscardTile(getTilePriorities(newHand)); //Calculate next discard
+			newHand = getHandWithoutTriples(newHand, [nextDiscard]); //Remove discard from hand
+			var newHandValue = getHandValues(newHand); //Get Value of that hand
+			newHandTriples = getTriplesAndPairsInHand(newHand); //Get Triples, to see if discard would make the hand worse
+			calls[0].pop();
+			calls[0].pop();
+			calls[0].pop();
+			
+			log("Combination found: " + combinations[i]);
+			comb = i;
+		}
+	}
+	
+	if(comb == -1) {
+		declineCall(operation); 
+		log("Could not find combination. Call declined!");
+		return false;
+	}
+	
+	if(shouldFold([newHandValue])) {
 		strategyAllowsCalls = false;
 	}
 	
-	log("Consider call on " + getTileName(getTileForCall()));
-	log("Check Strategy allows calls: " + strategyAllowsCalls);
-	log("Check Yaku above threshold: " + newHandValue[0].yaku.open + ">=" + CALL_YAKU_THRESHOLD + " && " + newHandValue[1].yaku.open + ">=" + CALL_YAKU_THRESHOLD);
-	log("Check if tile forms new triple: " + parseInt(newHandTriples.triples.length/3) + ">" + parseInt(currentHandTriples.triples.length/3));
-	log("Check if value of the new hand is high enough: " + ((newHandValue[0].yaku.open + newHandValue[0].dora) / ((handValue.yaku.closed + handValue.dora) + 1)) + " > " + CALL_CONSTANT/100);
-
-	if(strategyAllowsCalls &&
-		newHandValue[0].yaku.open >= CALL_YAKU_THRESHOLD && //Enough Yaku
-		newHandValue[1].yaku.open >= CALL_YAKU_THRESHOLD && //Enough Yaku
-		newHandTriples.triples.length > currentHandTriples.triples.length && //Forms new Triple
-		(parseInt(currentHandTriples.triples.length/3) <= 3 || parseInt(currentHandTriples.pairs.length/2) >= 1) && //New Triple does not destroy the last pair
-		((((newHandValue[0].yaku.open + newHandValue[0].dora) / ((handValue.yaku.closed + handValue.dora) + 1)) > CALL_CONSTANT/100) || //Value above threshold
-		(!isClosed && (newHandValue[0].yaku.open + newHandValue[0].dora) >= (handValue.yaku.open + handValue.dora)))) { //Or hand is open
-		
-		//Find best Combination
-		var newTriple = getHandWithoutTriples(newHandTriples.triples, currentHandTriples.triples.concat(getTileForCall())); 
-		newTriple = sortHand(newTriple);
-		for(var i = 0; i < combinations.length; i++) {
-			if(combinations[i] == getTileName(newTriple[0]) + "|" + getTileName(newTriple[1]) || combinations[i] == getTileName(newTriple[1]) + "|" + getTileName(newTriple[0])) {
-				log("Combination found: " + combinations[i] + ". Call accepted!");
-				makeCallWithOption(operation, i);
-				isClosed = false;
-				return true;
-			}
-		}
-		if(operation != getOperationList()[getOperationList().length - 1].type) { //Is not last operation?
-			log("Could not find combination for operation " + operation + ". Trying next operation.");
-			return false;
-		}
-		declineCall(); 
-		log("Could not find combination. Call declined!");
+	if(!strategyAllowsCalls) { //No Calls allowed
+		log("Strategy allows no calls! Declined!");
+		declineCall(operation); 
 		return false;
+	}
+	
+	if(newHandValue.yaku.open < CALL_YAKU_THRESHOLD) { //Yaku chance is too bad
+		log("Not enough Yaku! Declined! " + newHandValue.yaku.open + "<" + CALL_YAKU_THRESHOLD);
+		declineCall(operation); 
+		return false;
+	}
+	
+	if(newHandTriples.triples.length < currentHandTriples.triples.length) { //Destroys triple next turn
+		log("Next discard would destroy a triple. Declined!");
+		declineCall(operation); 
+		return false;
+	}
+	
+	if(parseInt(currentHandTriples.triples.length/3) == 3 && parseInt(currentHandTriples.pairs.length/2) == 1) { //New Triple destroys the last pair
+		log("Call would destroy last pair! Declined!");
+		declineCall(operation); 
+		return false;
+	}
+	
+	log("Check if value of the new hand is high enough: " + ((newHandValue.yaku.open + newHandValue.dora) / ((handValue.yaku.closed + handValue.dora) + 1)) + " > " + CALL_CONSTANT/100);
+	if((((newHandValue.yaku.open + newHandValue.dora) / ((handValue.yaku.closed + handValue.dora) + 1)) > CALL_CONSTANT/100) || //Value above threshold
+		(handValue.efficiency < EFFICIENCY_THRESHOLD) || //Hand is bad
+		(!isClosed && (newHandValue.yaku.open + newHandValue.dora) >= (handValue.yaku.open + handValue.dora) * 0.9)) { //Or hand is already open
+		
+		log("Call accepted!");
+		makeCallWithOption(operation, comb);
+		isClosed = false;
+		return true;
 	}
 	else { //Decline
 		declineCall();
@@ -104,7 +143,7 @@ function callAnkan() {
 //Needs a semi good hand to call Kans and other players are not dangerous
 function callKan(operation) {
 	log("Consider Kan.");
-	var tiles = getTilePriorities(getHandWithCalls(ownHand));
+	var tiles = getHandValues(getHandWithCalls(ownHand));
 	if(strategyAllowsCalls && tiles.efficiency >= 4 - (tilesLeft/30) - (1 - (CALL_KAN_CONSTANT/50)) && getCurrentDangerLevel() < 100 - CALL_KAN_CONSTANT) {
 		makeCall(operation);
 		log("Kan accepted!");
@@ -131,8 +170,12 @@ function callRiichi(tiles) {
 			combination = operations[i].combination;
 		}
 	}
+	log(JSON.stringify(combination)); //Sometimes throws dora before normal tile
 	for(var i = 0; i < tiles.length; i++) {
 		for(var j = 0; j < combination.length; j++) {
+			if(combination[j].charAt(0) == "0") { //Fix for Dora Tiles
+				combination.push("5" + combination[j].charAt(1));
+			}
 			if(getTileName(tiles[i].tile) == combination[j] && shouldRiichi(tiles[i].waits, tiles[i].yaku)) {
 				var moqie = false;
 				if(getTileName(tiles[i].tile) == getTileName(ownHand[ownHand.length - 1])) { //Is last tile?
@@ -224,7 +267,7 @@ function getHandValues(hand, tile) {
 	efficiency = baseEfficiency;
 	var baseDora = getNumberOfDorasInHand(triples.concat(pairs, calls[0]));
 	var doraValue = baseDora;
-	var baseYaku = getYaku(hand);
+	var baseYaku = getYaku(hand, calls[0]);
 	var yaku = baseYaku;
 	var waits = 0;
 	
@@ -278,7 +321,7 @@ function getHandValues(hand, tile) {
 		var y2 = baseYaku;
 		if(e2 > 0) { //If this tile forms a new triple
 			efficiency += e2 * chance;
-			y2 = getYaku(newHand);
+			y2 = getYaku(newHand, calls[0]);
 			y2.open -= baseYaku.open;
 			y2.closed -= baseYaku.closed;
 			if(y2.open > 0) {
@@ -344,7 +387,7 @@ function getHandValues(hand, tile) {
 		
 		if(e3 > 0) { //If this tile forms a new triple
 			efficiency += e3 * chance;
-			var y3 = getYaku(newHand);
+			var y3 = getYaku(newHand, calls[0]);
 			y3.open -= (baseYaku.open + oldYaku.open);
 			y3.closed -= (baseYaku.closed + oldYaku.closed);
 			if(y3.open > 0) {
@@ -404,7 +447,7 @@ function chiitoitsuPriorities() {
 		var efficiency = pairsValue;
 		var dora2 = 0;
 
-		var yaku = getYaku(newHand);
+		var yaku = getYaku(newHand, calls[0]);
 		var baseYaku = yaku;
 	
 		//Possible Value, Yaku and Dora after Draw
@@ -419,7 +462,7 @@ function chiitoitsuPriorities() {
 				if(pairs2.length > 0) {
 					efficiency += chance;
 					doraValue += getNumberOfDorasInHand(pairs2) * chance;
-					var y2 = getYaku(newHand);
+					var y2 = getYaku(newHand, calls[0]);
 					y2.open -= yaku.open;
 					y2.closed -= baseYaku.closed;
 					if(y2.open > 0) {
@@ -456,16 +499,7 @@ function discard() {
 	log("Tile Priorities: ");
 	printTilePriority(tiles);
 	
-	var tile = tiles[0].tile;
-	
-	if(!isClosed) { //Keep Yaku with open hand
-		for(var i = 0; i < tiles.length; i++) {
-			if(tiles[i].yaku.open >= 1) {
-				tile = tiles[i].tile;
-				break;
-			}
-		}
-	}
+	tile = getDiscardTile(tiles);
 	
 	if(canRiichi() && tilesLeft > RIICHI_TILES_LEFT) {
 		callRiichi(tiles);
@@ -474,5 +508,23 @@ function discard() {
 		discardTile(tile);
 	}
 	
+	return tile;
+}
+
+function getDiscardTile(tiles) {
+	var tile = tiles[0].tile;
+	
+	if(!isClosed) { //Keep Yaku with open hand
+		var highestYaku = -1;
+		for(var i = 0; i < tiles.length; i++) {
+			if(tiles[i].yaku.open > highestYaku + 0.01) {	
+				tile = tiles[i].tile;
+				highestYaku = tiles[i].yaku.open;
+				if(tiles[i].yaku.open >= 1) {
+					break;
+				}
+			}
+		}
+	}
 	return tile;
 }

@@ -51,6 +51,10 @@ function getSeatWind(player) {
 	return ((4 + localPosition2Seat(player) - view.DesktopMgr.Inst.index_ju) % 4) + 1;
 }
 
+function getRound() {
+	return view.DesktopMgr.Inst.index_ju;
+}
+
 function getRoundWind() {
 	return view.DesktopMgr.Inst.index_change + 1;
 }
@@ -74,8 +78,10 @@ function makeCallWithOption(type, option) {
 	app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', {type: type, index: option, timeuse: 2});
 }
 
-function declineCall() {
-	app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', {cancel_operation: true, timeuse: 2});
+function declineCall(operation) {
+	if(operation == getOperationList()[getOperationList().length - 1].type) { //Is last operation -> Send decline Command
+		app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', {cancel_operation: true, timeuse: 2});
+	}
 }
 
 function sendRiichiCall(tile, moqie) {

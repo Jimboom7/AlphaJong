@@ -14,8 +14,9 @@ var SUJI_MODIFIER = 1; //Higher Value: Suji is worth more
 
 //CALLS
 var CALL_CONSTANT = 70; //Higher Value: Higher Threshold for making a call. Default: 70
-var CALL_YAKU_THRESHOLD = 1; //How many Yakus does the hand need to call for tiles? Default: 1
+var CALL_YAKU_THRESHOLD = 0.01; //How many Yakus does the hand need to call for tiles? Default: 0.01 (aka medium chance for yaku soon)
 var CALL_KAN_CONSTANT = 50; //Higher Value: Higher Threshold for calling Kans. Default: 50
+var EFFICIENCY_THRESHOLD = 1; // If efficiency of hand is below this threshhold: Call if yaku.
 
 //HAND EVALUATION CONSTANTS
 var EFFICIENCY_VALUE = 1; // 0 -> ignore Efficiency (lol). Default: 1

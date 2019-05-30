@@ -30,22 +30,22 @@ if(!isDebug()) {
 
 //TODO LIST:
 
+//Kan: Check if less triples after call
+//Kan: Additional fourth tile... yaku calculation etc.?
+//Deep Copy Tiles in SetData
+//Consider number of safe tiles when deciding if fold
 //Fix calls for dora tiles
 //Fold later as Dealer
 //Defense: Last tile from left player has priority for discard (-> is safe for this turn)
 //Check isTenpai()
-//Calls: Check if tile forms new triple -> check efficiency (so pairs dont get swapped out) (kinda done)
 //Defense: Add Other Sujis (with low Prio)
 //Maybe Consider Calls that don't form an additional triple? (e.g. 4566 -> 6 is thrown (or dora 6))
 //When Calling Chi: Check if discard is valid
 //More value for pairs (see strategy guides) (?)
-//ShouldRiichi: Consider Scores
 //9 Terminals -> Call Draw
 //Start Main Loop instantly, top of loop: check ingame or lobby is loaded
-//Change the way how Safety-Value affects the normal discard
 //More Yaku
 //Use Scores for Calculating Strategy (Going for fast wins as first etc.)
-//Fold better... before calls?
 //Riichi sometimes fails...
 //Better Log
 //Save some parts of the log (Endresult? Won by Ron etc.) in Local Storage
@@ -167,16 +167,16 @@ function setData() {
 		calls.push(temp_calls);
 	}
 	
-	if(tilesLeft < getTilesLeft()) { //Check if new round
+	if(tilesLeft < getTilesLeft()) { //Check if new round/reload
 		isClosed = true;
+		if(calls[0].length > 0) {
+			isClosed = false;
+		}
 		setAutoCallWin(true);
 		strategy = STRATEGIES.GENERAL;
 		strategyAllowsCalls = true;
 	}
 	
-	if(calls[0].length > 0) {
-		isClosed = false;
-	}
 	tilesLeft = getTilesLeft();
 	
 	if(!isDebug()) {

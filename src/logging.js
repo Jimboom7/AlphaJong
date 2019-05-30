@@ -76,6 +76,36 @@ function getHandFromString(inputString) {
 	return tiles;
 }
 
+//Input string to get a tiles (e.g. "1m")
+function getTileFromString(inputString) {
+	var type = 4;
+	var dr = false;
+	switch(inputString[1]) {
+		case "p":
+			type = 0;
+			break;
+		case "m":
+			type = 1;
+			break;
+		case "s":
+			type = 2;
+			break;
+		case "z":
+			type = 3;
+			break;
+	}
+	if(inputString[0] == "0") {
+		inputString[0] = 5;
+		dr = true;
+	}
+	if(type != "4") {
+		var tile = {index: parseInt(inputString[0]), type: type, dora: dr};
+		tile.doraValue = getTileDoraValue(tile);
+		return tile;
+	}
+	return null;
+}
+
 //Returns the name for a tile
 function getTileName(tile) {
 	if(tile.dora == true) {
