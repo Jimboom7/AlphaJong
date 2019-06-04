@@ -114,7 +114,7 @@ function isPlayerRiichi(player) {
 }
 
 function isInGame() {
-	return view.DesktopMgr != null && view.DesktopMgr.Inst != null && view.DesktopMgr.player_link_state != null;
+	return this != null && view != null && view.DesktopMgr != null && view.DesktopMgr.Inst != null && view.DesktopMgr.player_link_state != null;
 }
 
 function getPlayerScore(player) {

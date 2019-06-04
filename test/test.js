@@ -424,6 +424,59 @@ function runTestcase() {
 
 		var expected = ["3z"];
 		break;
+	case 41:
+		log("Testcase 41: Sanshoku Douko");
+		dora = [{index: 1, type: 1, dora: false}];
+		ownHand = getHandFromString("111m11199p1167s");
+
+		var expected = ["6s", "9p"];
+		break;
+	case 42:
+		log("Testcase 42: Sanshoku");
+		dora = [{index: 1, type: 1, dora: false}];
+		ownHand = getHandFromString("123m12399p1289s");
+		discards = [[], [{index: 3, type: 2, dora: false, doraValue: 0}], [], []];
+
+		var expected = ["9s"];
+		break;
+	case 43:
+		log("Testcase 43: Chanta");
+		dora = [{index: 1, type: 1, dora: false}];
+		ownHand = getHandFromString("123m123999p579s22z");
+		discards = [[], [{index: 3, type: 2, dora: false, doraValue: 0}], [], []];
+
+		var expected = ["5s"];
+		break;
+	case 44:
+		log("Testcase 44: Honrou");
+		dora = [{index: 1, type: 1, dora: false}];
+		ownHand = getHandFromString("111m111999p11159s");
+		discards = [[], [{index: 9, type: 2, dora: false, doraValue: 0}, {index: 9, type: 2, dora: false, doraValue: 0}], [], []];
+
+		var expected = ["5s"];
+		break;
+	case 45:
+		log("Testcase 45: Shousangen");
+		dora = [{index: 1, type: 1, dora: false}];
+		ownHand = getHandFromString("456s23p78s5556667z");
+
+		var expected = ["2p"];
+		break;
+	case 46:
+		log("Testcase 46: Daisangen");
+		dora = [{index: 1, type: 1, dora: false}];
+		ownHand = getHandFromString("456s23p55566677z");
+
+		var expected = ["2p"];
+		break;
+	case 47:
+		log("Testcase 47: Junchan");
+		dora = [{index: 1, type: 1, dora: false}];
+		ownHand = getHandFromString("123m123999p11579s");
+		discards = [[], [{index: 3, type: 2, dora: false, doraValue: 0}], [], []];
+
+		var expected = ["5s"];
+		break;
 	default:
 		testsRunning = false;
 		return;
@@ -487,13 +540,13 @@ function runBenchmark() {
 	while(tilesLeft > 4) {
 		simulateTurn();
 		
+		var value = getTilePriorities(ownHand);
 		var triplesAndPairs = getTriplesAndPairsInHand(ownHand);
 		handWithoutTriples = getHandWithoutTriples(ownHand, triplesAndPairs.triples);
 		var doubles = getDoublesInHand(handWithoutTriples);
-		if(isTenpai(triplesAndPairs, doubles)) {
+		if(isTenpai(triplesAndPairs, doubles, value[0].efficiency)) {
 			log("<h2>Tenpai</h2>");
 			passes++;
-			var value = getTilePriorities(ownHand);
 			log("Turns: " + (currentTest % 50));
 			log("Value: " + (value[0].dora + value[0].yaku.closed));
 			winValues.push({time: (currentTest % 50), value: (value[0].dora + value[0].yaku.closed)});

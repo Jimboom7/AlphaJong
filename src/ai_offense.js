@@ -54,6 +54,7 @@ function callTriple(combinations, operation) {
 			var nextDiscard = getDiscardTile(getTilePriorities(newHand)); //Calculate next discard
 			newHand = getHandWithoutTriples(newHand, [nextDiscard]); //Remove discard from hand
 			var newHandValue = getHandValues(newHand); //Get Value of that hand
+			newHandValue.tile = nextDiscard;
 			newHandTriples = getTriplesAndPairsInHand(newHand); //Get Triples, to see if discard would make the hand worse
 			calls[0].pop();
 			calls[0].pop();
@@ -98,21 +99,28 @@ function callTriple(combinations, operation) {
 		return false;
 	}
 	
-	log("Check if value of the new hand is high enough: " + ((newHandValue.yaku.open + newHandValue.dora) / ((handValue.yaku.closed + handValue.dora) + 1)) + " > " + CALL_CONSTANT/100);
-	if((((newHandValue.yaku.open + newHandValue.dora) / ((handValue.yaku.closed + handValue.dora) + 1)) > CALL_CONSTANT/100) || //Value above threshold
-		(handValue.efficiency < EFFICIENCY_THRESHOLD) || //Hand is bad
-		(!isClosed && (newHandValue.yaku.open + newHandValue.dora) >= (handValue.yaku.open + handValue.dora) * 0.9)) { //Or hand is already open
-		
-		log("Call accepted!");
-		makeCallWithOption(operation, comb);
-		isClosed = false;
-		return true;
+	if(handValue.efficiency < EFFICIENCY_THRESHOLD && seatWind == 1) { //Low hand efficiency & dealer? -> Go for a fast win
+		log("Call accepted because of bad hand and dealer position!");
+	}
+	else if(newHandValue.yaku.open + getNumberOfDorasInHand(ownHand) >= CALL_CONSTANT && handValue.yaku.open + handValue.dora > newHandValue.yaku.open + newHandValue.dora * 0.7) { //High value hand? -> Go for a fast win
+		log("Call accepted because of high value hand!");
+	}
+	else if(getTileDoraValue(getTileForCall()) + newHandValue.yaku.open >= handValue.yaku.closed + 0.9) { //Call gives additional value to hand
+		log("Call accepted because it boosts the value of the hand!");
+	}
+	else if(!isClosed && (newHandValue.yaku.open + newHandValue.dora) >= (handValue.yaku.open + handValue.dora) * 0.9) { //Hand is already open and not much value is lost
+		log("Call accepted because hand is already open!");
 	}
 	else { //Decline
-		declineCall();
-		log("Call declined!");
+		declineCall(operation);
+		log("Call declined because it does not benefit the hand!");
+		return false;
 	}
-	return false;
+	
+	makeCallWithOption(operation, comb);
+	isClosed = false;
+	return true;
+	
 }
 
 //Call Tile for Kan
@@ -121,7 +129,7 @@ function callDaiminkan() {
 		makeCall(getOperations().ming_gang);
 	}
 	else {
-		declineCall();
+		declineCall(getOperations().ming_gang);
 	}
 }
 
@@ -131,7 +139,7 @@ function callShouminkan() {
 		makeCall(getOperations().add_gang);
 	}
 	else {
-		declineCall();
+		declineCall(getOperations().add_gang);
 	}
 }
 
@@ -144,12 +152,13 @@ function callAnkan() {
 function callKan(operation) {
 	log("Consider Kan.");
 	var tiles = getHandValues(getHandWithCalls(ownHand));
-	if(strategyAllowsCalls && tiles.efficiency >= 4 - (tilesLeft/30) - (1 - (CALL_KAN_CONSTANT/50)) && getCurrentDangerLevel() < 100 - CALL_KAN_CONSTANT) {
+	var newTiles = getHandValues(getHandWithCalls(getHandWithoutTriples(ownHand, [getTileForCall()]))); //Check if efficiency goes down without additional tile
+	if(strategyAllowsCalls && tiles.efficiency >= 4 - (tilesLeft/30) - (1 - (CALL_KAN_CONSTANT/50)) && getCurrentDangerLevel() < 100 - CALL_KAN_CONSTANT && (tiles.efficiency * 0.95) < newTiles.efficiency) {
 		makeCall(operation);
 		log("Kan accepted!");
 	}
 	else {
-		declineCall();
+		declineCall(operation);
 		log("Kan declined!");
 	}
 }
@@ -423,7 +432,7 @@ function getTileValue(hand, tile, efficiency, yakus, doraValue, waits) {
 	var triplesAndPairs = getTriplesAndPairsInHand(hand.concat(calls[0]));
 	handWithoutTriplesAndPairs = getHandWithoutTriples(hand, triplesAndPairs.triples.concat(triplesAndPairs.pairs));
 	var doubles = getDoublesInHand(handWithoutTriplesAndPairs);
-	if(isTenpai(triplesAndPairs, doubles)) {
+	if(isTenpai(triplesAndPairs, doubles, efficiency)) {
 		efficiency += (waits / (11 - (WAIT_VALUE*10)));
 	}
 	
@@ -444,7 +453,7 @@ function chiitoitsuPriorities() {
 		var doraValue = getNumberOfDorasInHand(pairs);
 		var waits = 0;
 		
-		var efficiency = pairsValue;
+		var efficiency = pairsValue/2;
 		var dora2 = 0;
 
 		var yaku = getYaku(newHand, calls[0]);
@@ -460,7 +469,7 @@ function chiitoitsuPriorities() {
 				var chance = (numberOfTiles / availableTiles.length);
 				var pairs2 = getPairsInHand(currentHand);
 				if(pairs2.length > 0) {
-					efficiency += chance;
+					efficiency += chance/2;
 					doraValue += getNumberOfDorasInHand(pairs2) * chance;
 					var y2 = getYaku(newHand, calls[0]);
 					y2.open -= yaku.open;

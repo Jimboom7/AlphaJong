@@ -32,10 +32,10 @@ function getTileDanger(tile) {
 				dangerPerPlayer[i] = 5;
 			}
 			else if(availableHonors == 2) {
-				dangerPerPlayer[i] = 30;
+				dangerPerPlayer[i] = 50;
 			}
 			else if(availableHonors == 3) {
-				dangerPerPlayer[i] = 80;
+				dangerPerPlayer[i] = 90;
 			}
 		}
 		else if(tile.type != 3 && getPositionOfTileInDiscard(i, {index: tile.index + 3, type: tile.type}) > 0 || getPositionOfTileInDiscard(i, {index: tile.index - 3, type: tile.type}) > 0) { //Suji
@@ -144,7 +144,7 @@ function getMostRecentDiscard(tile) {
 
 //Returns the position of a tile in discards
 function getPositionOfTileInDiscard(player, tile) {
-	for(var i = 0; i < discards[player].length; i++) {
+	for(var i = discards[player].length - 1; i >= 0; i--) {
 		if(discards[player][i].index == tile.index && discards[player][i].type == tile.type) {
 			return discards[player].length - i;
 		}
@@ -154,7 +154,7 @@ function getPositionOfTileInDiscard(player, tile) {
 
 //Returns the safety of a tile
 function getTileSafety(tile) {
-	return 1 - ((getTileDanger(tile)/100) * Math.pow(getCurrentDangerLevel()/100, 2));
+	return 1 - (Math.pow(getTileDanger(tile)/10, 2)/100);
 }
 
 //Returns true if the player is going for a flush of a given type

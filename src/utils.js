@@ -524,12 +524,13 @@ function getUsefulTilesForDouble(hand) {
 }
 
 //Returns true if triples, pairs and doubles are valid for tenpai
-//Not 100% accurate
-function isTenpai(triplesAndPairs, doubles) {
+//Not 100% accurate -> EDIT: efficiency helps, but (probably) still not accurate
+function isTenpai(triplesAndPairs, doubles, efficiency) {
 	if(strategy == STRATEGIES.CHIITOITSU) {
 		return parseInt(triplesAndPairs.pairs.length / 2) >= 6; //Should be enough
 	}
-	var tenpai = ((parseInt(triplesAndPairs.triples.length/3) == 3 && parseInt(triplesAndPairs.pairs.length / 2) >= 1 && ((parseInt(doubles.length/2) >= 1 ) || parseInt(triplesAndPairs.pairs.length / 2) >= 2)) || parseInt(triplesAndPairs.triples.length/3) == 4);
+	//PROBLEM: If Double & Pair overlap (3 tripels + 1667 -> thinks its tenpai)
+	var tenpai = (efficiency >= 3.5 && ((parseInt(triplesAndPairs.triples.length/3) == 3 && parseInt(triplesAndPairs.pairs.length / 2) >= 1 && ((parseInt(doubles.length/2) >= 1 ) || parseInt(triplesAndPairs.pairs.length / 2) >= 2)) || parseInt(triplesAndPairs.triples.length/3) == 4));
 	//if(tenpai) {
 		//TODO: Check for Furiten
 	//}
@@ -564,15 +565,17 @@ function shouldFold(tiles) {
 	var factor = FOLD_CONSTANT;
 	if(isLastGame()) { //Fold earlier when first/later when last in last game
 		if(getDistanceToLast() > 0) {
-			factor += 1000; //Last Place -> Never Fold
+			factor *= 1.5; //Last Place -> Later Fold
 		}
 		else if(getDistanceToFirst() < 0) {
-			factor += getDistanceToFirst() / 1000; //First Place -> Easier Fold
+			var dist = (getDistanceToFirst() / 30000) > -0.5 ? getDistanceToFirst() / 30000 : -0.5;
+			factor *= 1 + dist; //First Place -> Easier Fold
 		}
 	}
-	factor += seatWind == 1 ? 5 : 0; //Fold later as dealer
-	if(getCurrentDangerLevel() > tiles[0].value * factor) {
-		log("Danger Level " + getCurrentDangerLevel() + " is bigger than " + tiles[0].value * FOLD_CONSTANT + ". FOLD!");
+	factor *= seatWind == 1 ? 1.1 : 1; //Fold later as dealer
+	log("Would fold this hand below " + Number((1 - ((tiles[0].value * factor)/100))).toFixed(2) + " safety.");
+	if((tiles[0].value * factor)/100 < 1 - getTileSafety(tiles[0].tile)) {
+		log("Tile Safety " + getTileSafety(tiles[0].tile) + " of " + getTileName(tiles[0].tile) + " is too dangerous. FOLD!");
 		return true;
 	}
 	return false;

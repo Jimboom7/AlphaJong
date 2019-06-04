@@ -23,18 +23,21 @@ if(!isDebug()) {
 	if(AUTORUN) {
 		log("Autorun start");
 		setInterval(sendHeatBeat, 60000); // 1 min? 5 min?
-		setTimeout(startGame, 20000); //Search for new game after 20 seconds
+		setTimeout(startGame, 30000); //Search for new game after 30 seconds
+		setTimeout(main, 10000);
+		log("Main Loop started.");
+		run = true;
 	}
 }
 
 
 //TODO LIST:
 
-//Kan: Check if less triples after call
+//Defense against Riichi: Tiles after Riichi -> 100% safe. List?
+//Defensive: Check for players with calls which yaku they need (Yakuhai etc.)
 //Kan: Additional fourth tile... yaku calculation etc.?
 //Deep Copy Tiles in SetData
 //Consider number of safe tiles when deciding if fold
-//Fix calls for dora tiles
 //Fold later as Dealer
 //Defense: Last tile from left player has priority for discard (-> is safe for this turn)
 //Check isTenpai()
@@ -193,9 +196,6 @@ function startGame() {
 		log("Searching for Match in Room " + ROOM);
 		searchForGame();
 	}
-	log("Main Loop started.");
-	run = true;
-	main();
 }
 
 //Check if End Screen is shown

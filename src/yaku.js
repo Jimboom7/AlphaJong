@@ -17,7 +17,9 @@ function getYaku(inputHand, inputCalls) {
 	//handWithoutTriples = getHandWithoutTriples(hand, triplesAndPairs.triples);
 	handWithoutTriplesAndPairs = getHandWithoutTriples(hand, triplesAndPairs.triples.concat(triplesAndPairs.pairs));
 	var doubles = getDoublesInHand(handWithoutTriplesAndPairs);
-	var tenpai = isTenpai(triplesAndPairs, doubles);
+	//var tenpai = isTenpai(triplesAndPairs, doubles);
+	var pons = getPonsInHand(hand);
+	var chis = getBestChisInHand(hand);
 
 	//Yakuhai
 	//Wind/Dragon Triples
@@ -81,18 +83,37 @@ function getYaku(inputHand, inputCalls) {
 	//Sanshoku Doukou
 	//3 same index triplets in all 3 types
 	//Open
+	var sanshokuDouko = getSanshokuDouko(pons);
+	yakuOpen += sanshokuDouko.open;
+	yakuClosed += sanshokuDouko.closed;
+	
+	//Sanshoku
+	//3 same index straights in all types
+	//Open/-1 Han after call
+	var sanshoku = getSanshoku(chis);
+	yakuOpen += sanshoku.open;
+	yakuClosed += sanshoku.closed;
 	
 	//Shousangen
 	//Little 3 Dragons (2 Triplets + Pair)
 	//Open
+	var shousangen = getShousangen(pons, triplesAndPairs.pairs);
+	yakuOpen += shousangen.open;
+	yakuClosed += shousangen.closed;
 	
 	//Chanta
 	//Half outside Hand (including terminals)
 	//Open/-1 Han after call
+	var chanta = getChanta(pons, chis, triplesAndPairs.pairs);
+	yakuOpen += chanta.open;
+	yakuClosed += chanta.closed;
 	
 	//Honrou
 	//All Terminals and Honors (means: Also 4 triplets)
 	//Open
+	var honrou = getHonrou(hand);
+	yakuOpen += honrou.open;
+	yakuClosed += honrou.closed;
 	
 	//Ittsuu
 	//Pure Straight
@@ -100,10 +121,6 @@ function getYaku(inputHand, inputCalls) {
 	var ittsuu = getIttsuu(triplesAndPairs.triples);
 	yakuOpen += ittsuu.open;
 	yakuClosed += ittsuu.closed;
-	
-	//Sanshoku
-	//3 same index straights in all types
-	//Open/-1 Han after call
 	
 	//3 Han
 	
@@ -114,6 +131,9 @@ function getYaku(inputHand, inputCalls) {
 	//Junchan
 	//All Terminals
 	//Open/-1 Han after call
+	var junchan = getJunchan(pons, chis, triplesAndPairs.pairs);
+	yakuOpen += junchan.open;
+	yakuClosed += junchan.closed;
 	
 	//Honitsu
 	//Half Flush
@@ -133,8 +153,12 @@ function getYaku(inputHand, inputCalls) {
 	
 	//Yakuman
 	
+	//Daisangen
 	//Big Three Dragons
 	//Open
+	var daisangen = getDaisangen(pons);
+	yakuOpen += daisangen.open;
+	yakuClosed += daisangen.closed;
 	
 	//4 Concealed Triplets
 	//Closed
@@ -248,6 +272,66 @@ function getToitoi(hand) {
 		return {open: 2, closed: 2};
 	}
 	
+	return {open: 0, closed: 0};
+}
+
+//Sanshoku Douko
+function getSanshokuDouko(triples) {
+	for(var i = 1; i <= 9; i++) {
+		if(triples.filter(tile => tile.index == i && tile.type < 3).length >= 9) {
+			return {open: 2, closed: 2};
+		}
+	}
+	return {open: 0, closed: 0};
+}
+
+//Sanshoku Douko
+function getSanshoku(chis) {
+	for(var i = 1; i <= 7; i++) {
+		if(chis.filter(tile => tile.index == i || tile.index == i + 1 || tile.index == i + 2).length >= 9) {
+			return {open: 2, closed: 1};
+		}
+	}
+	return {open: 0, closed: 0};
+}
+
+//Shousangen - TODO: Check for Kans
+function getShousangen(hand) {
+	if(hand.filter(tile => tile.type == 3 && tile.index >= 5).length == 8) {
+		return {open: 2, closed: 2};
+	}
+	return {open: 0, closed: 0};
+}
+
+//Daisangen - TODO: Check for Kans
+function getDaisangen(hand) {
+	if(hand.filter(tile => tile.type == 3 && tile.index >= 5).length >= 9) {
+		return {open: 10, closed: 10}; //Yakuman -> 10?
+	}
+	return {open: 0, closed: 0};
+}
+
+//Chanta - poor detection
+function getChanta(pons, chis, pairs) {
+	if((pons.concat(pairs)).filter(tile => tile.type == 3 || tile.index == 1 || tile.index == 9).length + (chis.filter(tile => tile.index == 1 || tile.index == 9).length * 3) >= 13) {
+		return {open: 1, closed: 2};
+	}
+	return {open: 0, closed: 0};
+}
+
+//Honrou
+function getHonrou(hand) {
+	if(hand.filter(tile => tile.type == 3 || tile.index == 1 || tile.index == 9).length >= 13) {
+		return {open: 3, closed: 2}; // - Added to Chanta
+	}
+	return {open: 0, closed: 0};
+}
+
+//Junchan
+function getJunchan(pons, chis, pairs) {
+	if((pons.concat(pairs)).filter(tile => tile.type != 3 && (tile.index == 1 || tile.index == 9)).length + (chis.filter(tile => tile.index == 1 || tile.index == 9).length * 3) >= 13) {
+		return {open: 1, closed: 1}; // - Added to Chanta
+	}
 	return {open: 0, closed: 0};
 }
 

@@ -8,21 +8,21 @@ var AUTORUN = true; //Automatically start new Games
 var ROOM = 5; //2 = Bronze East, 3 = Bronze South, 5 = Silver East, ...
 
 //DEFENSE CONSTANTS
-var FOLD_CONSTANT = 50; //Lower -> Earlier Fold. Default: 50
+var FOLD_CONSTANT = 17; //Lower -> Earlier Fold. Default: 25
 var RECENT_DISCARD_MODIFIER = 10; // Higher Value: Recent Discards have more impact
 var SUJI_MODIFIER = 1; //Higher Value: Suji is worth more
 
 //CALLS
-var CALL_CONSTANT = 70; //Higher Value: Higher Threshold for making a call. Default: 70
+var CALL_CONSTANT = 3; //Amount of han (Open Yaku + Dora) that is needed for calls (to accelerate high value hands). Default: 3
 var CALL_YAKU_THRESHOLD = 0.01; //How many Yakus does the hand need to call for tiles? Default: 0.01 (aka medium chance for yaku soon)
-var CALL_KAN_CONSTANT = 50; //Higher Value: Higher Threshold for calling Kans. Default: 50
-var EFFICIENCY_THRESHOLD = 1; // If efficiency of hand is below this threshhold: Call if yaku.
+var CALL_KAN_CONSTANT = 60; //Higher Value: Higher Threshold for calling Kans. Default: 60
+var EFFICIENCY_THRESHOLD = 1; // If efficiency of hand is below this threshhold (& dealer): Call if hand has open yaku.
 
 //HAND EVALUATION CONSTANTS
 var EFFICIENCY_VALUE = 1; // 0 -> ignore Efficiency (lol). Default: 1
-var YAKU_VALUE = 1; // 0 -> ignore Yaku. Default: 1
+var YAKU_VALUE = 0.5; // 0 -> ignore Yaku. Default: 0.5
 var DORA_VALUE = 0.3; // 0 -> ignore Dora. Default: 0.3
-var SAFETY_VALUE = 0.5; // 0 -> Ignore Safety. Default: 0.2
+var SAFETY_VALUE = 0.5; // 0 -> Ignore Safety. Default: 0.5
 var PAIR_VALUE = 0.5; //Value for the first pair when evaluating the hand (Triples are 1). Default: 0.5
 var WAIT_VALUE = 0.3; //Value for good waits when tenpai. Maximum: 1. Default: 0.3
 
