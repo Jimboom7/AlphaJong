@@ -33,10 +33,11 @@ if(!isDebug()) {
 
 //TODO LIST:
 
-//Defense against Riichi: Tiles after Riichi -> 100% safe. List?
+//When fold: More value for closed hand
+//When Riichi: Consider Danger Level
+//Fix Tanyao Calls
 //Defensive: Check for players with calls which yaku they need (Yakuhai etc.)
-//Kan: Additional fourth tile... yaku calculation etc.?
-//Deep Copy Tiles in SetData
+//Kan: Additional fourth tile... yaku calculation etc.? (Tanyao, Honitsu etc.)
 //Consider number of safe tiles when deciding if fold
 //Fold later as Dealer
 //Defense: Last tile from left player has priority for discard (-> is safe for this turn)
@@ -47,9 +48,8 @@ if(!isDebug()) {
 //More value for pairs (see strategy guides) (?)
 //9 Terminals -> Call Draw
 //Start Main Loop instantly, top of loop: check ingame or lobby is loaded
-//More Yaku
+//More Yaku -> Chiitoitsu
 //Use Scores for Calculating Strategy (Going for fast wins as first etc.)
-//Riichi sometimes fails...
 //Better Log
 //Save some parts of the log (Endresult? Won by Ron etc.) in Local Storage
 
@@ -160,6 +160,7 @@ function setData() {
 		}
 		discards.push(temp_discards);
 	}
+	updateDiscardedTilesSafety();
 	
 	calls = [];
 	for(var j = 0; j < 4; j++) { //Get Calls for all Players
@@ -178,6 +179,7 @@ function setData() {
 		setAutoCallWin(true);
 		strategy = STRATEGIES.GENERAL;
 		strategyAllowsCalls = true;
+		initialDiscardedTilesSafety();
 	}
 	
 	tilesLeft = getTilesLeft();

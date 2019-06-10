@@ -1,15 +1,14 @@
+var AUTORUN = true; //Automatically start new Games 
 //################################
 // PARAMETERS
 // Contains Parameters to change the playstile of the bot
 //################################
 
 //AI PARAMETERS
-var AUTORUN = true; //Automatically start new Games 
 var ROOM = 5; //2 = Bronze East, 3 = Bronze South, 5 = Silver East, ...
 
 //DEFENSE CONSTANTS
-var FOLD_CONSTANT = 17; //Lower -> Earlier Fold. Default: 25
-var RECENT_DISCARD_MODIFIER = 10; // Higher Value: Recent Discards have more impact
+var FOLD_CONSTANT = 10; //Lower -> Earlier Fold. Default: 10
 var SUJI_MODIFIER = 1; //Higher Value: Suji is worth more
 
 //CALLS

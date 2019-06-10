@@ -7,17 +7,19 @@
 //TODO: Thirteen Orphans
 function determineStrategy() {
 	
-	var handTriples = parseInt(getTriplesInHand(getHandWithCalls(ownHand)).length/3);
-
-	if(getPairsInHand(ownHand).length/2 >= CHIITOITSU && handTriples < 2 && isClosed) { //Check for Chiitoitsu
-			strategy = STRATEGIES.CHIITOITSU;
-			strategyAllowsCalls = false;
-		}
-	else {
-		strategy = STRATEGIES.GENERAL;
-		strategyAllowsCalls = true;
-	}
+	if(strategy != STRATEGIES.FOLD) {
 	
+		var handTriples = parseInt(getTriplesInHand(getHandWithCalls(ownHand)).length/3);
+
+		if(getPairsInHand(ownHand).length/2 >= CHIITOITSU && handTriples < 2 && isClosed) { //Check for Chiitoitsu
+				strategy = STRATEGIES.CHIITOITSU;
+				strategyAllowsCalls = false;
+			}
+		else {
+			strategy = STRATEGIES.GENERAL;
+			strategyAllowsCalls = true;
+		}
+	}
 	log("Strategy: " + strategy);
 }
 
@@ -190,11 +192,13 @@ function callRiichi(tiles) {
 				if(getTileName(tiles[i].tile) == getTileName(ownHand[ownHand.length - 1])) { //Is last tile?
 					moqie = true;
 				}
+				log("Call Riichi!");
 				sendRiichiCall(combination[j], moqie);
 				return;
 			}
 		}
 	}
+	log("Riichi declined!");
 	discardTile(tiles[0].tile); //In case we are furiten(?)/no tiles available
 }
 
@@ -202,7 +206,7 @@ function callRiichi(tiles) {
 function discardFold() {
 	var tileDangers = getHandDanger(ownHand);
 	var tile;
-	var maxDanger = 100;
+	var maxDanger = 1000;
 	log("Danger Levels:");
 	for(var i = 0; i < tileDangers.length; i++) {
 		log(getTileName(tileDangers[i].tile) + " : " + tileDangers[i].danger);
@@ -501,7 +505,9 @@ function discard() {
 	
 	var tiles = getTilePriorities(ownHand);
 	
-	if(shouldFold(tiles)) {
+	if(strategy == STRATEGIES.FOLD || shouldFold(tiles)) {
+		strategy = STRATEGIES.FOLD;
+		strategyAllowsCalls = false;
 		return discardFold();
 	}
 	

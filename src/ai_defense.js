@@ -18,27 +18,28 @@ function getTileDanger(tile) {
 	var dangerPerPlayer = [0,100,100,100];
 	for(var i = 1; i < 4; i++) { //Foreach Player
 		var dangerLevel = getPlayerDangerLevel(i);
-		if(getPositionOfTileInDiscard(i, tile) > 0) { // Check if tile in discard
+		if(getLastTileInDiscard(i, tile) != null) { // Check if tile in discard
 			dangerPerPlayer[i] = 0;
 			continue;
 		}
-		else if(tile.type == 3) { // Honor tiles
+		
+		if(tile.type == 3) { // Honor tiles
 			var availableHonors = availableTiles.filter(t => t.index == tile.index && t.type == tile.type).length;
 			if(availableHonors == 0) {
 				dangerPerPlayer[i] = 0;
 				continue;
 			}
 			else if(availableHonors == 1) {
-				dangerPerPlayer[i] = 5;
+				dangerPerPlayer[i] = 10;
 			}
 			else if(availableHonors == 2) {
-				dangerPerPlayer[i] = 50;
+				dangerPerPlayer[i] = 60;
 			}
 			else if(availableHonors == 3) {
 				dangerPerPlayer[i] = 90;
 			}
 		}
-		else if(tile.type != 3 && getPositionOfTileInDiscard(i, {index: tile.index + 3, type: tile.type}) > 0 || getPositionOfTileInDiscard(i, {index: tile.index - 3, type: tile.type}) > 0) { //Suji
+		else if(getNumberOfPlayerHand(i) > 1 && getLastTileInDiscard(i, {index: tile.index + 3, type: tile.type}) != null || getLastTileInDiscard(i, {index: tile.index - 3, type: tile.type}) != null) { //Suji
 			if(tile.index < 4 || tile.index > 6) {
 				dangerPerPlayer[i] -= 40 * SUJI_MODIFIER;
 			}
@@ -47,25 +48,36 @@ function getTileDanger(tile) {
 			}
 		}
 
-		//Recent Discards: Last turn: -50, -40, -30, -25, ... -5, -5...
-		var mostRecentDiscard = getMostRecentDiscard(tile);
-		if(mostRecentDiscard != 0 && mostRecentDiscard < 4) {
-			dangerPerPlayer[i] -= (6 - mostRecentDiscard) * RECENT_DISCARD_MODIFIER;
+		var recentDiscardDanger = getMostRecentDiscardDanger(tile, i);
+		if(recentDiscardDanger == 0) {
+			dangerPerPlayer[i] = 0;
+			continue;
 		}
-		else if(mostRecentDiscard != 0 && mostRecentDiscard < 9) {
-			dangerPerPlayer[i] -= (9 - mostRecentDiscard) * (RECENT_DISCARD_MODIFIER/2);
+		else if(recentDiscardDanger == 1) {
+			dangerPerPlayer[i] -= 50;
 		}
-		else if(mostRecentDiscard != 0) {
-			dangerPerPlayer[i] -= RECENT_DISCARD_MODIFIER / 2;
+		else if(recentDiscardDanger == 2) {
+			dangerPerPlayer[i] -= 20;
+		}
+		else if(recentDiscardDanger < 99) {
+			dangerPerPlayer[i] -= 5;
 		}
 		
 		//Rest: Outer Tiles
 		if(tile.type != 3 && tile.index == 1 || tile.index == 9) {
-			dangerPerPlayer[i] -= 10;
+			dangerPerPlayer[i] -= 6;
 		}
 		//Rest: Outer Tiles
 		if(tile.type != 3 && tile.index == 2 || tile.index == 8) {
-			dangerPerPlayer[i] -= 5;
+			dangerPerPlayer[i] -= 3;
+		}
+		
+		//Is Dora? -> 12,5% more dangerous
+		dangerPerPlayer[i] *= (1 + (getTileDoraValue(tile)/8));
+		
+		//Is the player going for a flush of that type? -> 30% more dangerous
+		if(isGoingForFlush(i, tile.type)) {
+			dangerPerPlayer[i] *= 1.3;
 		}
 		
 		//Danger is at least 5
@@ -73,16 +85,8 @@ function getTileDanger(tile) {
 			dangerPerPlayer[i] = 5;
 		}
 		
-		//Is Dora? -> 20% more dangerous
-		dangerPerPlayer[i] *= (1 + (getTileDoraValue(tile)/5));
-		
-		//Is the player going for a flush of that type? -> 50% more dangerous
-		if(isGoingForFlush(i, tile.type)) {
-			dangerPerPlayer[i] *= 1.5;
-		}
-		
 		//Multiply with Danger Level
-		dangerPerPlayer[i] *= dangerLevel / 100;
+		dangerPerPlayer[i] *= getPlayerDangerLevel(i) / 100;
 	}
 	
 	var dangerNumber = ((dangerPerPlayer[1] + dangerPerPlayer[2] + dangerPerPlayer[3] + Math.max.apply(null, dangerPerPlayer)) / 4); //Most dangerous player counts twice
@@ -98,58 +102,66 @@ function getPlayerDangerLevel(player) {
 	if(getPlayerLinkState(player) == 0) { //Disconnected -> Safe
 		return 0;
 	}
-	if(isPlayerRiichi(player) || getNumberOfPlayerHand(player) <= 4) { //Riichi, 3 or 4 Calls
-		return 100;
-	}
 	
-	if(getNumberOfPlayerHand(player) < 13) { //1 or 2 Calls
-		var dangerLevel = 140 - (getNumberOfPlayerHand(player) * 8) - tilesLeft;
+	if(getNumberOfPlayerHand(player) < 13) { //Some Calls
+		var dangerLevel = parseInt(185 - (getNumberOfPlayerHand(player) * 8) - (tilesLeft * 1.5));
 	}
 	else {
 		var dangerLevel = 15 - tilesLeft; //Full hand without Riichi -> Nearly always safe
 	}
 	
-	dangerLevel += getNumberOfDorasInHand(calls[player]) * 10; //TODO: Does not account for non-red dora. Fix!
+
+	if(dangerLevel > 80) {
+		dangerLevel = 80;
+	}
+	else if(isPlayerRiichi(player)) { //Riichi
+		dangerLevel = 100;
+	}
+	else if(dangerLevel < 0) {
+		return 0;
+	}
+	
+	//Account for possible values of hands.
 	
 	if(getSeatWind(player) == 1) { //Is Dealer
 		dangerLevel += 10;
 	}
 	
-	if(dangerLevel < 0) {
-		return 0;
+	dangerLevel += getNumberOfDorasInHand(calls[player]) * 10; //TODO: Does not account for non-red dora. Fix!
+	
+	if(isGoingForFlush(player, 0) || isGoingForFlush(player, 1) || isGoingForFlush(player, 2)) {
+		dangerLevel += 10;
 	}
-	else if(dangerLevel > 100) {
-		return 100;
-	}
+	
 	return dangerLevel;
 }
 
 //Returns the current Danger level of the table
-function getCurrentDangerLevel() { //Dangeroust Player counts extra ((all/3)+1)/4dangeroust)
-	return ((getPlayerDangerLevel(1) + getPlayerDangerLevel(2) + getPlayerDangerLevel(3) + Math.max.apply(null, [getPlayerDangerLevel(1), getPlayerDangerLevel(2), getPlayerDangerLevel(3)])) / 4);
+function getCurrentDangerLevel() { //Most Dangerous Player counts extra
+	return ((getPlayerDangerLevel(1) + getPlayerDangerLevel(2) + getPlayerDangerLevel(3) + Math.max(getPlayerDangerLevel(1), getPlayerDangerLevel(2), getPlayerDangerLevel(3))) / 4);
 }
 
 //Returns the number of turns ago when the tile was most recently discarded
-function getMostRecentDiscard(tile) {
-	var mostRecent = 99;
+function getMostRecentDiscardDanger(tile, player) {
+	var danger = 99;
 	for(var i = 0; i < 4; i++) {
-		var r = getPositionOfTileInDiscard(i, tile);
-		if(r != 0 && r < mostRecent) {
-			mostRecent = r;
+		var r = getLastTileInDiscard(i, tile);
+		if(r != null && r.numberOfPlayerHandChanges[player] < danger) {
+			danger = r.numberOfPlayerHandChanges[player];
 		}
 	}
 
-	return mostRecent;
+	return danger;
 }
 
 //Returns the position of a tile in discards
-function getPositionOfTileInDiscard(player, tile) {
+function getLastTileInDiscard(player, tile) {
 	for(var i = discards[player].length - 1; i >= 0; i--) {
 		if(discards[player][i].index == tile.index && discards[player][i].type == tile.type) {
-			return discards[player].length - i;
+			return discards[player][i];
 		}
 	}
-	return 0;
+	return null;
 }
 
 //Returns the safety of a tile
@@ -166,4 +178,42 @@ function isGoingForFlush(player, type) {
 		return false;
 	}
 	return true;
+}
+
+//Sets tile safeties for discards
+function updateDiscardedTilesSafety() {
+	for(var k = 1; k < 4; k++) { //For all other players
+		for(var i = 0; i < 4; i++) { //For all discard ponds
+			for(var j = 0; j < discards[i].length; j++) { //For every tile in it
+				if(typeof(discards[i][j].numberOfPlayerHandChanges) == "undefined") {
+					discards[i][j].numberOfPlayerHandChanges = [0,0,0,0];
+				}
+				if(hasPlayerHandChanged(k)) {
+					if(j == discards[i].length - 1 && k < i && (k <= seat2LocalPosition(getCurrentPlayer()) || seat2LocalPosition(getCurrentPlayer()) == 0)) { //Ignore tiles by players after hand change
+						continue;
+					}					
+					discards[i][j].numberOfPlayerHandChanges[k]++;
+				}
+			}
+		}
+		rememberPlayerHand(k);
+	}
+}
+
+//Pretty simple (all 0), but should work in case of crash -> count intelligently upwards
+function initialDiscardedTilesSafety() {
+	for(var k = 1; k < 4; k++) { //For all other players
+		for(var i = 0; i < 4; i++) { //For all discard ponds
+			for(var j = 0; j < discards[i].length; j++) { //For every tile in it
+				if(typeof(discards[i][j].numberOfPlayerHandChanges) == "undefined") {
+					discards[i][j].numberOfPlayerHandChanges = [0,0,0,0];
+				}
+				var bonus = 0;
+				if(k < i && (k <= seat2LocalPosition(getCurrentPlayer()) || seat2LocalPosition(getCurrentPlayer()) == 0)) {
+					bonus = 1;
+				}
+				discards[i][j].numberOfPlayerHandChanges[k] = discards[i].length - j - bonus;
+			}
+		}
+	}
 }

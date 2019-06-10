@@ -47,6 +47,14 @@ function localPosition2Seat(player) {
 	return view.DesktopMgr.Inst.localPosition2Seat(player);
 }
 
+function seat2LocalPosition(playerSeat) {
+	return view.DesktopMgr.Inst.seat2LocalPosition(playerSeat);
+}
+
+function getCurrentPlayer() {
+	return view.DesktopMgr.Inst.index_player;
+}
+
 function getSeatWind(player) {
 	return ((4 + localPosition2Seat(player) - view.DesktopMgr.Inst.index_ju) % 4) + 1;
 }
@@ -119,4 +127,21 @@ function isInGame() {
 
 function getPlayerScore(player) {
 	return view.DesktopMgr.Inst.players[player].score;
+}
+
+//Needs to be called before calls array is updated
+function hasPlayerHandChanged(player) {
+	for(var i = 0; i < view.DesktopMgr.Inst.players[player].hand.length; i++) {
+		if(view.DesktopMgr.Inst.players[player].hand[i].old != true) {
+			return true;
+		}
+	}
+	return getCallsOfPlayer(player).length > calls[player].length;
+}
+
+//Sets a variable for each pai in a players hand
+function rememberPlayerHand(player) {
+	for(var i = 0; i < view.DesktopMgr.Inst.players[player].hand.length; i++) {
+		view.DesktopMgr.Inst.players[player].hand[i].old = true;
+	}
 }

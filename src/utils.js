@@ -573,8 +573,15 @@ function shouldFold(tiles) {
 		}
 	}
 	factor *= seatWind == 1 ? 1.1 : 1; //Fold later as dealer
-	log("Would fold this hand below " + Number((1 - ((tiles[0].value * factor)/100))).toFixed(2) + " safety.");
-	if((tiles[0].value * factor)/100 < 1 - getTileSafety(tiles[0].tile)) {
+	log("Would fold this hand below " + Number((1 - (((tiles[0].value * tiles[0].value * factor) + (factor/3))/100))).toFixed(2) + " safety.");
+	if(typeof tiles[2] != "undefined") {
+		var top3Safety = (getTileSafety(tiles[0].tile) + getTileSafety(tiles[1].tile) + getTileSafety(tiles[2].tile)) / 3;
+	}
+	else {
+		var top3Safety = -1;
+	}
+	var valueFactor = 1 - ((tiles[0].value * tiles[0].value * factor) + (factor/3))/100;
+	if(valueFactor > getTileSafety(tiles[0].tile) && valueFactor > top3Safety) {
 		log("Tile Safety " + getTileSafety(tiles[0].tile) + " of " + getTileName(tiles[0].tile) + " is too dangerous. FOLD!");
 		return true;
 	}
@@ -586,7 +593,7 @@ function shouldRiichi(waits, yaku) {
 	if(waits < WAITS_FOR_RIICHI - (2 - (tilesLeft/35))) { //Not enough waits? -> No Riichi
 		return false;
 	}
-	if((isClosed && yaku.closed >= 1 || !isClosed && yaku.open >= 1 ) && isLastGame() && (getDistanceToFirst() < 0 || (getDistanceToLast() < 0 && getDistanceToLast() >= -1000))) { //First place (or < 1000 before last) and other yaku? -> No Riichi
+	if(yaku.closed >= 1 && isLastGame() && (getDistanceToFirst() < 0 || (getDistanceToLast() < 0 && getDistanceToLast() >= -1000))) { //First place (or < 1000 before last) and other yaku? -> No Riichi
 		return false;
 	}
 	return true;
