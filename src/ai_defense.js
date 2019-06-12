@@ -39,12 +39,12 @@ function getTileDanger(tile) {
 				dangerPerPlayer[i] = 90;
 			}
 		}
-		else if(getNumberOfPlayerHand(i) > 1 && getLastTileInDiscard(i, {index: tile.index + 3, type: tile.type}) != null || getLastTileInDiscard(i, {index: tile.index - 3, type: tile.type}) != null) { //Suji
+		else if(getNumberOfPlayerHand(i) > 1 && getMostRecentDiscardDanger({index: tile.index + 3, type: tile.type}, i) == 0 || getMostRecentDiscardDanger({index: tile.index - 3, type: tile.type}, i) == 0) { //Suji
 			if(tile.index < 4 || tile.index > 6) {
 				dangerPerPlayer[i] -= 40 * SUJI_MODIFIER;
 			}
 			else {
-				dangerPerPlayer[i] -= 20 * SUJI_MODIFIER;
+				dangerPerPlayer[i] -= 10 * SUJI_MODIFIER;
 			}
 		}
 
@@ -146,6 +146,9 @@ function getMostRecentDiscardDanger(tile, player) {
 	var danger = 99;
 	for(var i = 0; i < 4; i++) {
 		var r = getLastTileInDiscard(i, tile);
+		if(player == i && r != null) {
+			return 0;
+		}
 		if(r != null && r.numberOfPlayerHandChanges[player] < danger) {
 			danger = r.numberOfPlayerHandChanges[player];
 		}

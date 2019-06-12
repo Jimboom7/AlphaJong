@@ -506,8 +506,8 @@ function discard() {
 	var tiles = getTilePriorities(ownHand);
 	
 	if(strategy == STRATEGIES.FOLD || shouldFold(tiles)) {
-		strategy = STRATEGIES.FOLD;
-		strategyAllowsCalls = false;
+		//strategy = STRATEGIES.FOLD;
+		//strategyAllowsCalls = false;
 		return discardFold();
 	}
 	
