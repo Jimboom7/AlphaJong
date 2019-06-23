@@ -128,7 +128,7 @@ function callTriple(combinations, operation) {
 //Call Tile for Kan
 function callDaiminkan() {
 	if(!isClosed) {
-		makeCall(getOperations().ming_gang);
+		callKan(getOperations().ming_gang, getTileForCall());
 	}
 	else {
 		declineCall(getOperations().ming_gang);
@@ -138,7 +138,7 @@ function callDaiminkan() {
 //Add from Hand to existing Pon
 function callShouminkan() {
 	if(!isClosed) {
-		makeCall(getOperations().add_gang);
+		callKan(getOperations().add_gang, getTileForCall());
 	}
 	else {
 		declineCall(getOperations().add_gang);
@@ -146,15 +146,17 @@ function callShouminkan() {
 }
 
 //Closed Kan
-function callAnkan() {
-	callKan(getOperations().an_gang);
+function callAnkan(combination) {
+	callKan(getOperations().an_gang, getTileFromString(combination[0]));
 }
 
 //Needs a semi good hand to call Kans and other players are not dangerous
-function callKan(operation) {
+function callKan(operation, tileForCall) {
 	log("Consider Kan.");
 	var tiles = getHandValues(getHandWithCalls(ownHand));
-	var newTiles = getHandValues(getHandWithCalls(getHandWithoutTriples(ownHand, [getTileForCall()]))); //Check if efficiency goes down without additional tile
+	
+	var newTiles = getHandValues(getHandWithCalls(getHandWithoutTriples(ownHand, [tileForCall]))); //Check if efficiency goes down without additional tile
+
 	if(strategyAllowsCalls && tiles.efficiency >= 4 - (tilesLeft/30) - (1 - (CALL_KAN_CONSTANT/50)) && getCurrentDangerLevel() < 100 - CALL_KAN_CONSTANT && (tiles.efficiency * 0.95) < newTiles.efficiency) {
 		makeCall(operation);
 		log("Kan accepted!");
@@ -343,7 +345,9 @@ function getHandValues(hand, tile) {
 			if(y2.closed > 0) {
 				yaku.closed += y2.closed * chance;
 			}
-			waits += numberOfTiles1;
+			if(parseInt((triples2.length / 3)) + callTriples == 4 && pairs2.length == 2) {
+				waits += numberOfTiles1 * ((3 - (getWaitScoreForTile(newTiles1[j]) / 90)) / 2); //Factor waits by "uselessness" for opponents
+			}
 		}
 		
 		valueForTile.push({tile: newTiles1[j], efficiency: e2, dora: d2, yaku: y2});
@@ -484,7 +488,7 @@ function chiitoitsuPriorities() {
 					if(y2.closed > 0) {
 						yaku.closed += y2.closed * chance;
 					}
-					waits += numberOfTiles;
+					waits += numberOfTiles * ((3 - (getWaitScoreForTile(tile) / 90)) / 2); //Factor waits by "uselessness" for opponents
 				}
 			}
 			oldTile = tile;

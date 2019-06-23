@@ -23,6 +23,45 @@ function getTileDanger(tile) {
 			continue;
 		}
 		
+		dangerPerPlayer[i] = getWaitScoreForTileAndPlayer(i, tile);
+
+		if(dangerPerPlayer[i] <= 0) {
+			continue;
+		}
+		
+		//Is Dora? -> 12,5% more dangerous
+		dangerPerPlayer[i] *= (1 + (getTileDoraValue(tile)/8));
+		
+		//Is the player going for a flush of that type? -> 30% more dangerous
+		if(isGoingForFlush(i, tile.type)) {
+			dangerPerPlayer[i] *= 1.3;
+		}
+		
+		//Danger is at least 5
+		if(dangerPerPlayer[i] < 5) {
+			dangerPerPlayer[i] = 5;
+		}
+		
+		//Multiply with Danger Level
+		dangerPerPlayer[i] *= getPlayerDangerLevel(i) / 100;
+	}
+	
+	var dangerNumber = ((dangerPerPlayer[1] + dangerPerPlayer[2] + dangerPerPlayer[3] + Math.max.apply(null, dangerPerPlayer)) / 4); //Most dangerous player counts twice
+	
+	return dangerNumber;
+}
+
+//Returns danger of tile for all players as a number from 0-100
+function getTileDangerOLD(tile) {
+	var dangerPerPlayer = [0,100,100,100];
+	for(var i = 1; i < 4; i++) { //Foreach Player
+		var dangerLevel = getPlayerDangerLevel(i);
+		if(getLastTileInDiscard(i, tile) != null) { // Check if tile in discard
+			dangerPerPlayer[i] = 0;
+			continue;
+		}
+	
+		
 		if(tile.type == 3) { // Honor tiles
 			var availableHonors = availableTiles.filter(t => t.index == tile.index && t.type == tile.type).length;
 			if(availableHonors == 0) {
@@ -47,6 +86,7 @@ function getTileDanger(tile) {
 				dangerPerPlayer[i] -= 10 * SUJI_MODIFIER;
 			}
 		}
+		
 
 		var recentDiscardDanger = getMostRecentDiscardDanger(tile, i);
 		if(recentDiscardDanger == 0) {
@@ -63,6 +103,7 @@ function getTileDanger(tile) {
 			dangerPerPlayer[i] -= 5;
 		}
 		
+		
 		//Rest: Outer Tiles
 		if(tile.type != 3 && tile.index == 1 || tile.index == 9) {
 			dangerPerPlayer[i] -= 6;
@@ -71,6 +112,7 @@ function getTileDanger(tile) {
 		if(tile.type != 3 && tile.index == 2 || tile.index == 8) {
 			dangerPerPlayer[i] -= 3;
 		}
+		
 		
 		//Is Dora? -> 12,5% more dangerous
 		dangerPerPlayer[i] *= (1 + (getTileDoraValue(tile)/8));
@@ -183,6 +225,79 @@ function isGoingForFlush(player, type) {
 	return true;
 }
 
+//Returns the Wait Score for a Tile (Possible that anyone is waiting for this tile)
+function getWaitScoreForTile(tile) {
+	var score = 0;
+	for(var i = 1; i < 4; i++) {
+		score += getWaitScoreForTileAndPlayer(i, tile);
+	}
+	return score/3;
+}
+
+//Returns a score how likely this tile can form the last triple/pair for a player
+function getWaitScoreForTileAndPlayer(player, tile) {
+	var tile0 = getNumberOfTilesAvailable(tile.index, tile.type);
+	var tile0Public = tile0 + getNumberOfTilesInHand(ownHand, tile.index, tile.type);
+	var factor = getFuritenValue(player, tile);
+	
+	var score = 0;
+	
+	//Same tile
+	score += tile0 * (tile0Public + 1) * 6;
+	
+	if(getNumberOfPlayerHand(player) == 1 || tile.type == 3) {
+		return score * factor; //Return normalized result
+	}
+	
+	var tileL3 = getNumberOfTilesAvailable(tile.index - 3, tile.type);
+	var tileL3Public = tileL3 + getNumberOfTilesInHand(ownHand, tile.index - 3, tile.type);
+	var factorL = getFuritenValue(player, {index: tile.index - 3, type: tile.type});
+	
+	var tileL2 = getNumberOfTilesAvailable(tile.index - 2, tile.type);
+	var tileL1 = getNumberOfTilesAvailable(tile.index - 1, tile.type);
+	var tileU1 = getNumberOfTilesAvailable(tile.index + 1, tile.type);
+	var tileU2 = getNumberOfTilesAvailable(tile.index + 2, tile.type);
+	var tileU3 = getNumberOfTilesAvailable(tile.index + 3, tile.type);
+	var tileU3Public = tileU3 + getNumberOfTilesInHand(ownHand, tile.index + 3, tile.type);
+	var factorU = getFuritenValue(player, {index: tile.index + 3, type: tile.type});
+	
+	score += (tileL1 * tileL2) * (tile0Public + tileL3Public) * factorL;
+	score += (tileU1 * tileU2) * (tile0Public + tileU3Public) * factorU;
+	
+	//Lower + Upper Tile -> lower * upper
+	score += tileL1 * tileU1 * tile0Public;
+	score *= factor;
+	
+	if(score > 180) {
+		score = 180 + ((score - 180) / 4); //add "overflow" that is worth less
+	}
+	
+	score /= 1.6; //Divide by this number to normalize result (more or less)
+
+	return score;
+}
+
+//Returns 0 if tile is 100% furiten, 1 if not. Value between 0-1 is returned if furiten tile was not called some turns ago.
+function getFuritenValue(player, tile) {
+	var danger = getMostRecentDiscardDanger(tile, player);
+	if(danger == 0) {
+		return 0;
+	}
+	else if(danger == 1) {
+		if(calls[player].length > 0) {
+			return 0.3;
+		}
+		return 0.9;
+	}
+	else if(danger == 2) {
+		if(calls[player].length > 0) {
+			return 0.8;
+		}
+		return 0.95;
+	}
+	return 1;
+}
+
 //Sets tile safeties for discards
 function updateDiscardedTilesSafety() {
 	for(var k = 1; k < 4; k++) { //For all other players
@@ -201,6 +316,45 @@ function updateDiscardedTilesSafety() {
 		}
 		rememberPlayerHand(k);
 	}
+}
+
+//For testing purposes
+function compareDangers() {
+	setData();
+	var avgA = 0;
+	var avgB = 0;
+	
+	var safeDiff = 0;
+	var dangerDiff = 0;
+	var dangerCount = 0;
+	var safeCount = 0;
+	for(var i = 0; i < ownHand.length; i++) {
+		var isDead = getPlayerHand(0)[i].ispaopai;
+		var a = getTileDanger(ownHand[i]);
+		avgA += a;
+		var b = getTileDangerOLD(ownHand[i]);
+		avgB += b;
+		if(isDead) {
+			dangerDiff += a - b;
+			dangerCount++;
+			log("Danger Tile:");
+		}
+		else {
+			safeDiff += a - b;
+			safeCount++;
+		}
+		log(getTileName(ownHand[i]) + " old: " + b + " new: " + a + "(" + getWaitScoreForTileAndPlayer(1, ownHand[i]) + ", " + getWaitScoreForTileAndPlayer(2, ownHand[i]) + ", " + getWaitScoreForTileAndPlayer(3, ownHand[i]) + ")");
+	}
+	avgA /= ownHand.length;
+	avgB /= ownHand.length;
+	dangerDiff /= dangerCount;
+	safeDiff /= safeCount;
+	dangerDiff += avgB-avgA;
+	safeDiff += avgB-avgA;
+	log("Average Old: " + avgB);
+	log("Average New: " + avgA);
+	log("Safe Tile Difference (- good): " + safeDiff);
+	log("Danger Tile Difference (+ good): " + dangerDiff);
 }
 
 //Pretty simple (all 0), but should work in case of crash -> count intelligently upwards

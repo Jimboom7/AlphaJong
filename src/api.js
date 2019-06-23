@@ -73,6 +73,9 @@ function setAutoCallWin(win) {
 }
 
 function getTileForCall() {
+	if(view.DesktopMgr.Inst.lastqipai == null) {
+		return {index: 0, type: 0, dora: false, doraValue: 0};
+	}
 	var tile = view.DesktopMgr.Inst.lastqipai.val;
 	tile.doraValue = getTileDoraValue(tile);
 	return tile;

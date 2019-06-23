@@ -103,7 +103,7 @@ function main() {
 	for(var i = 0; i < operations.length; i++) { //Priority Operations: Should be done before discard on own turn
 		switch(operations[i].type) {
 		case getOperations().an_gang: //From Hand
-			callAnkan();
+			callAnkan(operations[i].combination);
 			break;
 		case getOperations().add_gang: //Add from Hand to Pon
 			callShouminkan();
