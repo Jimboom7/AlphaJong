@@ -1,10 +1,10 @@
-var AUTORUN = true; //Automatically start new Games 
 //################################
 // PARAMETERS
 // Contains Parameters to change the playstile of the bot
 //################################
 
 //AI PARAMETERS
+var AUTORUN = true; //Automatically start new Games 
 var ROOM = 5; //2 = Bronze East, 3 = Bronze South, 5 = Silver East, ...
 
 //DEFENSE CONSTANTS
@@ -33,6 +33,9 @@ var WAITS_FOR_RIICHI = 3; //Waits needed to call Riichi at the start of the game
 
 //LOGGING
 var LOG_AMOUNT = 3; //Amount of Messages to log for Tile Priorities
+
+
+
 
 
 

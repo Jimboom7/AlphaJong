@@ -30,29 +30,6 @@ if(!isDebug()) {
 	}
 }
 
-
-//TODO LIST:
-
-//When fold: More value for closed hand
-//When Riichi: Consider Danger Level
-//Fix Tanyao Calls
-//Defensive: Check for players with calls which yaku they need (Yakuhai etc.)
-//Kan: Additional fourth tile... yaku calculation etc.? (Tanyao, Honitsu etc.)
-//Consider number of safe tiles when deciding if fold
-//Fold later as Dealer
-//Defense: Last tile from left player has priority for discard (-> is safe for this turn)
-//Check isTenpai()
-//Defense: Add Other Sujis (with low Prio)
-//Maybe Consider Calls that don't form an additional triple? (e.g. 4566 -> 6 is thrown (or dora 6))
-//When Calling Chi: Check if discard is valid
-//More value for pairs (see strategy guides) (?)
-//9 Terminals -> Call Draw
-//Start Main Loop instantly, top of loop: check ingame or lobby is loaded
-//More Yaku -> Chiitoitsu
-//Use Scores for Calculating Strategy (Going for fast wins as first etc.)
-//Better Log
-//Save some parts of the log (Endresult? Won by Ron etc.) in Local Storage
-
 //Main Loop
 function main() {
 	if(!run) {

@@ -30,7 +30,7 @@ function getYaku(inputHand, inputCalls) {
 		yakuClosed += yakuhai.closed;
 	}
 	
-	//Riichi
+	//Riichi (Bot has better results without additional value for Riichi)
 	//Closed
 	//var riichi = getRiichi(tenpai);
 	//yakuOpen += riichi.open;
@@ -42,7 +42,7 @@ function getYaku(inputHand, inputCalls) {
 	yakuOpen += tanyao.open;
 	yakuClosed += tanyao.closed;
 	
-	//Pinfu (?)
+	//Pinfu (Bot has better results without additional value for Pinfu)
 	//Closed
 	//var pinfu = getPinfu(triplesAndPairs, doubles, tenpai);
 	//yakuOpen += pinfu.open;
@@ -62,7 +62,7 @@ function getYaku(inputHand, inputCalls) {
 	// -> Not necessary, because own strategy
 	
 	//Sanankou
-	//3 concealed triplets (Open auch ok!)
+	//3 concealed triplets
 	//Open*
 	var sanankou = getSanankou(inputHand);
 	yakuOpen += sanankou.open;
@@ -71,7 +71,7 @@ function getYaku(inputHand, inputCalls) {
 	//Sankantsu
 	//3 Kans
 	//Open
-	//-> Should not influence score, but Kan calling
+	//-> TODO: Should not influence score, but Kan calling.
 	
 	//Toitoi
 	//All Triplets
