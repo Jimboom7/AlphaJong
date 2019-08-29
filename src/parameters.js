@@ -58,7 +58,6 @@ var seatWind = 1; //1: East,... 4: North
 var roundWind = 1; //1: East,... 4: North
 var tilesLeft = 0; //tileCounter
 var visibleTiles = []; //Tiles that are visible
-var isPlayerRiichi = [false, false, false, false];
 var errorCounter = 0; //Counter to check if bot is working
 var lastTilesLeft = 0; //Counter to check if bot is working
 var isConsideringCall = false;
