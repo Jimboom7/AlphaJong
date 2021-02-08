@@ -54,6 +54,11 @@ function callTriple(combinations, operation) {
 			calls[0].push(getTileForCall());
 			newHand = getHandWithoutTriples(ownHand, [newTriple[0], newTriple[1]]); //Remove called tiles from hand
 			var nextDiscard = getDiscardTile(getTilePriorities(newHand)); //Calculate next discard
+			if(nextDiscard.index == getTileForCall().index && nextDiscard.type == getTileForCall().type) {
+				declineCall(operation); 
+				log("Next discard would be the same tile. Call declined!");
+				return false;
+			}
 			newHand = getHandWithoutTriples(newHand, [nextDiscard]); //Remove discard from hand
 			var newHandValue = getHandValues(newHand); //Get Value of that hand
 			newHandValue.tile = nextDiscard;
