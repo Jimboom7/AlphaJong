@@ -537,29 +537,6 @@ function isTenpai(triplesAndPairs, doubles, efficiency) {
 	return tenpai;
 }
 
-//Return number of specific non furiten tiles available
-function getNumberOfNonFuritenTilesAvailable(index, type, lastTiles) {
-	if(typeof lastTiles != "undefined" && lastTiles.length == 2) { // Sequence furiten
-		lastTiles = sortHand(lastTiles);
-		if(lastTiles[0].type == lastTiles[1].type && lastTiles[1].index - lastTiles[0].index == 1) { //Is it a 2-tile sequence
-			if(index == lastTiles[1].index + 1 && type == lastTiles[1].type) { //Upper Tile -> Check if lower tile is furiten
-				if(discards[0].some(tile => tile.index == lastTiles[0].index - 1 && tile.type == type)) {
-					return 0;
-				}
-			}
-			else if(index == lastTiles[0].index - 1 && type == lastTiles[0].type) { //Upper Tile -> Check if lower tile is furiten
-				if(discards[0].some(tile => tile.index == lastTiles[1].index + 1 && tile.type == type)) {
-					return 0;
-				}
-			}
-		}
-	}
-	if(discards[0].some(tile => tile.index == index && tile.type == type)) { //Same tile furiten
-		return 0;
-	}
-	return getNumberOfTilesAvailable(index, type);
-}
-
 //Return true if: Not last place and the danger level is too high
 function shouldFold(tiles) {
 	var factor = FOLD_CONSTANT;
@@ -623,7 +600,7 @@ function isLastGame() {
 
 //Returns the binomialCoefficient for two numbers. Needed for chance to draw tile calculation. Fails if a faculty of > 134 is needed (should not be the case since there are 134 tiles)
 function binomialCoefficient(a, b) { 
-	numerator = facts[a]; 
-	denominator = facts[a-b] *  facts[b]; 
+	var numerator = facts[a]; 
+	var denominator = facts[a-b] * facts[b]; 
 	return numerator / denominator; 
 } 

@@ -284,7 +284,7 @@ function getHandValues(hand, tile) {
 	var baseEfficiency = parseInt((triples.length / 3)) + callTriples;
 	baseEfficiency = baseEfficiency > 3.5 ? 3.5 : baseEfficiency;
 	baseEfficiency += (pairs.length / 2) > 0 ? PAIR_VALUE : 0;
-	efficiency = baseEfficiency;
+	var efficiency = baseEfficiency;
 	var baseDora = getNumberOfDorasInHand(triples.concat(pairs, calls[0]));
 	var doraValue = baseDora;
 	var baseYaku = getYaku(hand, calls[0]);
@@ -382,8 +382,8 @@ function getHandValues(hand, tile) {
 		newHand.push(tileCombinations[j].tile1);
 		newHand.push(tileCombinations[j].tile2);
 		
-		tile1Value = valueForTile.find(t => getTileName(t.tile) == getTileName(tileCombinations[j].tile1));
-		tile2Value = valueForTile.find(t => getTileName(t.tile) == getTileName(tileCombinations[j].tile2));
+		var tile1Value = valueForTile.find(t => getTileName(t.tile) == getTileName(tileCombinations[j].tile1));
+		var tile2Value = valueForTile.find(t => getTileName(t.tile) == getTileName(tileCombinations[j].tile2));
 		
 		tile2Value == undefined ? tile2Value = {efficiency: 0, dora: 0, yaku: {open: 0, closed: 0}} : tile2Value;
 		
@@ -443,7 +443,7 @@ function getTileValue(hand, tile, efficiency, yakus, doraValue, waits) {
 	
 	//If Tenpai: Add number of waits to efficiency
 	var triplesAndPairs = getTriplesAndPairsInHand(hand.concat(calls[0]));
-	handWithoutTriplesAndPairs = getHandWithoutTriples(hand, triplesAndPairs.triples.concat(triplesAndPairs.pairs));
+	var handWithoutTriplesAndPairs = getHandWithoutTriples(hand, triplesAndPairs.triples.concat(triplesAndPairs.pairs));
 	var doubles = getDoublesInHand(handWithoutTriplesAndPairs);
 	if(isTenpai(triplesAndPairs, doubles, efficiency)) {
 		efficiency += (waits / (11 - (WAIT_VALUE*10)));
@@ -523,7 +523,7 @@ function discard() {
 	log("Tile Priorities: ");
 	printTilePriority(tiles);
 	
-	tile = getDiscardTile(tiles);
+	var tile = getDiscardTile(tiles);
 	
 	if(canRiichi() && tilesLeft > RIICHI_TILES_LEFT) {
 		callRiichi(tiles);

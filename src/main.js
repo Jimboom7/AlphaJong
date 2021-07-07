@@ -3,21 +3,15 @@
 // Main Class, starts the bot and sets up all necessary variables.
 //################################
 
-//Bot can be activated/deactivated by pressing Numpad +
+//GUI can be re-opened by pressing + on the Numpad
 if(!isDebug()) {
+	initGui();
     window.onkeyup = function(e) {
       var key = e.keyCode ? e.keyCode : e.which;
 
-      if (key == 107 && run) { // Numpad + Key
-        log("AlphaJong deactivated!"); 
-        run = false;
-      }
-      else if(key == 107 && !run) {
-        log("AlphaJong activated!"); 
-        run = true;
-		//setInterval(sendHeatBeat, 60000);
-        main();
-      }
+		if (key == 107) { // Numpad + Key
+			toggleGui();
+		}
     }
 	
 	if(AUTORUN) {
@@ -30,15 +24,32 @@ if(!isDebug()) {
 	}
 }
 
+function toggleRun() {
+	if (run) {
+		log("AlphaJong deactivated!"); 
+		run = false;
+		startButton.innerHTML = "Start Bot"
+	}
+	else if(!run) {
+		log("AlphaJong activated!"); 
+		run = true;
+		startButton.innerHTML = "Stop Bot"
+		//setInterval(sendHeatBeat, 60000);
+		main();
+	}
+}
+
 //Main Loop
 function main() {
 	if(!run) {
+		currentActionOutput.value = "Bot is not running.";
 		return;
 	}
 	if(!isInGame()) {
+		currentActionOutput.value = "Waiting for Game to start.";
 		log("Game is not running, sleep 2 seconds.");
 		errorCounter++;
-		if(errorCounter > 90) { //3 minutes no game found -> reload page
+		if(errorCounter > 90 && AUTORUN) { //3 minutes no game found -> reload page
 			goToLobby();
 		}
 		setTimeout(main, 2000); //Check every 2 seconds if ingame
@@ -54,7 +65,7 @@ function main() {
 	if(operations == null || operations.length == 0) {
 		errorCounter++;
 		if(getTilesLeft() == lastTilesLeft) { //1 minute no tile drawn
-			if(errorCounter > 30) {
+			if(errorCounter > 60) {
 				goToLobby();
 			}
 		}
@@ -63,12 +74,20 @@ function main() {
 			errorCounter = 0;
 		}
 		checkForEnd();
-		log("Waiting for own turn, sleep 2 seconds.");
-		setTimeout(main, 2000);
+		log("Waiting for own turn, sleep 1 second.");
+		currentActionOutput.value = "Waiting for own turn.";
+		setTimeout(main, 1000);
 		return;
 	}
 	
-	setData(); //Get current state of the board
+	currentActionOutput.value = "Calculating best move...";
+	
+	setTimeout(mainOwnTurn, 500 + (Math.random() * 500));
+}
+
+function mainOwnTurn() {
+	setData(); //Set current state of the board to local variables
+	var operations = getOperationList();
 	
 	log("");
 	log("##### OWN TURN #####");
@@ -113,7 +132,8 @@ function main() {
 	}
 
 	log(" ");
-	setTimeout(main, 2000);
+	currentActionOutput.value = "Own turn completed.";
+	setTimeout(main, 1000);
 }
 
 //Set Data from real Game
@@ -171,8 +191,9 @@ function setData() {
 
 //Search for Game and start Main Loop
 function startGame() {
-	if(!isInGame()) {
-		log("Searching for Match in Room " + ROOM);
+	if(!isInGame() && run) {
+		log("Searching for Game in Room " + ROOM);
+		currentActionOutput.value = "Searching for Game...";
 		searchForGame();
 	}
 }

@@ -15,7 +15,7 @@ function getYaku(inputHand, inputCalls) {
 	
 	var triplesAndPairs = getTriplesAndPairsInHand(hand);
 	//handWithoutTriples = getHandWithoutTriples(hand, triplesAndPairs.triples);
-	handWithoutTriplesAndPairs = getHandWithoutTriples(hand, triplesAndPairs.triples.concat(triplesAndPairs.pairs));
+	var handWithoutTriplesAndPairs = getHandWithoutTriples(hand, triplesAndPairs.triples.concat(triplesAndPairs.pairs));
 	var doubles = getDoublesInHand(handWithoutTriplesAndPairs);
 	//var tenpai = isTenpai(triplesAndPairs, doubles);
 	var pons = getPonsInHand(hand);
