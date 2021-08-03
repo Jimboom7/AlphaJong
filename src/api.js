@@ -12,7 +12,7 @@ function sendHeatBeat() {
 }
 
 function searchForGame() {
-	app.NetAgent.sendReq2Lobby('Lobby', 'matchGame', {match_mode: ROOM});
+	app.NetAgent.sendReq2Lobby('Lobby', 'matchGame', {match_mode: ROOM, client_version_string: GameMgr.Inst.getClientVersion()});
 }
 
 function getOperationList() {
