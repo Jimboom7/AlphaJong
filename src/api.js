@@ -32,10 +32,12 @@ function getPlayerHand() {
 }
 
 function getDiscardsOfPlayer(player) {
+    player = getCorrectPlayerNumber(player);
 	return view.DesktopMgr.Inst.players[player].container_qipai;
 }
 
 function getCallsOfPlayer(player) {
+    player = getCorrectPlayerNumber(player);
 	return view.DesktopMgr.Inst.players[player].container_ming.pais;
 }
 
@@ -44,6 +46,7 @@ function getTilesLeft() {
 }
 
 function localPosition2Seat(player) {
+    player = getCorrectPlayerNumber(player);
 	return view.DesktopMgr.Inst.localPosition2Seat(player);
 }
 
@@ -99,16 +102,23 @@ function sendRiichiCall(tile, moqie) {
 	app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', {type: mjcore.E_PlayOperation.liqi, tile: tile, moqie: moqie, timeuse: 2}); //Moqie: Throwing last drawn tile (Riichi -> false)
 }
 
+function sendKitaCall() {
+    moqie = view.DesktopMgr.Inst.mainrole.last_tile.val.toString() == "4z";
+	app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', {type: mjcore.E_PlayOperation.babei, moqie: moqie, timeuse: 2});
+}
+
 function callDiscard(tileNumber) {
 	view.DesktopMgr.Inst.players[0]._choose_pai = view.DesktopMgr.Inst.players[0].hand[tileNumber];
 	view.DesktopMgr.Inst.players[0].DoDiscardTile();
 }
 
 function getPlayerLinkState(player) {
+    player = getCorrectPlayerNumber(player);
 	return view.DesktopMgr.player_link_state[localPosition2Seat(player)];
 }
 
 function getNumberOfPlayerHand(player) {
+    player = getCorrectPlayerNumber(player);
 	return view.DesktopMgr.Inst.players[player].hand.length;
 }
 
@@ -121,21 +131,28 @@ function isDisconnect() {
 }
 
 function isPlayerRiichi(player) {
-	return view.DesktopMgr.Inst.players[player].liqibang._activeInHierarchy || getDiscardsOfPlayer(player).last_is_liqi;
+    player_correct = getCorrectPlayerNumber(player);
+	return view.DesktopMgr.Inst.players[player_correct].liqibang._activeInHierarchy || getDiscardsOfPlayer(player).last_is_liqi;
 }
 
 function isInGame() {
 	return this != null && view != null && view.DesktopMgr != null && view.DesktopMgr.Inst != null && view.DesktopMgr.player_link_state != null;
 }
 
+function doesPlayerExist(player) {
+	return view.DesktopMgr.Inst.players[player].hand != undefined;
+}
+
 function getPlayerScore(player) {
+    player = getCorrectPlayerNumber(player);
 	return view.DesktopMgr.Inst.players[player].score;
 }
 
 //Needs to be called before calls array is updated
 function hasPlayerHandChanged(player) {
-	for(var i = 0; i < view.DesktopMgr.Inst.players[player].hand.length; i++) {
-		if(view.DesktopMgr.Inst.players[player].hand[i].old != true) {
+    player_correct = getCorrectPlayerNumber(player);
+	for(var i = 0; i < view.DesktopMgr.Inst.players[player_correct].hand.length; i++) {
+		if(view.DesktopMgr.Inst.players[player_correct].hand[i].old != true) {
 			return true;
 		}
 	}
@@ -144,6 +161,7 @@ function hasPlayerHandChanged(player) {
 
 //Sets a variable for each pai in a players hand
 function rememberPlayerHand(player) {
+    player = getCorrectPlayerNumber(player);
 	for(var i = 0; i < view.DesktopMgr.Inst.players[player].hand.length; i++) {
 		view.DesktopMgr.Inst.players[player].hand[i].old = true;
 	}

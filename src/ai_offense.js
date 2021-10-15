@@ -180,6 +180,10 @@ function callTsumo() {
 	makeCall(getOperations().zimo);
 }
 
+function callKita() { // 3 player only
+	sendKitaCall();
+}
+
 function callRiichi(tiles) {
 	var operations = getOperationList();
 	var combination = [];

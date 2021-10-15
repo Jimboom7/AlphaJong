@@ -89,7 +89,6 @@ function mainOwnTurn() {
 	setData(); //Set current state of the board to local variables
 	var operations = getOperationList();
 	
-	log("");
 	log("##### OWN TURN #####");
 	log("Current Danger Level: " + getCurrentDangerLevel());
 	
@@ -109,6 +108,9 @@ function mainOwnTurn() {
 			break;
 		case getOperations().rong:
 			callRon();
+			break;
+		case getOperations().babei:
+			callKita();
 			break;
 		}
 	}
@@ -147,7 +149,7 @@ function setData() {
 	}
 	
 	discards = [];
-	for(var j = 0; j < 4; j++) { //Get Discards for all Players
+	for(var j = 0; j < getNumberOfPlayers(); j++) { //Get Discards for all Players
 		var temp_discards = [];
 		for(var i = 0; i < getDiscardsOfPlayer(j).pais.length; i++) {
 			temp_discards.push(getDiscardsOfPlayer(j).pais[i].val);
@@ -160,7 +162,7 @@ function setData() {
 	updateDiscardedTilesSafety();
 	
 	calls = [];
-	for(var j = 0; j < 4; j++) { //Get Calls for all Players
+	for(var j = 0; j < getNumberOfPlayers(); j++) { //Get Calls for all Players
 		var temp_calls = [];
 		for(var i = 0; i < getCallsOfPlayer(j).length; i++) {
 			temp_calls.push(getCallsOfPlayer(j)[i].val);

@@ -3,6 +3,30 @@
 // Contains utility functions
 //################################
 
+function getNumberOfPlayers() {
+    if(!doesPlayerExist(1) || !doesPlayerExist(2) || !doesPlayerExist(3)) {
+        return 3;
+    }
+    return 4;
+}
+
+function getCorrectPlayerNumber(player) { //Only necessary for 3 player games
+    if(getNumberOfPlayers() == 4) {
+        return player;
+    }
+    if(!doesPlayerExist(1)) {
+        if(player > 0) {
+            return player + 1;
+        }
+    }
+    if(!doesPlayerExist(2)) {
+        if(player > 1) {
+            return player + 1;
+        }
+    }
+    return player;
+}
+
 //Return number of doras in hand
 function getNumberOfDorasInHand(hand) {
 	var dr = 0;
@@ -326,8 +350,11 @@ function sortHandBackwards(inputHand) {
 //Return number of specific tiles available
 function getNumberOfTilesAvailable(index, type) {
 	if(index < 1 || index > 9) {
-			return 0;
+		return 0;
 	}
+    if(getNumberOfPlayers() == 3 && (index > 1 && index < 9 && type == 1)) {
+        return 0;
+    }
 	
 	return 4 - visibleTiles.filter(tile => tile.index == index && tile.type == type).length;
 }
@@ -369,6 +396,7 @@ function getTilesInHand(inputHand, index, type) {
 //Update the available tile pool
 function updateAvailableTiles() {
 	visibleTiles = dora.concat(ownHand, discards[0], discards[1], discards[2], discards[3], calls[0], calls[1], calls[2], calls[3]);
+    visibleTiles = visibleTiles.filter(tile => tile != undefined);
 	availableTiles = [];
 	for (var i = 0; i <= 3; i++) {
 		for (var j = 1; j <= 9; j++) {
@@ -579,12 +607,18 @@ function shouldRiichi(waits, yaku) {
 //Negative number: Distance to second
 //Positive number: Distance to first
 function getDistanceToFirst() {
+    if(getNumberOfPlayers() == 3) {
+        return Math.max(getPlayerScore(1), getPlayerScore(2)) - getPlayerScore(0);
+    }
 	return Math.max(getPlayerScore(1), getPlayerScore(2), getPlayerScore(3)) - getPlayerScore(0);
 }
 
 //Negative number: Distance to last
 //Positive number: Distance to third
 function getDistanceToLast() {
+    if(getNumberOfPlayers() == 3) {
+        return Math.min(getPlayerScore(1), getPlayerScore(2)) - getPlayerScore(0);
+    }
 	return Math.min(getPlayerScore(1), getPlayerScore(2), getPlayerScore(3)) - getPlayerScore(0);
 }
 
