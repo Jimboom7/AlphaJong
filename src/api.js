@@ -4,15 +4,34 @@
 //################################
 
 
-//Prevent AFK warning, gets called every minute. Does not work -> Move Mouse?
-function sendHeatBeat() {
-	log("Sending Heatbeat");
-	app.NetAgent.sendReq2Lobby('Lobby', 'heatbeat', {no_operation_counter: 0});
-	//this.GameMgr.Inst._pre_mouse_point...
+function preventAFK() {
+    if(typeof GameMgr == 'undefined') {
+        return;
+    }
+    GameMgr.Inst._pre_mouse_point.x = Math.floor(Math.random() * 100) + 1;
+    GameMgr.Inst._pre_mouse_point.y = Math.floor(Math.random() * 100) + 1;
+    GameMgr.Inst.clientHeatBeat(); // Prevent Client-side AFK
+    app.NetAgent.sendReq2Lobby('Lobby', 'heatbeat', {no_operation_counter: 0}); //Prevent Server-side AFK
+    
+    if(typeof view == 'undefined' || typeof view.DesktopMgr == 'undefined') {
+        return;
+    }
+    view.DesktopMgr.Inst.hangupCount = 0;
+    //uiscript.UI_Hangup_Warn.Inst.locking
+}
+
+function hasFinishedMainLobbyLoading() {
+    if(typeof GameMgr == 'undefined') {
+        return false;
+    }
+    return GameMgr.Inst.login_loading_end;
 }
 
 function searchForGame() {
-	app.NetAgent.sendReq2Lobby('Lobby', 'startUnifiedMatch', {match_sid: 1 + ":" + ROOM, client_version_string: GameMgr.Inst.getClientVersion()});
+    uiscript.UI_PiPeiYuYue.Inst.addMatch(ROOM);
+    
+    // Direct way to search for a game, without UI:
+	// app.NetAgent.sendReq2Lobby('Lobby', 'startUnifiedMatch', {match_sid: 1 + ":" + ROOM, client_version_string: GameMgr.Inst.getClientVersion()});
 }
 
 function getOperationList() {
@@ -136,7 +155,12 @@ function isPlayerRiichi(player) {
 }
 
 function isInGame() {
-	return this != null && view != null && view.DesktopMgr != null && view.DesktopMgr.Inst != null && view.DesktopMgr.player_link_state != null;
+    try {
+        return this != null && view != null && view.DesktopMgr != null && view.DesktopMgr.Inst != null && view.DesktopMgr.player_link_state != null;
+    }
+    catch {
+        return false;
+    }
 }
 
 function doesPlayerExist(player) {

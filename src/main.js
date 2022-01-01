@@ -5,7 +5,7 @@
 
 //GUI can be re-opened by pressing + on the Numpad
 if(!isDebug()) {
-	initGui();
+    setTimeout(initGui, 2000);
     window.onkeyup = function(e) {
       var key = e.keyCode ? e.keyCode : e.which;
 
@@ -13,14 +13,12 @@ if(!isDebug()) {
 			toggleGui();
 		}
     }
-	
+    
 	if(AUTORUN) {
 		log("Autorun start");
-		setInterval(sendHeatBeat, 60000); // 1 min? 5 min?
-		setTimeout(startGame, 30000); //Search for new game after 30 seconds
-		setTimeout(main, 10000);
-		log("Main Loop started.");
-		run = true;
+        run = true;
+        setInterval(preventAFK, 30000);
+        waitForMainLobbyLoad();
 	}
 }
 
@@ -34,9 +32,26 @@ function toggleRun() {
 		log("AlphaJong activated!"); 
 		run = true;
 		startButton.innerHTML = "Stop Bot"
-		//setInterval(sendHeatBeat, 60000);
 		main();
 	}
+}
+
+function waitForMainLobbyLoad() {
+    if(isInGame()) { // In case game is already ongoing after reload
+        main();
+        return;
+    }
+    
+    if(!hasFinishedMainLobbyLoading()) { //Otherwise wait for Main Lobby to load and then search for game
+        log("Waiting for Main Lobby to load...");
+        currentActionOutput.value = "Wait for Loading.";
+        setTimeout(waitForMainLobbyLoad, 2000);
+        return;
+    }
+    log("Main Lobby loaded!");
+    startGame();
+    setTimeout(main, 10000);
+    log("Main Loop started.");
 }
 
 //Main Loop
@@ -191,7 +206,7 @@ function setData() {
 	updateAvailableTiles();
 }
 
-//Search for Game and start Main Loop
+//Search for Game
 function startGame() {
 	if(!isInGame() && run) {
 		log("Searching for Game in Room " + ROOM);

@@ -243,45 +243,6 @@ function updateDiscardedTilesSafety() {
 	}
 }
 
-//For testing purposes
-function compareDangers() {
-	setData();
-	var avgA = 0;
-	var avgB = 0;
-	
-	var safeDiff = 0;
-	var dangerDiff = 0;
-	var dangerCount = 0;
-	var safeCount = 0;
-	for(var i = 0; i < ownHand.length; i++) {
-		var isDead = getPlayerHand(0)[i].ispaopai;
-		var a = getTileDanger(ownHand[i]);
-		avgA += a;
-		var b = getTileDangerOLD(ownHand[i]);
-		avgB += b;
-		if(isDead) {
-			dangerDiff += a - b;
-			dangerCount++;
-			log("Danger Tile:");
-		}
-		else {
-			safeDiff += a - b;
-			safeCount++;
-		}
-		log(getTileName(ownHand[i]) + " old: " + b + " new: " + a + "(" + getWaitScoreForTileAndPlayer(1, ownHand[i]) + ", " + getWaitScoreForTileAndPlayer(2, ownHand[i]) + ", " + getWaitScoreForTileAndPlayer(3, ownHand[i]) + ")");
-	}
-	avgA /= ownHand.length;
-	avgB /= ownHand.length;
-	dangerDiff /= dangerCount;
-	safeDiff /= safeCount;
-	dangerDiff += avgB-avgA;
-	safeDiff += avgB-avgA;
-	log("Average Old: " + avgB);
-	log("Average New: " + avgA);
-	log("Safe Tile Difference (- good): " + safeDiff);
-	log("Danger Tile Difference (+ good): " + dangerDiff);
-}
-
 //Pretty simple (all 0), but should work in case of crash -> count intelligently upwards
 function initialDiscardedTilesSafety() {
 	for(var k = 1; k < getNumberOfPlayers(); k++) { //For all other players
