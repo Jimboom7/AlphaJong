@@ -381,7 +381,7 @@ function runTestcase() {
 		ownHand = getHandFromString("111222m4455667p5s");
 		discards = [[{index: 6, type: 0, dora: false, doraValue: 0}], [], [], []];
 
-		var expected = ["7p"];
+		var expected = ["5s"];
 		break;
 	case 36:
 		log("Testcase 36: Test Honitsu");
@@ -397,7 +397,7 @@ function runTestcase() {
 		ownHand = getHandFromString("12345689m67s777z");
 		discards = [[{index: 6, type: 0, dora: false, doraValue: 0}], [], [], []];
 
-		var expected = ["6s"];
+		var expected = ["6s", "7s"];
 		break;
 	case 38:
 		log("Testcase 38: Test Sanankou");
@@ -481,6 +481,7 @@ function runTestcase() {
 		testsRunning = false;
 		return;
 	}
+    updateDiscardedTilesSafety();
 	updateAvailableTiles();
 	
 	var tile = discard();

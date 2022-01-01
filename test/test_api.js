@@ -41,7 +41,15 @@ function getTilesLeft() {
 }
 
 function localPosition2Seat(player) {
+    return player;
+}
 
+function seat2LocalPosition(playerSeat) {
+    return playerSeat;
+}
+
+function getCurrentPlayer() {
+	return 0;
 }
 
 function getSeatWind(player) {
@@ -106,4 +114,20 @@ function isPlayerRiichi(player) {
 
 function isInGame() {
 	return true;
+}
+
+function doesPlayerExist(player) {
+	return true;
+}
+
+function getPlayerScore(player) {
+    return 25000;
+}
+
+function hasPlayerHandChanged(player) {
+    return true;
+}
+
+function rememberPlayerHand(player) {
+
 }
