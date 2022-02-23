@@ -190,3 +190,7 @@ function rememberPlayerHand(player) {
 		view.DesktopMgr.Inst.players[player].hand[i].old = true;
 	}
 }
+
+function isEastRound() {
+    return view.DesktopMgr.Inst.game_config.mode.mode == 1;
+}

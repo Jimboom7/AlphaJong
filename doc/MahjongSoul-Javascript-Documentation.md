@@ -26,6 +26,7 @@ Is a singleton, view.DesktopMgr.Inst is usually what you want to access.
 **view.DesktopMgr.player_link_state[playerSear]** - Shows disconnects.  
 **view.DesktopMgr.Inst.gameEndResult** - Has data when game is over.  
 **view.DesktopMgr.Inst.players[playerNumber].liqibang._activeInHierarchy** - check player is riichi  
+**return view.DesktopMgr.Inst.game_config.mode.mode** Gamemode: 1 = East Round, 2 = South Round  
 
 
 ## GameMgr.Inst

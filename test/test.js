@@ -47,6 +47,8 @@ function runTestcase() {
 	TEST_DANGER_LEVEL = 1;
 	WAIT_VALUE = 0.3;
 	isClosed = true;
+    testPlayerRiichi = -1;
+    testPlayerHand = [13,13,13,13];
 	
 	switch(currentTest) {
 	case 1:
@@ -287,7 +289,7 @@ function runTestcase() {
 		dora = [{index: 7, type: 0, dora: false}];
 		ownHand = getHandFromString("111222m5588p39s13z");
 
-		var expected = ["3z"];
+		var expected = ["1z", "3z"];
 		break;
 	case 24:
 		log("Testcase 24: Yaku: Two from Tanyao");
@@ -476,6 +478,61 @@ function runTestcase() {
 		discards = [[], [{index: 3, type: 2, dora: false, doraValue: 0}], [], []];
 
 		var expected = ["5s"];
+		break;
+    case 48:
+		log("Testcase 48: Issue #12-1"); // https://github.com/Jimboom7/AlphaJong/issues/12#issuecomment-1045805246
+		dora = [{index: 2, type: 2, dora: false}];
+		ownHand = getHandFromString("012234567m68p6s57z");
+		discards = [[{index: 3, type: 3, dora: false, doraValue: 0}, {index: 1, type: 0, dora: false, doraValue: 0}, {index: 4, type: 2, dora: false, doraValue: 0}, {index: 3, type: 3, dora: false, doraValue: 0}],
+        [{index: 7, type: 1, dora: false, doraValue: 0}, {index: 2, type: 3, dora: false, doraValue: 0}, {index: 1, type: 3, dora: false, doraValue: 0}, {index: 9, type: 0, dora: false, doraValue: 0}],
+        [{index: 3, type: 3, dora: false, doraValue: 0}, {index: 2, type: 3, dora: false, doraValue: 0}, {index: 9, type: 1, dora: false, doraValue: 0}, {index: 3, type: 3, dora: false, doraValue: 0}, {index: 9, type: 1, dora: false, doraValue: 0}],
+        [{index: 1, type: 0, dora: false, doraValue: 0}, {index: 9, type: 2, dora: false, doraValue: 0}, {index: 9, type: 0, dora: false, doraValue: 0}, {index: 7, type: 3, dora: false, doraValue: 0}, {index: 5, type: 2, dora: false, doraValue: 0}]];
+
+		var expected = ["6s", "7z", "5z"];
+		break;
+    case 49:
+    	log("Testcase 49: Issue #12-2"); // https://github.com/Jimboom7/AlphaJong/issues/12#issuecomment-1045805246
+		dora = [{index: 2, type: 2, dora: false}];
+		ownHand = getHandFromString("12234567m68p68s57z");
+		discards = [[{index: 3, type: 3, dora: false, doraValue: 0}, {index: 1, type: 0, dora: false, doraValue: 0}, {index: 4, type: 2, dora: false, doraValue: 0}, {index: 3, type: 3, dora: false, doraValue: 0}],
+        [{index: 7, type: 1, dora: false, doraValue: 0}, {index: 2, type: 3, dora: false, doraValue: 0}, {index: 1, type: 3, dora: false, doraValue: 0}, {index: 9, type: 0, dora: false, doraValue: 0}, {index: 7, type: 0, dora: false, doraValue: 0}],
+        [{index: 3, type: 3, dora: false, doraValue: 0}, {index: 2, type: 3, dora: false, doraValue: 0}, {index: 9, type: 1, dora: false, doraValue: 0}, {index: 3, type: 3, dora: false, doraValue: 0}, {index: 9, type: 1, dora: false, doraValue: 0}],
+        [{index: 1, type: 0, dora: false, doraValue: 0}, {index: 9, type: 2, dora: false, doraValue: 0}, {index: 9, type: 0, dora: false, doraValue: 0}, {index: 7, type: 3, dora: false, doraValue: 0}, {index: 5, type: 2, dora: false, doraValue: 0}, {index: 7, type: 0, dora: false, doraValue: 0}]];
+
+        calls[1] = getHandFromString("456m");
+        calls[3] = getHandFromString("555z");
+		var expected = ["7z", "5z"];
+		break;
+    case 50:
+    	log("Testcase 50: Issue #12-4"); // https://github.com/Jimboom7/AlphaJong/issues/12#issuecomment-1046320488
+		dora = [{index: 5, type: 3, dora: false}];
+		ownHand = getHandFromString("4447788m6p222344s");
+		discards = [getHandFromString("38p1s255z"),
+                    getHandFromString("5m479p9s36z"),
+                    getHandFromString("19m24788p6s44z"),
+                    getHandFromString("1m9p1s122337z")];
+                    
+        testPlayerHand = [13,10,4,13];
+        tilesLeft = 20;
+        calls[1] = getHandFromString("123m");
+        calls[2] = getHandFromString("034p999s666z");
+
+		var expected = ["6p"];
+		break;
+    case 51:
+    	log("Testcase 51: Issue #15-1"); // https://github.com/Jimboom7/AlphaJong/issues/15#issuecomment-1047236697
+		dora = [{index: 6, type: 3, dora: false}];
+		ownHand = getHandFromString("12234550678p477z");
+		discards = [getHandFromString("6m368s23z"),
+                    getHandFromString("245m4z"),
+                    getHandFromString("1138m1s2z"),
+                    getHandFromString("5m19s236z")];
+                    
+        testPlayerHand = [13,13,7,13];
+        tilesLeft = 40;
+        calls[2] = getHandFromString("678p444s");
+
+		var expected = ["4z"];
 		break;
 	default:
 		testsRunning = false;

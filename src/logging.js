@@ -68,7 +68,12 @@ function getHandFromString(inputString) {
 		}
 		if(type != "4") {
 			for(var j = 0; j < numbers.length; j++) {
-				tiles.push({index: parseInt(numbers[j]), type: type, dora: false, doraValue: 0});
+                if(parseInt(numbers[j]) == 0) {
+                    tiles.push({index: 5, type: type, dora: true, doraValue: 1});
+                }
+                else {
+                    tiles.push({index: parseInt(numbers[j]), type: type, dora: false, doraValue: 0});
+                }
 			}
 			numbers = [];
 		}

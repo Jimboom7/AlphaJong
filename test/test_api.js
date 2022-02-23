@@ -73,7 +73,7 @@ function makeCall(type) {
 }
 
 function getRound() {
-	return 1;
+	return 3;
 }
 
 function makeCallWithOption(type, option) {
@@ -93,11 +93,11 @@ function callDiscard(tileNumber) {
 }
 
 function getPlayerLinkState(player) {
-	return 3;
+	return 1;
 }
 
 function getNumberOfPlayerHand(player) {
-
+    return testPlayerHand[player];
 }
 
 function isEndscreenShown() {
@@ -109,7 +109,7 @@ function isDisconnect() {
 }
 
 function isPlayerRiichi(player) {
-
+    return testPlayerRiichi == player;
 }
 
 function isInGame() {
@@ -130,4 +130,8 @@ function hasPlayerHandChanged(player) {
 
 function rememberPlayerHand(player) {
 
+}
+
+function isEastRound() {
+    return true;
 }

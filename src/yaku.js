@@ -16,9 +16,8 @@ function getYaku(inputHand, inputCalls) {
 	var triplesAndPairs = getTriplesAndPairsInHand(hand);
 	//handWithoutTriples = getHandWithoutTriples(hand, triplesAndPairs.triples);
 	var handWithoutTriplesAndPairs = getHandWithoutTriples(hand, triplesAndPairs.triples.concat(triplesAndPairs.pairs));
-	var doubles = getDoublesInHand(handWithoutTriplesAndPairs);
 	//var tenpai = isTenpai(triplesAndPairs, doubles);
-	var pons = getPonsInHand(hand);
+	var pons = getPonsInHandAsArray(hand);
 	var chis = getBestChisInHand(hand);
 
 	//Yakuhai
@@ -76,10 +75,10 @@ function getYaku(inputHand, inputCalls) {
 	//Toitoi
 	//All Triplets
 	//Open
-	var toitoi = getToitoi(hand);
+	var toitoi = getToitoi(pons);
 	yakuOpen += toitoi.open;
 	yakuClosed += toitoi.closed;
-	
+
 	//Sanshoku Doukou
 	//3 same index triplets in all 3 types
 	//Open
@@ -87,17 +86,17 @@ function getYaku(inputHand, inputCalls) {
 	yakuOpen += sanshokuDouko.open;
 	yakuClosed += sanshokuDouko.closed;
 	
-	//Sanshoku
+	//Sanshoku Doujun
 	//3 same index straights in all types
 	//Open/-1 Han after call
-	var sanshoku = getSanshoku(chis);
+	var sanshoku = getSanshokuDoujun(chis);
 	yakuOpen += sanshoku.open;
 	yakuClosed += sanshoku.closed;
 	
 	//Shousangen
 	//Little 3 Dragons (2 Triplets + Pair)
 	//Open
-	var shousangen = getShousangen(pons, triplesAndPairs.pairs);
+	var shousangen = getShousangen(hand);
 	yakuOpen += shousangen.open;
 	yakuClosed += shousangen.closed;
 	
@@ -118,7 +117,7 @@ function getYaku(inputHand, inputCalls) {
 	//Ittsuu
 	//Pure Straight
 	//Open/-1 Han after call
-	var ittsuu = getIttsuu(triplesAndPairs.triples);
+	var ittsuu = getIttsuu(chis);
 	yakuOpen += ittsuu.open;
 	yakuClosed += ittsuu.closed;
 	
@@ -156,7 +155,7 @@ function getYaku(inputHand, inputCalls) {
 	//Daisangen
 	//Big Three Dragons
 	//Open
-	var daisangen = getDaisangen(pons);
+	var daisangen = getDaisangen(hand);
 	yakuOpen += daisangen.open;
 	yakuClosed += daisangen.closed;
 	
@@ -228,7 +227,7 @@ function getTanyao(hand, inputCalls) {
 //Pinfu (Does not detect all Pinfu)
 function getPinfu(triplesAndPairs, doubles, tenpai) {
 
-	if(isClosed && tenpai && parseInt(triplesAndPairs.triples.length/3) == 3 && parseInt(triplesAndPairs.pairs.length/2) == 1 && getPonsInHand(triplesAndPairs.triples).length == 0) {
+	if(isClosed && tenpai && parseInt(triplesAndPairs.triples.length/3) == 3 && parseInt(triplesAndPairs.pairs.length/2) == 1 && getPonsInHandAsArray(triplesAndPairs.triples).length == 0) {
 		doubles = sortHand(doubles);
 		for(var i = 0; i < doubles.length - 1; i++) {
 			if(doubles[i].index > 1 && doubles[i+1].index < 9 && Math.abs(doubles[0].index - doubles[1].index) == 1) {
@@ -256,7 +255,7 @@ function getIipeikou(triples) {
 //Sanankou
 function getSanankou(hand) {
 	if(!isConsideringCall) {
-		var concealedTriples = getPonsInHand(hand);
+		var concealedTriples = getPonsInHandAsArray(hand);
 		if(parseInt(concealedTriples.length/3) >= 3) {
 			return {open: 2, closed: 2};
 		}
@@ -266,8 +265,7 @@ function getSanankou(hand) {
 }
 
 //Toitoi
-function getToitoi(hand) {
-	var pons = getPonsInHand(hand);
+function getToitoi(pons) {
 	if(parseInt(pons.length/3) >= 4) {
 		return {open: 2, closed: 2};
 	}
@@ -276,17 +274,17 @@ function getToitoi(hand) {
 }
 
 //Sanshoku Douko
-function getSanshokuDouko(triples) {
+function getSanshokuDouko(pons) {
 	for(var i = 1; i <= 9; i++) {
-		if(triples.filter(tile => tile.index == i && tile.type < 3).length >= 9) {
+		if(pons.filter(tile => tile.index == i && tile.type < 3).length >= 9) {
 			return {open: 2, closed: 2};
 		}
 	}
 	return {open: 0, closed: 0};
 }
 
-//Sanshoku Douko
-function getSanshoku(chis) {
+//Sanshoku Doujun
+function getSanshokuDoujun(chis) {
 	for(var i = 1; i <= 7; i++) {
 		if(chis.filter(tile => tile.index == i || tile.index == i + 1 || tile.index == i + 2).length >= 9) {
 			return {open: 2, closed: 1};

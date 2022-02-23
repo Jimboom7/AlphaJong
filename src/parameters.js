@@ -66,6 +66,8 @@ var startTime = 0;
 var winValues = [];
 var TEST_DANGER_LEVEL = 50; 
 var testCallTile = {};
+var testPlayerRiichi = -1;
+var testPlayerHand = [];
 
 //LOCAL STORAGE
 var AUTORUN = window.localStorage.getItem("alphajongAutorun") == "true";

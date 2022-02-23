@@ -56,14 +56,24 @@ function getPairsInHand(hand) {
 		if(oldIndex != tile.index || oldType != tile.type) {
 			var tiles = getTilesInHand(hand, tile.index, tile.type);
 			if((tiles.length >= 2)) {
-				pairs.push(tiles[0]); //Grabs highest dora tiles first
-				pairs.push(tiles[1]);
+				pairs.push({tile1: tiles[0], tile2: tiles[1]}); //Grabs highest dora tiles first
 			}
 			oldIndex = tile.index;
 			oldType = tile.type;
 		}
 	});
 	return pairs;
+}
+
+//Pairs in hand as array
+function getPairsInHandAsArray(hand) {
+	var pairs = getPairsInHand(hand);
+	var pairList = [];
+	pairs.forEach(function (pair) {
+		pairList.push(pair.tile1);
+		pairList.push(pair.tile2);
+	});
+	return pairList;
 }
 
 //Return doubles in hand
@@ -91,85 +101,121 @@ function isDouble(hand, tile) {
 	  (getNumberOfTilesInHand(hand, tile.index + 2, tile.type) >= 1)) && tileNumber >= 1));
 }
 
-//Return all triples/3-sequences in hand
-function getTriplesInHand(inputHand) {
-	var hand = sortHand(inputHand);
-	
-	var trip = [];
-	var pa = [];
-	var lastTileIndex = 0;
-	for(var i = 0; i < hand.length; i++) {
-		if(i != hand.length - 1 && (hand[i].index >= hand[i+1].index - 1 && hand[i].type == hand[i+1].type)) { //Split if there is a gap between numbers
-			continue;
-		}
-		var currentHand = hand.slice(lastTileIndex, i + 1);
-		
-		var triples = getPonsInHand(currentHand);
-		currentHand = getHandWithoutTriples(currentHand, triples);
-		var straights = getBestChisInHand(currentHand);
-		
-		var currentHand = hand.slice(lastTileIndex, i + 1);
-
-		var straights2 = getBestChisInHand(currentHand);
-		currentHand = getHandWithoutTriples(currentHand, straights2);
-		var triples2 = getPonsInHand(currentHand);
-		
-		var t1 = triples.concat(straights);
-		var t2 = triples2.concat(straights2);
-		
-		if(t1.length > t2.length || (t1.length == t2.length && getNumberOfDorasInHand(t1) > getNumberOfDorasInHand(t2))) {
-			t2 = t1;
-		}
-		trip = trip.concat(t2);
-		
-		lastTileIndex = i + 1;
-	}
-
-	return trip;
-}
-
 //Return all triples/3-sequences and pairs in hand -> 4 and 1 result: winning hand
 function getTriplesAndPairsInHand(inputHand) {
-	var hand = sortHand(inputHand);
+	var sequences = getChisInHand(inputHand);
+	var triplets = getPonsInHand(inputHand);
+	var pairs = getPairsInHand(inputHand);
+	return getBestChisInHandRecursive(inputHand, sequences.concat(triplets).concat(pairs), {triples: [], pairs: []});
+}
+
+//Return all triples/3-tile-sequences in an array of tiles
+function getTriplesInHand(inputHand) {
+	var sequences = getChisInHand(inputHand);
+	var triplets = getPonsInHand(inputHand);
+	return getBestChisInHandRecursive(inputHand, sequences.concat(triplets), {triples: [], pairs: []}).triples;
+}
+
+//Return all triplets in hand
+function getPonsInHand(input_hand) {
+	var hand = [...input_hand];
+	hand = sortHand(hand);
 	
-	var trip = [];
-	var pa = [];
-	var lastTileIndex = 0;
-	for(var i = 0; i < hand.length; i++) {
-		if(i != hand.length - 1 && (hand[i].index >= hand[i+1].index - 1 && hand[i].type == hand[i+1].type)) { //Split if there is a gap between numbers
+	var triples = [];
+	var oldIndex = 0;
+	var oldType = 0;
+	hand.forEach(function(tile) {
+		if(oldIndex != tile.index || oldType != tile.type) {
+			var tiles = getTilesInHand(hand, tile.index, tile.type);
+			if((tiles.length >= 3)) {
+				triples.push({tile1: tiles[0], tile2: tiles[1], tile3: tiles[2]}); //Grabs highest dora tiles first because of sorting
+			}
+			oldIndex = tile.index;
+			oldType = tile.type;
+		}
+	});
+	return triples;
+}
+
+//Pons in hand as array
+function getPonsInHandAsArray(hand) {
+	var pons = getPonsInHand(hand);
+	var ponList = [];
+	pons.forEach(function (pon) {
+		ponList.push(pon.tile1);
+		ponList.push(pon.tile2);
+		ponList.push(pon.tile3);
+	});
+	return ponList;
+}
+
+function getBestChisInHand(inputHand) {
+	return getBestChisInHandRecursive(inputHand, getChisInHand(inputHand), {triples: [], pairs: []}).triples;
+}
+
+//Return the best combination of 3-tile Sequences in hand
+//Recursive Function, initial call should be via getBestSequencesInHand
+function getBestChisInHandRecursive(inputHand, possibleSequences, chosenSequences) {
+	var originalCS = {triples: [...chosenSequences.triples], pairs: [...chosenSequences.pairs]};
+	for(var i = 0; i < possibleSequences.length; i++) {
+		cs = {triples: [...originalCS.triples], pairs: [...originalCS.pairs]};
+		tiles = possibleSequences[i];
+		var hand = [...inputHand];
+		if(!("tile3" in tiles)) { // Pairs
+		    if(tiles.tile1.index == tiles.tile2.index && getNumberOfTilesInHand(hand, tiles.tile1.index, tiles.tile1.type) < 2) {
+				continue;
+			}
+		} 
+		else if(getNumberOfTilesInHand(hand, tiles.tile1.index, tiles.tile1.type) == 0 ||
+			    getNumberOfTilesInHand(hand, tiles.tile2.index, tiles.tile2.type) == 0 ||
+			    getNumberOfTilesInHand(hand, tiles.tile3.index, tiles.tile3.type) == 0 ||
+			   (tiles.tile1.index == tiles.tile2.index && getNumberOfTilesInHand(hand, tiles.tile1.index, tiles.tile1.type) < 3)) {
 			continue;
 		}
-		
-		var currentHand = hand.slice(lastTileIndex, i + 1);
-		var triples = getPonsInHand(currentHand);
-		currentHand = getHandWithoutTriples(currentHand, triples);
-		var p1 = getPairsInHand(currentHand);
-		currentHand = getHandWithoutTriples(currentHand, p1);
-		var straights = getBestChisInHand(currentHand);
-		
-		var currentHand = hand.slice(lastTileIndex, i + 1);
-
-		var straights2 = getBestChisInHand(currentHand);
-		currentHand = getHandWithoutTriples(currentHand, straights2);
-		var triples2 = getPonsInHand(currentHand);
-		currentHand = getHandWithoutTriples(currentHand, triples2);
-		var p2 = getPairsInHand(currentHand);
-		
-		var t1 = triples.concat(straights);
-		var t2 = triples2.concat(straights2);
-		
-		//If same: Priorize Chis -> Still double in hand. TODO: Sometimes priorize Pon is better
-		if(t1.length > t2.length || (t1.length == t2.length && p1.length > p2.length) || (t1.length == t2.length && p1.length == p2.length && getNumberOfDorasInHand(t1) > getNumberOfDorasInHand(t2))) {
-			t2 = t1;
-			p2 = p1;
+		if("tile3" in tiles) {
+			cs.triples.push(tiles.tile1);
+			cs.triples.push(tiles.tile2);
+			cs.triples.push(tiles.tile3);
+			hand = getHandWithoutTriples(hand, [tiles.tile1, tiles.tile2, tiles.tile3]);
 		}
-		trip = trip.concat(t2);
-		pa = pa.concat(p2);
-		
-		lastTileIndex = i + 1;
+		else {
+			cs.pairs.push(tiles.tile1);
+			cs.pairs.push(tiles.tile2);
+			hand = getHandWithoutTriples(hand, [tiles.tile1, tiles.tile2]);
+		}
+		var anotherChoice = getBestChisInHandRecursive(hand, possibleSequences.slice(i + 1), cs);
+		if(anotherChoice.triples.length > chosenSequences.triples.length ||
+			(anotherChoice.triples.length == chosenSequences.triples.length &&
+			 anotherChoice.pairs.length > chosenSequences.pairs.length) ||
+			(anotherChoice.triples.length == chosenSequences.triples.length &&
+			 anotherChoice.pairs.length == chosenSequences.pairs.length &&
+			 getNumberOfDorasInHand(anotherChoice) > getNumberOfDorasInHand(chosenSequences))) {
+			chosenSequences = anotherChoice;
+		}
 	}
+	
+	return chosenSequences;
+}
 
-	return {triples: trip, pairs: pa};
+//Return all 3-tile Sequences in hand
+function getChisInHand(inputHand) {
+    var hand = [...inputHand];
+    hand = sortHand(hand);
+	var sequences = [];
+    for(var index = 0; index <= 7; index++) {
+        for(var type = 0; type <= 2; type++) {
+            var tiles1 = getTilesInHand(hand, index, type);
+            var tiles2 = getTilesInHand(hand, index + 1, type);
+            var tiles3 = getTilesInHand(hand, index + 2, type);
+
+			var i = 0;
+			while(tiles1.length > i && tiles2.length > i && tiles3.length > i) {
+				sequences.push({tile1: tiles1[i], tile2: tiles2[i], tile3: tiles3[i]});
+				i++;
+			}
+        }
+    }
+	return sequences;
 }
 
 //Return hand without given tiles
@@ -202,121 +248,6 @@ function getHandWithoutTile(inputHand, tile) {
 	return hand;
 }
 
-//Return all triples in hand
-function getPonsInHand(input_hand) {
-	var hand = [...input_hand];
-	hand = sortHand(hand);
-	
-	var triples = [];
-	var oldIndex = 0;
-	var oldType = 0;
-	hand.forEach(function(tile) {
-		if(oldIndex != tile.index || oldType != tile.type) {
-			var tiles = getTilesInHand(hand, tile.index, tile.type);
-			if((tiles.length >= 3)) {
-				triples.push(tiles[0]); //Grabs highest dora tiles first because of sorting
-				triples.push(tiles[1]);
-				triples.push(tiles[2]);
-			}
-			oldIndex = tile.index;
-			oldType = tile.type;
-		}
-	});
-	return triples;
-}
-
-//Tries to find the best sequences with most dora
-function getBestChisInHand(inputHand) {
-	var straights = getChisInHand(inputHand, []);
-	var straightsB = getChisInHandDownward(inputHand, []);
-	if(getNumberOfDorasInHand(straightsB) > getNumberOfDorasInHand(straights)) {
-		straights = straightsB;
-	}
-	return straights;
-}
-
-//Return all 3-sequences in hand
-function getChisInHand(inputHand, sequences) {
-	
-	var hand = [...inputHand];
-	hand = sortHand(hand);
-
-	if(hand.length <= 2 || hand[0].type == 3) {
-		return sequences;
-	}
-	var index = hand[0].index;
-	var type = hand[0].type;
-
-	var tiles2 = getTilesInHand(hand, index + 1, type);
-	var tiles3 = getTilesInHand(hand, index + 2, type);
-
-	if(tiles2.length >= 1 && tiles3.length >= 1) {
-		sequences.push(hand[0]);
-		sequences.push(tiles2[0]);
-		sequences.push(tiles3[0]);
-		
-		for(var i = 0; i < hand.length; i++) {
-			if(hand[i].index == index + 1 && hand[i].type == type) {
-				hand.splice(i, 1);
-				break;
-			}
-		}
-		for(var i = 0; i < hand.length; i++) {
-			if(hand[i].index == index + 2 && hand[i].type == type) {
-				hand.splice(i, 1);
-				break;
-			}
-		}
-		hand.splice(0, 1);
-		return getChisInHand(hand, sequences);
-	}
-	else {
-		hand.splice(0, 1);
-		return getChisInHand(hand, sequences);
-	}
-}
-
-//Return all 3-sequences in hand
-function getChisInHandDownward(inputHand, sequences) {
-	
-	var hand = [...inputHand];
-	hand = sortHandBackwards(hand);
-
-	if(hand.length <= 2 || hand[0].type == 3) {
-		return sequences;
-	}
-	var index = hand[0].index;
-	var type = hand[0].type;
-
-	var tiles2 = getTilesInHand(hand, index - 1, type);
-	var tiles3 = getTilesInHand(hand, index - 2, type);
-
-	if(tiles2.length >= 1 && tiles3.length >= 1) {
-		sequences.push(hand[0]);
-		sequences.push(tiles2[0]);
-		sequences.push(tiles3[0]);
-		
-		for(var i = 0; i < hand.length; i++) {
-			if(hand[i].index == index - 1 && hand[i].type == type) {
-				hand.splice(i, 1);
-				break;
-			}
-		}
-		for(var i = 0; i < hand.length; i++) {
-			if(hand[i].index == index - 2 && hand[i].type == type) {
-				hand.splice(i, 1);
-				break;
-			}
-		}
-		hand.splice(0, 1);
-		return getChisInHand(hand, sequences);
-	}
-	else {
-		hand.splice(0, 1);
-		return getChisInHand(hand, sequences);
-	}
-}
-
 //Sort hand
 function sortHand(inputHand) {
 	var hand = [...inputHand];
@@ -325,21 +256,6 @@ function sortHand(inputHand) {
 	});
 	hand = hand.sort(function (p1, p2) { //Sort index ascending
 		return p1.index - p2.index;
-	});
-	hand = hand.sort(function (p1, p2) { //Sort type ascending
-		return p1.type - p2.type;
-	});
-	return hand;
-}
-
-//Sort hand backwards (For 3-sequences search)
-function sortHandBackwards(inputHand) {
-	var hand = [...inputHand];
-	hand = hand.sort(function (p1, p2) { //Sort dora value descending
-		return p2.doraValue - p1.doraValue;
-	});
-	hand = hand.sort(function (p1, p2) { //Sort index ascending
-		return p2.index - p1.index;
 	});
 	hand = hand.sort(function (p1, p2) { //Sort type ascending
 		return p1.type - p2.type;
@@ -384,12 +300,11 @@ function getNumberOfNonFuritenTilesAvailable(index, type, lastTiles) {
 
 //Return number of specific tile in hand
 function getNumberOfTilesInHand(hand, index, type) {
-	return hand.filter(tile => tile.index == index && tile.type == type).length;
+	return getTilesInHand(hand, index, type).length;
 }
 
 //Return specific tiles in hand
-function getTilesInHand(inputHand, index, type) {
-	var hand = [...inputHand];
+function getTilesInHand(hand, index, type) {
 	return hand.filter(tile => tile.index == index && tile.type == type);
 }
 
@@ -486,14 +401,15 @@ function pushTileIfNotExists(tiles, index, type) {
 
 //Returns true if player can call riichi
 function canRiichi() {
-	if(!isDebug()) {
-		var operations = getOperationList();
-		for(var i = 0; i < operations.length; i++) {
-			if(operations[i].type == getOperations().liqi) {
-				return true;
-			}
-		}
+	if(isDebug()) {
+        return false;
 	}
+    var operations = getOperationList();
+    for(var i = 0; i < operations.length; i++) {
+        if(operations[i].type == getOperations().liqi) {
+            return true;
+        }
+    }
 	return false;
 }
 
@@ -535,8 +451,6 @@ function getUsefulTilesForDouble(hand) {
 		if(hand[i].type == 3) {
 			continue;
 		}
-
-		var amount = getNumberOfTilesInHand(hand, hand[i].index, hand[i].type);
 		
 		var amountLower = getNumberOfTilesInHand(hand, hand[i].index - 1, hand[i].type);
 		var amountUpper = getNumberOfTilesInHand(hand, hand[i].index + 1, hand[i].type);
@@ -557,7 +471,7 @@ function isTenpai(triplesAndPairs, doubles, efficiency) {
 	if(strategy == STRATEGIES.CHIITOITSU) {
 		return parseInt(triplesAndPairs.pairs.length / 2) >= 6; //Should be enough
 	}
-	//PROBLEM: If Double & Pair overlap (3 tripels + 1667 -> thinks its tenpai)
+	//PROBLEM: If Double & Pair overlap (3 triples + 1667 -> thinks its tenpai)
 	var tenpai = (efficiency >= 3.5 && ((parseInt(triplesAndPairs.triples.length/3) == 3 && parseInt(triplesAndPairs.pairs.length / 2) >= 1 && ((parseInt(doubles.length/2) >= 1 ) || parseInt(triplesAndPairs.pairs.length / 2) >= 2)) || parseInt(triplesAndPairs.triples.length/3) == 4));
 	//if(tenpai) {
 		//TODO: Check for Furiten
@@ -623,13 +537,13 @@ function getDistanceToLast() {
 }
 
 function isLastGame() {
-	if(ROOM % 3 == 2) { // Hanchan (East Round)
+	if(isEastRound()) {
 		return getRound() == 3 || getRoundWind() > 1; //East 4 or South X
 	}
 	else { // South Game
 		return (getRound() == 3 && getRoundWind() > 1) || getRoundWind() > 2; //South 4 or West X
 	}
-	return false; //TODO: South Round
+	return false;
 }
 
 //Returns the binomialCoefficient for two numbers. Needed for chance to draw tile calculation. Fails if a faculty of > 134 is needed (should not be the case since there are 134 tiles)

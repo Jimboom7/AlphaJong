@@ -464,7 +464,7 @@ function chiitoitsuPriorities() {
 	for (var i = 0; i < ownHand.length; i++){ //Create 13 Tile hands, check for pairs
 		var newHand = [...ownHand];
 		newHand.splice(i, 1);
-		var pairs = getPairsInHand(newHand);
+		var pairs = getPairsInHandAsArray(newHand);
 		var pairsValue = pairs.length/2;
 		var handWithoutPairs = getHandWithoutTriples(newHand, pairs);
 		var doraValue = getNumberOfDorasInHand(pairs);
@@ -484,7 +484,7 @@ function chiitoitsuPriorities() {
 				currentHand.push(tile);
 				var numberOfTiles = getNumberOfNonFuritenTilesAvailable(tile.index, tile.type);
 				var chance = (numberOfTiles / availableTiles.length);
-				var pairs2 = getPairsInHand(currentHand);
+				var pairs2 = getPairsInHandAsArray(currentHand);
 				if(pairs2.length > 0) {
 					efficiency += chance/2;
 					doraValue += getNumberOfDorasInHand(pairs2) * chance;
