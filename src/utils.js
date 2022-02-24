@@ -3,60 +3,54 @@
 // Contains utility functions
 //################################
 
+//Return the number of players in the game (3 or 4)
 function getNumberOfPlayers() {
-    if(!doesPlayerExist(1) || !doesPlayerExist(2) || !doesPlayerExist(3)) {
-        return 3;
-    }
-    return 4;
+	if (!doesPlayerExist(1) || !doesPlayerExist(2) || !doesPlayerExist(3)) {
+		return 3;
+	}
+	return 4;
 }
 
-function getCorrectPlayerNumber(player) { //Only necessary for 3 player games
-    if(getNumberOfPlayers() == 4) {
-        return player;
-    }
-    if(!doesPlayerExist(1)) {
-        if(player > 0) {
-            return player + 1;
-        }
-    }
-    if(!doesPlayerExist(2)) {
-        if(player > 1) {
-            return player + 1;
-        }
-    }
-    return player;
+//Correct the player numbers
+//Only necessary for 3 player games
+function getCorrectPlayerNumber(player) {
+	if (getNumberOfPlayers() == 4) {
+		return player;
+	}
+	if (!doesPlayerExist(1)) {
+		if (player > 0) {
+			return player + 1;
+		}
+	}
+	if (!doesPlayerExist(2)) {
+		if (player > 1) {
+			return player + 1;
+		}
+	}
+	return player;
 }
 
-//Return number of doras in hand
-function getNumberOfDorasInHand(hand) {
+//Return number of doras in tiles
+function getNumberOfDoras(tiles) {
 	var dr = 0;
-	for(var i = 0; i < hand.length; i++) {
-		dr += hand[i].doraValue;
+	for (let tile of tiles) {
+		dr += tile.doraValue;
 	}
 	return dr;
 }
 
-//Return a hand with only tiles of a specific type
-function getHandOfType(inputHand, type) {
-	var hand = [...inputHand];
-	if(type >= 0 && type <= 3) {
-		return hand.filter(tile => tile.type == type);
-	}
-	return hand;
-}
+//Pairs in tiles
+function getPairs(tiles) {
+	var sortedTiles = sortTiles(tiles);
 
-//Pairs in hand
-function getPairsInHand(hand) {
-	var hand = sortHand(hand);
-	
 	var pairs = [];
 	var oldIndex = 0;
 	var oldType = 0;
-	hand.forEach(function(tile) {
-		if(oldIndex != tile.index || oldType != tile.type) {
-			var tiles = getTilesInHand(hand, tile.index, tile.type);
-			if((tiles.length >= 2)) {
-				pairs.push({tile1: tiles[0], tile2: tiles[1]}); //Grabs highest dora tiles first
+	sortedTiles.forEach(function (tile) {
+		if (oldIndex != tile.index || oldType != tile.type) {
+			var ts = getTilesInTileArray(sortedTiles, tile.index, tile.type);
+			if ((ts.length >= 2)) {
+				pairs.push({ tile1: ts[0], tile2: ts[1] }); //Grabs highest dora tiles first
 			}
 			oldIndex = tile.index;
 			oldType = tile.type;
@@ -65,9 +59,9 @@ function getPairsInHand(hand) {
 	return pairs;
 }
 
-//Pairs in hand as array
-function getPairsInHandAsArray(hand) {
-	var pairs = getPairsInHand(hand);
+//Pairs in tiles as array
+function getPairsAsArray(tiles) {
+	var pairs = getPairs(tiles);
 	var pairList = [];
 	pairs.forEach(function (pair) {
 		pairList.push(pair.tile1);
@@ -76,11 +70,11 @@ function getPairsInHandAsArray(hand) {
 	return pairList;
 }
 
-//Return doubles in hand
-function getDoublesInHand(hand) {
+//Return doubles in tiles
+function getDoubles(tiles) {
 	var doubles = [];
-	hand.forEach(function(tile) {
-		if(isDouble(hand, tile)) {
+	tiles.forEach(function (tile) {
+		if (isDouble(tiles, tile)) {
 			doubles.push(tile);
 		}
 	});
@@ -89,46 +83,45 @@ function getDoublesInHand(hand) {
 
 
 //Tile twice or 2 sequence or "bridge". Might even be triple
-function isDouble(hand, tile) {
-	var tileNumber = getNumberOfTilesInHand(hand, tile.index, tile.type);
-	if(tile.type == 3) {
+function isDouble(tiles, tile) {
+	var tileNumber = getNumberOfTilesInTileArray(tiles, tile.index, tile.type);
+	if (tile.type == 3) {
 		return tileNumber == 2;
 	}
 	return ((tileNumber == 2) ||
-	(((getNumberOfTilesInHand(hand, tile.index - 1, tile.type) >= 1) ||
-	  (getNumberOfTilesInHand(hand, tile.index + 1, tile.type) >= 1) ||
-	  (getNumberOfTilesInHand(hand, tile.index - 2, tile.type) >= 1) ||
-	  (getNumberOfTilesInHand(hand, tile.index + 2, tile.type) >= 1)) && tileNumber >= 1));
+		(((getNumberOfTilesInTileArray(tiles, tile.index - 1, tile.type) >= 1) ||
+			(getNumberOfTilesInTileArray(tiles, tile.index + 1, tile.type) >= 1) ||
+			(getNumberOfTilesInTileArray(tiles, tile.index - 2, tile.type) >= 1) ||
+			(getNumberOfTilesInTileArray(tiles, tile.index + 2, tile.type) >= 1)) && tileNumber >= 1));
 }
 
-//Return all triples/3-sequences and pairs in hand -> 4 and 1 result: winning hand
-function getTriplesAndPairsInHand(inputHand) {
-	var sequences = getChisInHand(inputHand);
-	var triplets = getPonsInHand(inputHand);
-	var pairs = getPairsInHand(inputHand);
-	return getBestChisInHandRecursive(inputHand, sequences.concat(triplets).concat(pairs), {triples: [], pairs: []});
+//Return all triplets/3-sequences and pairs as a tile array
+function getTriplesAndPairs(tiles) {
+	var sequences = getSequences(tiles);
+	var triplets = getTriplets(tiles);
+	var pairs = getPairs(tiles);
+	return getBestCombinationOfTiles(tiles, sequences.concat(triplets).concat(pairs), { triples: [], pairs: [] });
 }
 
-//Return all triples/3-tile-sequences in an array of tiles
-function getTriplesInHand(inputHand) {
-	var sequences = getChisInHand(inputHand);
-	var triplets = getPonsInHand(inputHand);
-	return getBestChisInHandRecursive(inputHand, sequences.concat(triplets), {triples: [], pairs: []}).triples;
+//Return all triplets/3-tile-sequences as a tile array
+function getTriples(tiles) {
+	var sequences = getSequences(tiles);
+	var triplets = getTriplets(tiles);
+	return getBestCombinationOfTiles(tiles, sequences.concat(triplets), { triples: [], pairs: [] }).triples;
 }
 
-//Return all triplets in hand
-function getPonsInHand(input_hand) {
-	var hand = [...input_hand];
-	hand = sortHand(hand);
-	
+//Return all triplets in tile array
+function getTriplets(tiles) {
+	var sortedTiles = sortTiles(tiles);
+
 	var triples = [];
 	var oldIndex = 0;
 	var oldType = 0;
-	hand.forEach(function(tile) {
-		if(oldIndex != tile.index || oldType != tile.type) {
-			var tiles = getTilesInHand(hand, tile.index, tile.type);
-			if((tiles.length >= 3)) {
-				triples.push({tile1: tiles[0], tile2: tiles[1], tile3: tiles[2]}); //Grabs highest dora tiles first because of sorting
+	sortedTiles.forEach(function (tile) {
+		if (oldIndex != tile.index || oldType != tile.type) {
+			var ts = getTilesInTileArray(sortedTiles, tile.index, tile.type);
+			if ((ts.length >= 3)) {
+				triples.push({ tile1: ts[0], tile2: ts[1], tile3: ts[2] }); //Grabs highest dora tiles first because of sorting
 			}
 			oldIndex = tile.index;
 			oldType = tile.type;
@@ -137,243 +130,224 @@ function getPonsInHand(input_hand) {
 	return triples;
 }
 
-//Pons in hand as array
-function getPonsInHandAsArray(hand) {
-	var pons = getPonsInHand(hand);
-	var ponList = [];
-	pons.forEach(function (pon) {
-		ponList.push(pon.tile1);
-		ponList.push(pon.tile2);
-		ponList.push(pon.tile3);
+//Triplets in tiles as array
+function getTripletsAsArray(tiles) {
+	var triplets = getTriplets(tiles);
+	var tripletsList = [];
+	triplets.forEach(function (triplet) {
+		tripletsList.push(triplet.tile1);
+		tripletsList.push(triplet.tile2);
+		tripletsList.push(triplet.tile3);
 	});
-	return ponList;
+	return tripletsList;
 }
 
-function getBestChisInHand(inputHand) {
-	return getBestChisInHandRecursive(inputHand, getChisInHand(inputHand), {triples: [], pairs: []}).triples;
+function getBestSequenceCombination(inputHand) {
+	return getBestCombinationOfTiles(inputHand, getSequences(inputHand), { triples: [], pairs: [] }).triples;
 }
 
-//Return the best combination of 3-tile Sequences in hand
-//Recursive Function, initial call should be via getBestSequencesInHand
-function getBestChisInHandRecursive(inputHand, possibleSequences, chosenSequences) {
-	var originalCS = {triples: [...chosenSequences.triples], pairs: [...chosenSequences.pairs]};
-	for(var i = 0; i < possibleSequences.length; i++) {
-		cs = {triples: [...originalCS.triples], pairs: [...originalCS.pairs]};
-		tiles = possibleSequences[i];
-		var hand = [...inputHand];
-		if(!("tile3" in tiles)) { // Pairs
-		    if(tiles.tile1.index == tiles.tile2.index && getNumberOfTilesInHand(hand, tiles.tile1.index, tiles.tile1.type) < 2) {
+//Return the best combination of 3-tile Sequences, Triplets and pairs in array of tiles
+//Recursive Function, weird code that can probably be optimized
+function getBestCombinationOfTiles(inputTiles, possibleCombinations, chosenCombinations) {
+	var originalC = { triples: [...chosenCombinations.triples], pairs: [...chosenCombinations.pairs] };
+	for (var i = 0; i < possibleCombinations.length; i++) {
+		var cs = { triples: [...originalC.triples], pairs: [...originalC.pairs] };
+		var tiles = possibleCombinations[i];
+		var hand = [...inputTiles];
+		if (!("tile3" in tiles)) { // Pairs
+			if (tiles.tile1.index == tiles.tile2.index && getNumberOfTilesInTileArray(hand, tiles.tile1.index, tiles.tile1.type) < 2) {
 				continue;
 			}
-		} 
-		else if(getNumberOfTilesInHand(hand, tiles.tile1.index, tiles.tile1.type) == 0 ||
-			    getNumberOfTilesInHand(hand, tiles.tile2.index, tiles.tile2.type) == 0 ||
-			    getNumberOfTilesInHand(hand, tiles.tile3.index, tiles.tile3.type) == 0 ||
-			   (tiles.tile1.index == tiles.tile2.index && getNumberOfTilesInHand(hand, tiles.tile1.index, tiles.tile1.type) < 3)) {
+		}
+		else if (getNumberOfTilesInTileArray(hand, tiles.tile1.index, tiles.tile1.type) == 0 ||
+			getNumberOfTilesInTileArray(hand, tiles.tile2.index, tiles.tile2.type) == 0 ||
+			getNumberOfTilesInTileArray(hand, tiles.tile3.index, tiles.tile3.type) == 0 ||
+			(tiles.tile1.index == tiles.tile2.index && getNumberOfTilesInTileArray(hand, tiles.tile1.index, tiles.tile1.type) < 3)) {
 			continue;
 		}
-		if("tile3" in tiles) {
+		if ("tile3" in tiles) {
 			cs.triples.push(tiles.tile1);
 			cs.triples.push(tiles.tile2);
 			cs.triples.push(tiles.tile3);
-			hand = getHandWithoutTriples(hand, [tiles.tile1, tiles.tile2, tiles.tile3]);
+			hand = removeTilesFromTileArray(hand, [tiles.tile1, tiles.tile2, tiles.tile3]);
 		}
 		else {
 			cs.pairs.push(tiles.tile1);
 			cs.pairs.push(tiles.tile2);
-			hand = getHandWithoutTriples(hand, [tiles.tile1, tiles.tile2]);
+			hand = removeTilesFromTileArray(hand, [tiles.tile1, tiles.tile2]);
 		}
-		var anotherChoice = getBestChisInHandRecursive(hand, possibleSequences.slice(i + 1), cs);
-		if(anotherChoice.triples.length > chosenSequences.triples.length ||
-			(anotherChoice.triples.length == chosenSequences.triples.length &&
-			 anotherChoice.pairs.length > chosenSequences.pairs.length) ||
-			(anotherChoice.triples.length == chosenSequences.triples.length &&
-			 anotherChoice.pairs.length == chosenSequences.pairs.length &&
-			 getNumberOfDorasInHand(anotherChoice) > getNumberOfDorasInHand(chosenSequences))) {
-			chosenSequences = anotherChoice;
+		var anotherChoice = getBestCombinationOfTiles(hand, possibleCombinations.slice(i + 1), cs);
+		if (anotherChoice.triples.length > chosenCombinations.triples.length ||
+			(anotherChoice.triples.length == chosenCombinations.triples.length &&
+				anotherChoice.pairs.length > chosenCombinations.pairs.length) ||
+			(anotherChoice.triples.length == chosenCombinations.triples.length &&
+				anotherChoice.pairs.length == chosenCombinations.pairs.length &&
+				getNumberOfDoras(anotherChoice.triples.concat(anotherChoice.pairs)) > getNumberOfDoras(chosenCombinations.triples.concat(chosenCombinations.pairs)))) {
+			chosenCombinations = anotherChoice;
 		}
 	}
-	
-	return chosenSequences;
+
+	return chosenCombinations;
 }
 
-//Return all 3-tile Sequences in hand
-function getChisInHand(inputHand) {
-    var hand = [...inputHand];
-    hand = sortHand(hand);
+//Return all 3-tile Sequences in tile array
+function getSequences(tiles) {
+	var sortedTiles = sortTiles(tiles);
 	var sequences = [];
-    for(var index = 0; index <= 7; index++) {
-        for(var type = 0; type <= 2; type++) {
-            var tiles1 = getTilesInHand(hand, index, type);
-            var tiles2 = getTilesInHand(hand, index + 1, type);
-            var tiles3 = getTilesInHand(hand, index + 2, type);
+	for (var index = 0; index <= 7; index++) {
+		for (var type = 0; type <= 2; type++) {
+			var tiles1 = getTilesInTileArray(sortedTiles, index, type);
+			var tiles2 = getTilesInTileArray(sortedTiles, index + 1, type);
+			var tiles3 = getTilesInTileArray(sortedTiles, index + 2, type);
 
 			var i = 0;
-			while(tiles1.length > i && tiles2.length > i && tiles3.length > i) {
-				sequences.push({tile1: tiles1[i], tile2: tiles2[i], tile3: tiles3[i]});
+			while (tiles1.length > i && tiles2.length > i && tiles3.length > i) {
+				sequences.push({ tile1: tiles1[i], tile2: tiles2[i], tile3: tiles3[i] });
 				i++;
 			}
-        }
-    }
+		}
+	}
 	return sequences;
 }
 
-//Return hand without given tiles
-function getHandWithoutTriples(inputHand, triples) {
-	var hand = [...inputHand];
-	
-	for(var i = 0; i < triples.length; i++) {
-		for(var j = 0; j < hand.length; j++) {
-			if(triples[i].index == hand[j].index && triples[i].type == hand[j].type && triples[i].dora == hand[j].dora) {
-				hand.splice(j, 1);
+//Return tile array without given tiles
+function removeTilesFromTileArray(inputTiles, tiles) {
+	var tileArray = [...inputTiles];
+
+	for (let tile of tiles) {
+		for (var j = 0; j < tileArray.length; j++) {
+			if (tile.index == tileArray[j].index && tile.type == tileArray[j].type && tile.dora == tileArray[j].dora) {
+				tileArray.splice(j, 1);
 				break;
 			}
 		}
 	}
-	
-	return hand;
+
+	return tileArray;
 }
 
-//Return hand without given tile
-function getHandWithoutTile(inputHand, tile) {
-	var hand = [...inputHand];
-	
-	for(var j = 0; j < hand.length; j++) {
-		if(tile.index == hand[j].index && tile.type == hand[j].type && tile.dora == hand[j].dora) {
-			hand.splice(j, 1);
-			break;
-		}
-	}
-	
-	return hand;
-}
-
-//Sort hand
-function sortHand(inputHand) {
-	var hand = [...inputHand];
-	hand = hand.sort(function (p1, p2) { //Sort dora value descending
+//Sort tiles
+function sortTiles(inputTiles) {
+	var tiles = [...inputTiles];
+	tiles = tiles.sort(function (p1, p2) { //Sort dora value descending
 		return p2.doraValue - p1.doraValue;
 	});
-	hand = hand.sort(function (p1, p2) { //Sort index ascending
+	tiles = tiles.sort(function (p1, p2) { //Sort index ascending
 		return p1.index - p2.index;
 	});
-	hand = hand.sort(function (p1, p2) { //Sort type ascending
+	tiles = tiles.sort(function (p1, p2) { //Sort type ascending
 		return p1.type - p2.type;
 	});
-	return hand;
+	return tiles;
 }
 
 //Return number of specific tiles available
 function getNumberOfTilesAvailable(index, type) {
-	if(index < 1 || index > 9) {
+	if (index < 1 || index > 9) {
 		return 0;
 	}
-    if(getNumberOfPlayers() == 3 && (index > 1 && index < 9 && type == 1)) {
-        return 0;
-    }
-	
+	if (getNumberOfPlayers() == 3 && (index > 1 && index < 9 && type == 1)) {
+		return 0;
+	}
+
 	return 4 - visibleTiles.filter(tile => tile.index == index && tile.type == type).length;
 }
 
 //Return number of specific non furiten tiles available
 function getNumberOfNonFuritenTilesAvailable(index, type, lastTiles) {
-	if(typeof lastTiles != "undefined" && lastTiles.length == 2) { // Sequence furiten
-		lastTiles = sortHand(lastTiles);
-		if(lastTiles[0].type == lastTiles[1].type && lastTiles[1].index - lastTiles[0].index == 1) { //Is it a 2-tile sequence
-			if(index == lastTiles[1].index + 1 && type == lastTiles[1].type) { //Upper Tile -> Check if lower tile is furiten
-				if(discards[0].some(tile => tile.index == lastTiles[0].index - 1 && tile.type == type)) {
+	if (typeof lastTiles != "undefined" && lastTiles.length == 2) { // Sequence furiten
+		lastTiles = sortTiles(lastTiles);
+		if (lastTiles[0].type == lastTiles[1].type && lastTiles[1].index - lastTiles[0].index == 1) { //Is it a 2-tile sequence
+			if (index == lastTiles[1].index + 1 && type == lastTiles[1].type) { //Upper Tile -> Check if lower tile is furiten
+				if (discards[0].some(tile => tile.index == lastTiles[0].index - 1 && tile.type == type)) {
 					return 0;
 				}
 			}
-			else if(index == lastTiles[0].index - 1 && type == lastTiles[0].type) { //Upper Tile -> Check if lower tile is furiten
-				if(discards[0].some(tile => tile.index == lastTiles[1].index + 1 && tile.type == type)) {
+			else if (index == lastTiles[0].index - 1 && type == lastTiles[0].type) { //Upper Tile -> Check if lower tile is furiten
+				if (discards[0].some(tile => tile.index == lastTiles[1].index + 1 && tile.type == type)) {
 					return 0;
 				}
 			}
 		}
 	}
-	if(discards[0].some(tile => tile.index == index && tile.type == type)) { //Same tile furiten
+	if (discards[0].some(tile => tile.index == index && tile.type == type)) { //Same tile furiten
 		return 0;
 	}
 	return getNumberOfTilesAvailable(index, type);
 }
 
-//Return number of specific tile in hand
-function getNumberOfTilesInHand(hand, index, type) {
-	return getTilesInHand(hand, index, type).length;
+//Return number of specific tile in tile array
+function getNumberOfTilesInTileArray(tileArray, index, type) {
+	return getTilesInTileArray(tileArray, index, type).length;
 }
 
-//Return specific tiles in hand
-function getTilesInHand(hand, index, type) {
-	return hand.filter(tile => tile.index == index && tile.type == type);
+//Return specific tiles in tile array
+function getTilesInTileArray(tileArray, index, type) {
+	return tileArray.filter(tile => tile.index == index && tile.type == type);
 }
 
 //Update the available tile pool
 function updateAvailableTiles() {
 	visibleTiles = dora.concat(ownHand, discards[0], discards[1], discards[2], discards[3], calls[0], calls[1], calls[2], calls[3]);
-    visibleTiles = visibleTiles.filter(tile => tile != undefined);
+	visibleTiles = visibleTiles.filter(tile => tile != undefined);
 	availableTiles = [];
 	for (var i = 0; i <= 3; i++) {
 		for (var j = 1; j <= 9; j++) {
-			if(i == 3 && j == 8) {
+			if (i == 3 && j == 8) {
 				break;
 			}
-			for(var k = 1; k <= getNumberOfTilesAvailable(j, i); k++) {
+			for (var k = 1; k <= getNumberOfTilesAvailable(j, i); k++) {
 				availableTiles.push({
 					index: j,
 					type: i,
 					dora: false,
-					doraValue: getTileDoraValue({index: j, type: i, dora: false})
+					doraValue: getTileDoraValue({ index: j, type: i, dora: false })
 				});
 			}
 		}
 	}
-	for(var i = 0; i < visibleTiles.length; i++) {
-		visibleTiles[i].doraValue = getTileDoraValue(visibleTiles[i]);
+	for (let vis of visibleTiles) {
+		vis.doraValue = getTileDoraValue(vis);
 	}
 }
 
 //Return sum of red dora/dora indicators for tile
 function getTileDoraValue(tile) {
 	var dr = 0;
-	
-	for(var i = 0; i < dora.length; i++) {
-		if(dora[i].type == tile.type && getHigherTileIndex(dora[i]) == tile.index) {
+
+	for (let d of dora) {
+		if (d.type == tile.type && getHigherTileIndex(d) == tile.index) {
 			dr++;
 		}
 	}
-	
-	if(!tile.dora) {
-		return dr;
-	}
-	else {
+
+	if (tile.dora) {
 		return dr + 1;
 	}
+	return dr;
 }
 
 //Helper function for dora indicators
 function getHigherTileIndex(tile) {
-	if(tile.type == 3) {
-		if(tile.index == 4) {
+	if (tile.type == 3) {
+		if (tile.index == 4) {
 			return 1;
 		}
 		return tile.index == 7 ? 5 : tile.index + 1;
 	}
-	else {
-		return tile.index == 9 ? 1 : tile.index + 1;
-	}
+	return tile.index == 9 ? 1 : tile.index + 1;
 }
 
 //Returns 0 if not winning hand. Returns value of yaku/dora otherwise.
 //Only used for benchmark
 function checkWin(hand) {
-	var win = getTriplesAndPairsInHand(hand);
-	if(parseInt((win.triples.length/3)) >= 4 && parseInt((win.pairs.length/2)) >= 1) {
-		if(isClosed) {
-			return getNumberOfDorasInHand(hand) + getYaku(hand).closed;
+	var win = getTriplesAndPairs(hand);
+	if (parseInt((win.triples.length / 3)) >= 4 && parseInt((win.pairs.length / 2)) >= 1) {
+		if (isClosed) {
+			return getNumberOfDoras(hand) + getYaku(hand).closed;
 		}
 		else {
-			return getNumberOfDorasInHand(hand) + getYaku(hand).open;
+			return getNumberOfDoras(hand) + getYaku(hand).open;
 		}
 	}
 	return 0;
@@ -386,14 +360,13 @@ function isDebug() {
 
 //Adds calls of player 0 to the hand
 function getHandWithCalls(inputHand) {
-	var hand = inputHand.concat(calls[0]);
-	return hand;
+	return inputHand.concat(calls[0]);
 }
 
 //Adds a tile if not in array
 function pushTileIfNotExists(tiles, index, type) {
-	if(tiles.findIndex(t => t.index == index && t.type == type) === -1) {
-		var tile = {index: index, type: type, dora: false};
+	if (tiles.findIndex(t => t.index == index && t.type == type) === -1) {
+		var tile = { index: index, type: type, dora: false };
 		tile.doraValue = getTileDoraValue(tile);
 		tiles.push(tile);
 	}
@@ -401,65 +374,65 @@ function pushTileIfNotExists(tiles, index, type) {
 
 //Returns true if player can call riichi
 function canRiichi() {
-	if(isDebug()) {
-        return false;
+	if (isDebug()) {
+		return false;
 	}
-    var operations = getOperationList();
-    for(var i = 0; i < operations.length; i++) {
-        if(operations[i].type == getOperations().liqi) {
-            return true;
-        }
-    }
+	var operations = getOperationList();
+	for (let op of operations) {
+		if (op.type == getOperations().liqi) {
+			return true;
+		}
+	}
 	return false;
 }
 
-//Returns tiles that can form a triple in one turn for a given hand
-function getUsefulTilesForTriple(hand) {
+//Returns tiles that can form a triple in one turn for a given tile array
+function getUsefulTilesForTriple(tileArray) {
 	var tiles = [];
-	for(var i = 0; i < hand.length; i++) {
-		
-		var amount = getNumberOfTilesInHand(hand, hand[i].index, hand[i].type);
-		if(hand[i].type == 3 && amount >= 2) {
-			pushTileIfNotExists(tiles, hand[i].index, hand[i].type);
+	for (let tile of tileArray) {
+
+		var amount = getNumberOfTilesInTileArray(tileArray, tile.index, tile.type);
+		if (tile.type == 3 && amount >= 2) {
+			pushTileIfNotExists(tiles, tile.index, tile.type);
 			continue;
 		}
 
-		if(amount >= 2) {
-			pushTileIfNotExists(tiles, hand[i].index, hand[i].type);
+		if (amount >= 2) {
+			pushTileIfNotExists(tiles, tile.index, tile.type);
 		}
-		
-		var amountLower = getNumberOfTilesInHand(hand, hand[i].index - 1, hand[i].type);
-		var amountLower2 = getNumberOfTilesInHand(hand, hand[i].index - 2, hand[i].type);
-		var amountUpper = getNumberOfTilesInHand(hand, hand[i].index + 1, hand[i].type);
-		var amountUpper2 = getNumberOfTilesInHand(hand, hand[i].index + 2, hand[i].type);
-		if(hand[i].index - 1 >= 1 && (amount == amountLower + 1 && (amountUpper > 0 || amountLower2 == amount))) { //No need to check if index in bounds
-			pushTileIfNotExists(tiles, hand[i].index - 1, hand[i].type);
+
+		var amountLower = getNumberOfTilesInTileArray(tileArray, tile.index - 1, tile.type);
+		var amountLower2 = getNumberOfTilesInTileArray(tileArray, tile.index - 2, tile.type);
+		var amountUpper = getNumberOfTilesInTileArray(tileArray, tile.index + 1, tile.type);
+		var amountUpper2 = getNumberOfTilesInTileArray(tileArray, tile.index + 2, tile.type);
+		if (tile.index - 1 >= 1 && (amount == amountLower + 1 && (amountUpper > 0 || amountLower2 == amount))) { //No need to check if index in bounds
+			pushTileIfNotExists(tiles, tile.index - 1, tile.type);
 		}
-		
-		if(hand[i].index + 1 <= 9 && (amount == amountUpper + 1 && (amountLower > 0 || amountUpper2 == amount))) {
-			pushTileIfNotExists(tiles, hand[i].index + 1, hand[i].type);
+
+		if (tile.index + 1 <= 9 && (amount == amountUpper + 1 && (amountLower > 0 || amountUpper2 == amount))) {
+			pushTileIfNotExists(tiles, tile.index + 1, tile.type);
 		}
 	}
 	return tiles;
 }
 
-//Returns tiles that can form at least a double in one turn for a given hand
-function getUsefulTilesForDouble(hand) {
+//Returns tiles that can form at least a double in one turn for a given tile array
+function getUsefulTilesForDouble(tileArray) {
 	var tiles = [];
-	for(var i = 0; i < hand.length; i++) {
-		pushTileIfNotExists(tiles, hand[i].index, hand[i].type);
-		if(hand[i].type == 3) {
+	for (let tile of tileArray) {
+		pushTileIfNotExists(tiles, tile.index, tile.type);
+		if (tile.type == 3) {
 			continue;
 		}
-		
-		var amountLower = getNumberOfTilesInHand(hand, hand[i].index - 1, hand[i].type);
-		var amountUpper = getNumberOfTilesInHand(hand, hand[i].index + 1, hand[i].type);
-		if(amountLower == 0 && hand[i].index - 1 >= 1) {
-			pushTileIfNotExists(tiles, hand[i].index - 1, hand[i].type);
+
+		var amountLower = getNumberOfTilesInTileArray(tileArray, tile.index - 1, tile.type);
+		var amountUpper = getNumberOfTilesInTileArray(tileArray, tile.index + 1, tile.type);
+		if (amountLower == 0 && tile.index - 1 >= 1) {
+			pushTileIfNotExists(tiles, tile.index - 1, tile.type);
 		}
-		
-		if(amountUpper == 0 && hand[i].index + 1 <= 9) {
-			pushTileIfNotExists(tiles, hand[i].index + 1, hand[i].type);
+
+		if (amountUpper == 0 && tile.index + 1 <= 9) {
+			pushTileIfNotExists(tiles, tile.index + 1, tile.type);
 		}
 	}
 	return tiles;
@@ -468,13 +441,13 @@ function getUsefulTilesForDouble(hand) {
 //Returns true if triples, pairs and doubles are valid for tenpai
 //Not 100% accurate -> EDIT: efficiency helps, but (probably) still not accurate
 function isTenpai(triplesAndPairs, doubles, efficiency) {
-	if(strategy == STRATEGIES.CHIITOITSU) {
+	if (strategy == STRATEGIES.CHIITOITSU) {
 		return parseInt(triplesAndPairs.pairs.length / 2) >= 6; //Should be enough
 	}
 	//PROBLEM: If Double & Pair overlap (3 triples + 1667 -> thinks its tenpai)
-	var tenpai = (efficiency >= 3.5 && ((parseInt(triplesAndPairs.triples.length/3) == 3 && parseInt(triplesAndPairs.pairs.length / 2) >= 1 && ((parseInt(doubles.length/2) >= 1 ) || parseInt(triplesAndPairs.pairs.length / 2) >= 2)) || parseInt(triplesAndPairs.triples.length/3) == 4));
+	var tenpai = (efficiency >= 3.5 && ((parseInt(triplesAndPairs.triples.length / 3) == 3 && parseInt(triplesAndPairs.pairs.length / 2) >= 1 && ((parseInt(doubles.length / 2) >= 1) || parseInt(triplesAndPairs.pairs.length / 2) >= 2)) || parseInt(triplesAndPairs.triples.length / 3) == 4));
 	//if(tenpai) {
-		//TODO: Check for Furiten
+	//TODO: Check for Furiten
 	//}
 	return tenpai;
 }
@@ -482,25 +455,25 @@ function isTenpai(triplesAndPairs, doubles, efficiency) {
 //Return true if: Not last place and the danger level is too high
 function shouldFold(tiles) {
 	var factor = FOLD_CONSTANT;
-	if(isLastGame()) { //Fold earlier when first/later when last in last game
-		if(getDistanceToLast() > 0) {
+	if (isLastGame()) { //Fold earlier when first/later when last in last game
+		if (getDistanceToLast() > 0) {
 			factor *= 1.5; //Last Place -> Later Fold
 		}
-		else if(getDistanceToFirst() < 0) {
+		else if (getDistanceToFirst() < 0) {
 			var dist = (getDistanceToFirst() / 30000) > -0.5 ? getDistanceToFirst() / 30000 : -0.5;
 			factor *= 1 + dist; //First Place -> Easier Fold
 		}
 	}
 	factor *= seatWind == 1 ? 1.1 : 1; //Fold later as dealer
-	log("Would fold this hand below " + Number((1 - (((tiles[0].value * tiles[0].value * factor) + (factor/3))/100))).toFixed(2) + " safety.");
-	if(typeof tiles[2] != "undefined") {
-		var top3Safety = (getTileSafety(tiles[0].tile) + getTileSafety(tiles[1].tile) + getTileSafety(tiles[2].tile)) / 3;
+	log("Would fold this hand below " + Number((1 - (((tiles[0].value * tiles[0].value * factor) + (factor / 3)) / 100))).toFixed(2) + " safety.");
+
+	var top3Safety = -1;
+	if (typeof tiles[2] != "undefined") {
+		top3Safety = (getTileSafety(tiles[0].tile) + getTileSafety(tiles[1].tile) + getTileSafety(tiles[2].tile)) / 3;
 	}
-	else {
-		var top3Safety = -1;
-	}
-	var valueFactor = 1 - ((tiles[0].value * tiles[0].value * factor) + (factor/3))/100;
-	if(valueFactor > getTileSafety(tiles[0].tile) && valueFactor > top3Safety) {
+
+	var valueFactor = 1 - ((tiles[0].value * tiles[0].value * factor) + (factor / 3)) / 100;
+	if (valueFactor > getTileSafety(tiles[0].tile) && valueFactor > top3Safety) {
 		log("Tile Safety " + getTileSafety(tiles[0].tile) + " of " + getTileName(tiles[0].tile) + " is too dangerous. FOLD!");
 		return true;
 	}
@@ -509,10 +482,10 @@ function shouldFold(tiles) {
 
 //Only Call Riichi if enough waits and not first with yaku
 function shouldRiichi(waits, yaku) {
-	if(waits < WAITS_FOR_RIICHI - (2 - (tilesLeft/35))) { //Not enough waits? -> No Riichi
+	if (waits < WAITS_FOR_RIICHI - (2 - (tilesLeft / 35))) { //Not enough waits? -> No Riichi
 		return false;
 	}
-	if(yaku.closed >= 1 && isLastGame() && (getDistanceToFirst() < 0 || (getDistanceToLast() < 0 && getDistanceToLast() >= -1000))) { //First place (or < 1000 before last) and other yaku? -> No Riichi
+	if (yaku.closed >= 1 && isLastGame() && (getDistanceToFirst() < 0 || (getDistanceToLast() < 0 && getDistanceToLast() >= -1000))) { //First place (or < 1000 before last) and other yaku? -> No Riichi
 		return false;
 	}
 	return true;
@@ -521,34 +494,32 @@ function shouldRiichi(waits, yaku) {
 //Negative number: Distance to second
 //Positive number: Distance to first
 function getDistanceToFirst() {
-    if(getNumberOfPlayers() == 3) {
-        return Math.max(getPlayerScore(1), getPlayerScore(2)) - getPlayerScore(0);
-    }
+	if (getNumberOfPlayers() == 3) {
+		return Math.max(getPlayerScore(1), getPlayerScore(2)) - getPlayerScore(0);
+	}
 	return Math.max(getPlayerScore(1), getPlayerScore(2), getPlayerScore(3)) - getPlayerScore(0);
 }
 
 //Negative number: Distance to last
 //Positive number: Distance to third
 function getDistanceToLast() {
-    if(getNumberOfPlayers() == 3) {
-        return Math.min(getPlayerScore(1), getPlayerScore(2)) - getPlayerScore(0);
-    }
+	if (getNumberOfPlayers() == 3) {
+		return Math.min(getPlayerScore(1), getPlayerScore(2)) - getPlayerScore(0);
+	}
 	return Math.min(getPlayerScore(1), getPlayerScore(2), getPlayerScore(3)) - getPlayerScore(0);
 }
 
+//Check if "All Last"
 function isLastGame() {
-	if(isEastRound()) {
+	if (isEastRound()) {
 		return getRound() == 3 || getRoundWind() > 1; //East 4 or South X
 	}
-	else { // South Game
-		return (getRound() == 3 && getRoundWind() > 1) || getRoundWind() > 2; //South 4 or West X
-	}
-	return false;
+	return (getRound() == 3 && getRoundWind() > 1) || getRoundWind() > 2; //South 4 or West X
 }
 
 //Returns the binomialCoefficient for two numbers. Needed for chance to draw tile calculation. Fails if a faculty of > 134 is needed (should not be the case since there are 134 tiles)
-function binomialCoefficient(a, b) { 
-	var numerator = facts[a]; 
-	var denominator = facts[a-b] * facts[b]; 
-	return numerator / denominator; 
+function binomialCoefficient(a, b) {
+	var numerator = facts[a];
+	var denominator = facts[a - b] * facts[b];
+	return numerator / denominator;
 } 

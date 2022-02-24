@@ -5,23 +5,23 @@
 
 
 function sendHeatBeat() {
-	
+
 }
 
 function searchForGame() {
-	
+
 }
 
 function getOperationList() {
-	
+
 }
 
 function getOperations() {
-	
+
 }
 
 function getDora() {
-	
+
 }
 
 function getPlayerHand() {
@@ -41,11 +41,11 @@ function getTilesLeft() {
 }
 
 function localPosition2Seat(player) {
-    return player;
+	return player;
 }
 
 function seat2LocalPosition(playerSeat) {
-    return playerSeat;
+	return playerSeat;
 }
 
 function getCurrentPlayer() {
@@ -97,7 +97,7 @@ function getPlayerLinkState(player) {
 }
 
 function getNumberOfPlayerHand(player) {
-    return testPlayerHand[player];
+	return testPlayerHand[player];
 }
 
 function isEndscreenShown() {
@@ -109,7 +109,7 @@ function isDisconnect() {
 }
 
 function isPlayerRiichi(player) {
-    return testPlayerRiichi == player;
+	return testPlayerRiichi == player;
 }
 
 function isInGame() {
@@ -121,11 +121,11 @@ function doesPlayerExist(player) {
 }
 
 function getPlayerScore(player) {
-    return 25000;
+	return 25000;
 }
 
 function hasPlayerHandChanged(player) {
-    return true;
+	return true;
 }
 
 function rememberPlayerHand(player) {
@@ -133,5 +133,5 @@ function rememberPlayerHand(player) {
 }
 
 function isEastRound() {
-    return true;
+	return true;
 }

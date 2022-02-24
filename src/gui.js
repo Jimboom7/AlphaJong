@@ -19,25 +19,25 @@ function initGui() {
 	guiDiv.style.width = "100%";
 	guiDiv.style.textAlign = "center";
 	guiDiv.style.fontSize = "20px";
-	
+
 	guiSpan.style.backgroundColor = "rgba(255,255,255,0.5)";
 	guiSpan.style.padding = "5px";
 
 	startButton.innerHTML = "Start Bot";
-	if(window.localStorage.getItem("alphajongAutorun") == "true") {
+	if (window.localStorage.getItem("alphajongAutorun") == "true") {
 		startButton.innerHTML = "Stop Bot";
 	}
 	startButton.style.marginRight = "15px";
-	startButton.onclick = function() {
+	startButton.onclick = function () {
 		toggleRun();
-    };
+	};
 	guiSpan.appendChild(startButton);
-	
+
 	autorunCheckbox.type = "checkbox";
 	autorunCheckbox.id = "autorun";
-	autorunCheckbox.onclick = function() {
+	autorunCheckbox.onclick = function () {
 		autorunCheckboxClick();
-    };
+	};
 	if (window.localStorage.getItem("alphajongAutorun") == "true") {
 		autorunCheckbox.checked = true;
 	}
@@ -47,7 +47,7 @@ function initGui() {
 	checkboxLabel.appendChild(document.createTextNode('Autostart new Game in'));
 	checkboxLabel.style.marginRight = "5px";
 	guiSpan.appendChild(checkboxLabel);
-	
+
 	var bronzeEastOption = document.createElement("option");
 	bronzeEastOption.text = "Bronze East";
 	bronzeEastOption.value = "2";
@@ -72,7 +72,7 @@ function initGui() {
 	goldSouthOption.text = "Gold South";
 	goldSouthOption.value = "9";
 	roomCombobox.appendChild(goldSouthOption);
-    var bronzeEast3Option = document.createElement("option");
+	var bronzeEast3Option = document.createElement("option");
 	bronzeEast3Option.text = "Bronze East 3P";
 	bronzeEast3Option.value = "17";
 	roomCombobox.appendChild(bronzeEast3Option);
@@ -97,7 +97,7 @@ function initGui() {
 	goldSouth3Option.value = "22";
 	roomCombobox.appendChild(goldSouth3Option);
 	roomCombobox.style.marginRight = "15px";
-	roomCombobox.onchange = function() {
+	roomCombobox.onchange = function () {
 		roomChange();
 	};
 	roomCombobox.value = ROOM;
@@ -105,34 +105,34 @@ function initGui() {
 		roomCombobox.disabled = true;
 	}
 	guiSpan.appendChild(roomCombobox);
-	
+
 	currentActionOutput.readOnly = "true";
 	currentActionOutput.size = "20";
 	currentActionOutput.style.marginRight = "15px";
 	currentActionOutput.value = "Bot is not running.";
-	if(window.localStorage.getItem("alphajongAutorun") == "true") {
+	if (window.localStorage.getItem("alphajongAutorun") == "true") {
 		currentActionOutput.value = "Bot started.";
 	}
 	guiSpan.appendChild(currentActionOutput);
-	
+
 	hideButton.innerHTML = "Hide GUI";
-	hideButton.onclick = function() {
+	hideButton.onclick = function () {
 		toggleGui();
 	};
 	guiSpan.appendChild(hideButton);
-	
+
 	guiDiv.appendChild(guiSpan);
 	document.body.appendChild(guiDiv);
 	toggleGui();
 }
 
 function toggleGui() {
-	if(guiDiv.style.display == "block") {
+	if (guiDiv.style.display == "block") {
 		guiDiv.style.display = "none";
 	}
 	else {
 		guiDiv.style.display = "block";
-	}	
+	}
 }
 
 function roomChange() {
@@ -141,11 +141,11 @@ function roomChange() {
 }
 
 function hideButtonClick() {
-    guiDiv.style.display = "none";
+	guiDiv.style.display = "none";
 }
 
 function autorunCheckboxClick() {
-	if(autorunCheckbox.checked) {
+	if (autorunCheckbox.checked) {
 		roomCombobox.disabled = false;
 		window.localStorage.setItem("alphajongAutorun", "true");
 		AUTORUN = true;

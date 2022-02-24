@@ -5,32 +5,33 @@
 
 
 function preventAFK() {
-    if(typeof GameMgr == 'undefined') {
-        return;
-    }
-    GameMgr.Inst._pre_mouse_point.x = Math.floor(Math.random() * 100) + 1;
-    GameMgr.Inst._pre_mouse_point.y = Math.floor(Math.random() * 100) + 1;
-    GameMgr.Inst.clientHeatBeat(); // Prevent Client-side AFK
-    app.NetAgent.sendReq2Lobby('Lobby', 'heatbeat', {no_operation_counter: 0}); //Prevent Server-side AFK
-    
-    if(typeof view == 'undefined' || typeof view.DesktopMgr == 'undefined') {
-        return;
-    }
-    view.DesktopMgr.Inst.hangupCount = 0;
-    //uiscript.UI_Hangup_Warn.Inst.locking
+	if (typeof GameMgr == 'undefined') {
+		return;
+	}
+	GameMgr.Inst._pre_mouse_point.x = Math.floor(Math.random() * 100) + 1;
+	GameMgr.Inst._pre_mouse_point.y = Math.floor(Math.random() * 100) + 1;
+	GameMgr.Inst.clientHeatBeat(); // Prevent Client-side AFK
+	app.NetAgent.sendReq2Lobby('Lobby', 'heatbeat', { no_operation_counter: 0 }); //Prevent Server-side AFK
+
+	if (typeof view == 'undefined' || typeof view.DesktopMgr == 'undefined' ||
+		typeof view.DesktopMgr.Inst == 'undefined') {
+		return;
+	}
+	view.DesktopMgr.Inst.hangupCount = 0;
+	//uiscript.UI_Hangup_Warn.Inst.locking
 }
 
 function hasFinishedMainLobbyLoading() {
-    if(typeof GameMgr == 'undefined') {
-        return false;
-    }
-    return GameMgr.Inst.login_loading_end;
+	if (typeof GameMgr == 'undefined') {
+		return false;
+	}
+	return GameMgr.Inst.login_loading_end;
 }
 
 function searchForGame() {
-    uiscript.UI_PiPeiYuYue.Inst.addMatch(ROOM);
-    
-    // Direct way to search for a game, without UI:
+	uiscript.UI_PiPeiYuYue.Inst.addMatch(ROOM);
+
+	// Direct way to search for a game, without UI:
 	// app.NetAgent.sendReq2Lobby('Lobby', 'startUnifiedMatch', {match_sid: 1 + ":" + ROOM, client_version_string: GameMgr.Inst.getClientVersion()});
 }
 
@@ -51,12 +52,12 @@ function getPlayerHand() {
 }
 
 function getDiscardsOfPlayer(player) {
-    player = getCorrectPlayerNumber(player);
+	player = getCorrectPlayerNumber(player);
 	return view.DesktopMgr.Inst.players[player].container_qipai;
 }
 
 function getCallsOfPlayer(player) {
-    player = getCorrectPlayerNumber(player);
+	player = getCorrectPlayerNumber(player);
 	return view.DesktopMgr.Inst.players[player].container_ming.pais;
 }
 
@@ -65,7 +66,7 @@ function getTilesLeft() {
 }
 
 function localPosition2Seat(player) {
-    player = getCorrectPlayerNumber(player);
+	player = getCorrectPlayerNumber(player);
 	return view.DesktopMgr.Inst.localPosition2Seat(player);
 }
 
@@ -95,8 +96,8 @@ function setAutoCallWin(win) {
 }
 
 function getTileForCall() {
-	if(view.DesktopMgr.Inst.lastqipai == null) {
-		return {index: 0, type: 0, dora: false, doraValue: 0};
+	if (view.DesktopMgr.Inst.lastqipai == null) {
+		return { index: 0, type: 0, dora: false, doraValue: 0 };
 	}
 	var tile = view.DesktopMgr.Inst.lastqipai.val;
 	tile.doraValue = getTileDoraValue(tile);
@@ -104,26 +105,26 @@ function getTileForCall() {
 }
 
 function makeCall(type) {
-	app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', {type: type, index: 0, timeuse: 2});
+	app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { type: type, index: 0, timeuse: 2 });
 }
 
 function makeCallWithOption(type, option) {
-	app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', {type: type, index: option, timeuse: 2});
+	app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { type: type, index: option, timeuse: 2 });
 }
 
 function declineCall(operation) {
-	if(operation == getOperationList()[getOperationList().length - 1].type) { //Is last operation -> Send decline Command
-		app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', {cancel_operation: true, timeuse: 2});
+	if (operation == getOperationList()[getOperationList().length - 1].type) { //Is last operation -> Send decline Command
+		app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { cancel_operation: true, timeuse: 2 });
 	}
 }
 
 function sendRiichiCall(tile, moqie) {
-	app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', {type: mjcore.E_PlayOperation.liqi, tile: tile, moqie: moqie, timeuse: 2}); //Moqie: Throwing last drawn tile (Riichi -> false)
+	app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.liqi, tile: tile, moqie: moqie, timeuse: 2 }); //Moqie: Throwing last drawn tile (Riichi -> false)
 }
 
 function sendKitaCall() {
-    moqie = view.DesktopMgr.Inst.mainrole.last_tile.val.toString() == "4z";
-	app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', {type: mjcore.E_PlayOperation.babei, moqie: moqie, timeuse: 2});
+	var moqie = view.DesktopMgr.Inst.mainrole.last_tile.val.toString() == "4z";
+	app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.babei, moqie: moqie, timeuse: 2 });
 }
 
 function callDiscard(tileNumber) {
@@ -132,12 +133,12 @@ function callDiscard(tileNumber) {
 }
 
 function getPlayerLinkState(player) {
-    player = getCorrectPlayerNumber(player);
+	player = getCorrectPlayerNumber(player);
 	return view.DesktopMgr.player_link_state[localPosition2Seat(player)];
 }
 
 function getNumberOfPlayerHand(player) {
-    player = getCorrectPlayerNumber(player);
+	player = getCorrectPlayerNumber(player);
 	return view.DesktopMgr.Inst.players[player].hand.length;
 }
 
@@ -150,17 +151,17 @@ function isDisconnect() {
 }
 
 function isPlayerRiichi(player) {
-    player_correct = getCorrectPlayerNumber(player);
+	var player_correct = getCorrectPlayerNumber(player);
 	return view.DesktopMgr.Inst.players[player_correct].liqibang._activeInHierarchy || getDiscardsOfPlayer(player).last_is_liqi;
 }
 
 function isInGame() {
-    try {
-        return this != null && view != null && view.DesktopMgr != null && view.DesktopMgr.Inst != null && view.DesktopMgr.player_link_state != null;
-    }
-    catch {
-        return false;
-    }
+	try {
+		return this != null && view != null && view.DesktopMgr != null && view.DesktopMgr.Inst != null && view.DesktopMgr.player_link_state != null;
+	}
+	catch {
+		return false;
+	}
 }
 
 function doesPlayerExist(player) {
@@ -168,15 +169,15 @@ function doesPlayerExist(player) {
 }
 
 function getPlayerScore(player) {
-    player = getCorrectPlayerNumber(player);
+	player = getCorrectPlayerNumber(player);
 	return view.DesktopMgr.Inst.players[player].score;
 }
 
 //Needs to be called before calls array is updated
 function hasPlayerHandChanged(player) {
-    player_correct = getCorrectPlayerNumber(player);
-	for(var i = 0; i < view.DesktopMgr.Inst.players[player_correct].hand.length; i++) {
-		if(view.DesktopMgr.Inst.players[player_correct].hand[i].old != true) {
+	var player_correct = getCorrectPlayerNumber(player);
+	for (let hand of view.DesktopMgr.Inst.players[player_correct].hand) {
+		if (hand.old != true) {
 			return true;
 		}
 	}
@@ -185,12 +186,12 @@ function hasPlayerHandChanged(player) {
 
 //Sets a variable for each pai in a players hand
 function rememberPlayerHand(player) {
-    player = getCorrectPlayerNumber(player);
-	for(var i = 0; i < view.DesktopMgr.Inst.players[player].hand.length; i++) {
-		view.DesktopMgr.Inst.players[player].hand[i].old = true;
+	var player_correct = getCorrectPlayerNumber(player);
+	for (let hand of view.DesktopMgr.Inst.players[player_correct].hand) {
+		hand.old = true;
 	}
 }
 
 function isEastRound() {
-    return view.DesktopMgr.Inst.game_config.mode.mode == 1;
+	return view.DesktopMgr.Inst.game_config.mode.mode == 1;
 }
