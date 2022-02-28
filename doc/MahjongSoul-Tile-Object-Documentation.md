@@ -13,8 +13,8 @@ Currently, the `Tile` object looks something like this:
 }
 ```
 
-> `getTileDoraValue(Tile)` includes both the current tile's dora, and the current game's Dora into calculation.<br/>
-> Check in `utils.js` for the function.
+> Index, type and dora are set by the game itself, doraValue is additionally calculated by AlphaJong.<br/>
+> `getTileDoraValue(Tile)` includes both the current tile's (red) dora, and the current game's Dora into calculation. Check in `utils.js` for the function.<br/>
 
 Check [Suits](#suits) section to determine the `type`.
 
@@ -27,12 +27,12 @@ Tiles as Strings comes in this format: `{Number}{Suit}`.
 `p` - Drums (Pin, 筒). The circle tiles. `1` for `type`.<br/>
 `s` - Bamboo (Sō, 索子). `2` for `type`.
 
-**Red Fives** - Red fives have a `!` between the prefix and number.
-> Example: `5!s` is a 5-Red Bamboo.
-However, in hand-evaluation for calls, Red-Fives will become index 0. `0s` would represent a 5-Red Bamboo in an Open-Call
+### Red Fives
+Have the number 0.
+> Example: `0s` is a 5-Red Bamboo.
 
 ### Honor Tiles
-All Honor tiles begins with a `z`. `3` for `type` property in Tile object.
+All Honor tiles have the character `z`. `3` for `type` property in Tile object.
 
 `1z` - East (ton, 東).<br/>
 `2z` - South (Nan, 南).<br/>
@@ -42,15 +42,11 @@ All Honor tiles begins with a `z`. `3` for `type` property in Tile object.
 `6z` - Green Dragon (hatsu, 發).<br/>
 `7z` - Red Dragon (chun, 中).
 
-## Hand Evaluation
-When evaluting entire hand, everything will be shortened where possible.
+## Logging of multiple tiles
+When logging multiple tiles the string will be shortened according to the sorting. Tiles of the same suit that follow each only display their number.
 
-*Example:* `27m 79p 3345!679s 35z 1s`.<br/>
-![27m 79p 3345!679s 35z 1s](./hand-evalution-example.png?raw=true "Hand Evaluation Image for 27m 79p 3345!679s 35z 1s")
-
-**Open Hands**<br/>
-Same concept as above, but Red-Fives will become index 0.<br/>
-The hand will be reversed too, reading from right-to-left.
+*Example:* `27m 79p 0334679s 35z 1s`.<br/>
+![27m 79p 0334579s 35z 1s](./img/hand-evalution-example.png?raw=true "Hand Evaluation Image for 27m 79p 0334679s 35z 1s")
 
 *Example:* `055m 555p`.<br/>
-![055m 555p](./open-hand-example.png?raw=true "Open Hand Image for 055m 555p")
+![055m 555p](./img/open-hand-example.png?raw=true "Open Hand Image for 055m 555p")
