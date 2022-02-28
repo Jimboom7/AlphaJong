@@ -120,7 +120,9 @@ function initGui() {
 	debugButton.onclick = function () {
 		showDebugString();
 	};
-	guiSpan.appendChild(debugButton);
+	if(DEBUG_BUTTON) {
+		guiSpan.appendChild(debugButton);
+	}
 
 	hideButton.innerHTML = "Hide GUI";
 	hideButton.onclick = function () {

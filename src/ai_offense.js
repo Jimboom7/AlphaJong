@@ -198,7 +198,7 @@ function callRiichi(tiles) {
 			if (comb.charAt(0) == "0") { //Fix for Dora Tiles, probably not necessary anymore but doesn't hurt
 				combination.push("5" + comb.charAt(1));
 			}
-			if (getTileName(tile.tile) == comb && shouldRiichi(tile.waits, tile.yaku)) {
+			if (getTileName(tile.tile) == comb && shouldRiichi(tile.waits, tile.yaku, tile.dora)) {
 				var moqie = false;
 				if (getTileName(tile.tile) == getTileName(ownHand[ownHand.length - 1])) { //Is last tile?
 					moqie = true;

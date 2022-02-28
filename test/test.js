@@ -439,13 +439,6 @@ function runTestcase() {
 
 			expected = ["3m", "7p"];
 			break;
-		case 53:
-			log("Testcase 53: Fold 3");
-			readDebugString("1m|1m4405p33489s333z9p|||675243p||412z18p6z22p2z37m|457z3p3z69m7s7m|17651z1s7z8s67m1p|4z3m1625z19p3m64z7s|0,1,0,1|2|1|26");
-			expected = ["3z"];
-			TEST_DANGER_LEVEL = 100;
-			determineStrategy();
-			break;
 
 		default:
 			testsRunning = false;

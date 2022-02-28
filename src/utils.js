@@ -480,14 +480,68 @@ function shouldFold(tiles) {
 	return false;
 }
 
-//Only Call Riichi if enough waits and not first with yaku
-function shouldRiichi(waits, yaku) {
-	if (waits < WAITS_FOR_RIICHI - (2 - (tilesLeft / 35))) { //Not enough waits? -> No Riichi
+//Decide whether to call Riichi
+//Based on: https://mahjong.guide/2018/01/28/mahjong-fundamentals-5-riichi/
+function shouldRiichi(waits, yaku, handDora) {
+
+	//No waits
+	if(waits == 0) {
+		log("Decline Riichi because of no waits.");
 		return false;
 	}
-	if (yaku.closed >= 1 && isLastGame() && (getDistanceToFirst() < 0 || (getDistanceToLast() < 0 && getDistanceToLast() >= -1000))) { //First place (or < 1000 before last) and other yaku? -> No Riichi
+
+	// Last Place (in last game)? -> Yolo
+	if(isLastGame() && getDistanceToLast() > 0) {
+		log("Accept Riichi because of last place in last game.");
+		return true;
+	}
+
+	// Already large lead of more than 10000 points
+	if(isLastGame() && getDistanceToFirst() < -10000) {
+		log("Decline Riichi because of huge lead in last game.");
 		return false;
 	}
+
+	// Not Dealer & bad Wait & Riichi is only yaku
+	if(seatWind != 1 && waits < WAITS_FOR_RIICHI && yaku.closed + handDora <= 1 && dora.length < 3) {
+		log("Decline Riichi because of worthless hand, bad waits and not dealer.");
+		return false;
+	}
+
+	// High Danger and hand not worth much
+	if(getCurrentDangerLevel() > 60 && yaku.closed + handDora <= 1) {
+		log("Decline Riichi because of worthless hand and high danger.");
+		return false;
+	}
+
+	// Hand already has high value and enough yaku
+	if(yaku.closed >= 1 && yaku.closed + handDora > 5) {
+		log("Decline Riichi because of high value hand with enough yaku.");
+		return false;
+	}
+
+	// Hand already has high value and no yaku
+	if(yaku.closed < 1 && handDora >= 2) {
+		log("Accept Riichi because of high value hand without yaku.");
+		return true;
+	}
+
+	// Number of Kans(Dora Indicators) - more = higher score
+	if(dora.length >= 3) {
+		log("Accept Riichi because of multiple dora indicators.");
+		return true;
+	}
+
+	// Don't Riichi when: Last round with bad waits & would lose place with -1000
+	if(isLastGame() && waits < WAITS_FOR_RIICHI && ((getDistanceToPlayer(1) > -1000 && getDistanceToPlayer(1) <= 0) ||
+	(getDistanceToPlayer(2) > -1000 && getDistanceToPlayer(2) <= 0) ||
+	(getNumberOfPlayer() > 3 && getDistanceToPlayer(3) > -1000 && getDistanceToPlayer(3) <= 0))) {
+		log("Decline Riichi because distance to next player is < 1000 in last game.");
+		return false;
+	}
+
+	// Default: Just do it.
+	log("Accept Riichi by default.");
 	return true;
 }
 
@@ -509,12 +563,21 @@ function getDistanceToLast() {
 	return Math.min(getPlayerScore(1), getPlayerScore(2), getPlayerScore(3)) - getPlayerScore(0);
 }
 
+
+//Positive: Other player is in front of you
+function getDistanceToPlayer(player) {
+	if (getNumberOfPlayers() == 3 && player == 3) {
+		return 0;
+	}
+	return getPlayerScore(player) - getPlayerScore(0);
+}
+
 //Check if "All Last"
 function isLastGame() {
 	if (isEastRound()) {
 		return getRound() == 3 || getRoundWind() > 1; //East 4 or South X
 	}
-	return (getRound() == 3 && getRoundWind() > 1) || getRoundWind() > 2; //South 4 or West X
+	return (getRound() == 2 && getRoundWind() > 1) || getRoundWind() > 2; //South 3 or West X
 }
 
 //Returns the binomialCoefficient for two numbers. Needed for chance to draw tile calculation. Fails if a faculty of > 134 is needed (should not be the case since there are 134 tiles)
