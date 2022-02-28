@@ -142,8 +142,23 @@ function getTripletsAsArray(tiles) {
 	return tripletsList;
 }
 
+//Returns the best combination of sequences. 
+//Small Bug: Can return red dora tiles multiple times, but doesn't matter for the current use cases
 function getBestSequenceCombination(inputHand) {
 	return getBestCombinationOfTiles(inputHand, getSequences(inputHand), { triples: [], pairs: [] }).triples;
+}
+
+//Check if there is already a red dora tile in the tiles array.
+//More or less a workaround for a problem with the getBestCombinationOfTiles function...
+function pushTileAndCheckDora(tiles, arrayToPush, tile) {
+	if (tile.dora && tiles.some(t => t.type == tile.type && t.dora)) {
+		nonDoraTile = { ...tile };
+		nonDoraTile.dora = false;
+		nonDoraTile.doraValue = getTileDoraValue(nonDoraTile);
+		arrayToPush.push(nonDoraTile);
+		return;
+	}
+	arrayToPush.push(tile);
 }
 
 //Return the best combination of 3-tile Sequences, Triplets and pairs in array of tiles
@@ -166,14 +181,14 @@ function getBestCombinationOfTiles(inputTiles, possibleCombinations, chosenCombi
 			continue;
 		}
 		if ("tile3" in tiles) {
-			cs.triples.push(tiles.tile1);
-			cs.triples.push(tiles.tile2);
-			cs.triples.push(tiles.tile3);
+			pushTileAndCheckDora(cs.pairs.concat(cs.triples), cs.triples, tiles.tile1);
+			pushTileAndCheckDora(cs.pairs.concat(cs.triples), cs.triples, tiles.tile2);
+			pushTileAndCheckDora(cs.pairs.concat(cs.triples), cs.triples, tiles.tile3);
 			hand = removeTilesFromTileArray(hand, [tiles.tile1, tiles.tile2, tiles.tile3]);
 		}
 		else {
-			cs.pairs.push(tiles.tile1);
-			cs.pairs.push(tiles.tile2);
+			pushTileAndCheckDora(cs.pairs.concat(cs.triples), cs.pairs, tiles.tile1);
+			pushTileAndCheckDora(cs.pairs.concat(cs.triples), cs.pairs, tiles.tile2);
 			hand = removeTilesFromTileArray(hand, [tiles.tile1, tiles.tile2]);
 		}
 		var anotherChoice = getBestCombinationOfTiles(hand, possibleCombinations.slice(i + 1), cs);
@@ -390,7 +405,6 @@ function canRiichi() {
 function getUsefulTilesForTriple(tileArray) {
 	var tiles = [];
 	for (let tile of tileArray) {
-
 		var amount = getNumberOfTilesInTileArray(tileArray, tile.index, tile.type);
 		if (tile.type == 3 && amount >= 2) {
 			pushTileIfNotExists(tiles, tile.index, tile.type);
@@ -405,11 +419,11 @@ function getUsefulTilesForTriple(tileArray) {
 		var amountLower2 = getNumberOfTilesInTileArray(tileArray, tile.index - 2, tile.type);
 		var amountUpper = getNumberOfTilesInTileArray(tileArray, tile.index + 1, tile.type);
 		var amountUpper2 = getNumberOfTilesInTileArray(tileArray, tile.index + 2, tile.type);
-		if (tile.index - 1 >= 1 && (amount == amountLower + 1 && (amountUpper > 0 || amountLower2 == amount))) { //No need to check if index in bounds
+		if (tile.index > 1 && (amount == amountLower + 1 && (amountUpper > 0 || amountLower2 > 0))) { //No need to check if index in bounds
 			pushTileIfNotExists(tiles, tile.index - 1, tile.type);
 		}
 
-		if (tile.index + 1 <= 9 && (amount == amountUpper + 1 && (amountLower > 0 || amountUpper2 == amount))) {
+		if (tile.index < 9 && (amount == amountUpper + 1 && (amountLower > 0 || amountUpper2 > 0))) {
 			pushTileIfNotExists(tiles, tile.index + 1, tile.type);
 		}
 	}
@@ -436,20 +450,6 @@ function getUsefulTilesForDouble(tileArray) {
 		}
 	}
 	return tiles;
-}
-
-//Returns true if triples, pairs and doubles are valid for tenpai
-//Not 100% accurate -> EDIT: efficiency helps, but (probably) still not accurate
-function isTenpai(triplesAndPairs, doubles, efficiency) {
-	if (strategy == STRATEGIES.CHIITOITSU) {
-		return parseInt(triplesAndPairs.pairs.length / 2) >= 6; //Should be enough
-	}
-	//PROBLEM: If Double & Pair overlap (3 triples + 1667 -> thinks its tenpai)
-	var tenpai = (efficiency >= 3.5 && ((parseInt(triplesAndPairs.triples.length / 3) == 3 && parseInt(triplesAndPairs.pairs.length / 2) >= 1 && ((parseInt(doubles.length / 2) >= 1) || parseInt(triplesAndPairs.pairs.length / 2) >= 2)) || parseInt(triplesAndPairs.triples.length / 3) == 4));
-	//if(tenpai) {
-	//TODO: Check for Furiten
-	//}
-	return tenpai;
 }
 
 //Return true if: Not last place and the danger level is too high

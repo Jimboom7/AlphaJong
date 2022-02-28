@@ -1,7 +1,8 @@
 ## About The Project
 
-This project is a Mahjong AI for [Mahjong Soul](https://mahjongsoul.game.yo-star.com/) that runs directly in any browser. Everything was written from scratch in native JavaScript without any libraries.
-The AI does not use machine learning, but conventional algorithms. Simply said it's simulating some turns (with heuristics to save calculation time) and looking for the best move.
+This project is a Mahjong AI for [Mahjong Soul](https://mahjongsoul.game.yo-star.com/) that runs directly in any browser. Everything was written from scratch in native JavaScript without any libraries.  
+The AI does not use machine learning, but conventional algorithms. Simply said it's simulating some turns (with heuristics to save calculation time) and looking for the best move.  
+Compatible with both 3 and 4 player mode.
 
 ## Getting Started
 
@@ -43,6 +44,10 @@ The project contains a testclass with simple "Nani Kiru?" testcases.
 ## Known Problems
 
 -Sometimes the game disconnects you for AFK. This usually happens if the window is minimized or you switch to another tab for a while (not having focus is fine, as long as the window is open). If that happens the bot will try to reconnect by reloading the page.
+
+## Issues
+
+When creating an issue on a suboptimal play by this AI, please include the Debug String of that turn. To get it go to the correct turn in the replay and click the "Debug" button in the GUI. A screenshot of the state of the game is also helpful.
 
 ## Disclaimer
 

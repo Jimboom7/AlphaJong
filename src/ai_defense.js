@@ -14,13 +14,14 @@ function getHandDanger(hand) {
 }
 
 //Returns danger of tile for all players as a number from 0-100
+//Takes into account Genbutsu (Furiten for opponents), Suji, Walls and general knowledge about remaining tiles.
 function getTileDanger(tile) {
 	var dangerPerPlayer = [0, 100, 100, 100];
 	if (getNumberOfPlayers() == 3) {
 		dangerPerPlayer = [0, 100, 100];
 	}
 	for (var i = 1; i < getNumberOfPlayers(); i++) { //Foreach Player
-		if (getLastTileInDiscard(i, tile) != null) { // Check if tile in discard
+		if (getLastTileInDiscard(i, tile) != null) { // Check if tile in discard (Genbutsu)
 			dangerPerPlayer[i] = 0;
 			continue;
 		}
@@ -53,7 +54,6 @@ function getTileDanger(tile) {
 	if (getNumberOfPlayers() == 3) {
 		dangerNumber = ((dangerPerPlayer[1] + dangerPerPlayer[2] + Math.max.apply(null, dangerPerPlayer)) / 4); //Most dangerous player counts twice
 	}
-
 	return dangerNumber;
 }
 

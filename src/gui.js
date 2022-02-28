@@ -9,6 +9,7 @@ var startButton = document.createElement("button");
 var autorunCheckbox = document.createElement("input");
 var roomCombobox = document.createElement("select");
 var currentActionOutput = document.createElement("input");
+var debugButton = document.createElement("button");
 var hideButton = document.createElement("button");
 
 function initGui() {
@@ -115,6 +116,12 @@ function initGui() {
 	}
 	guiSpan.appendChild(currentActionOutput);
 
+	debugButton.innerHTML = "Debug";
+	debugButton.onclick = function () {
+		showDebugString();
+	};
+	guiSpan.appendChild(debugButton);
+
 	hideButton.innerHTML = "Hide GUI";
 	hideButton.onclick = function () {
 		toggleGui();
@@ -132,6 +139,14 @@ function toggleGui() {
 	}
 	else {
 		guiDiv.style.display = "block";
+	}
+}
+
+function showDebugString() {
+	alert("If you notice a bug while playing please go to the correct turn in the replay (before the bad discard), press this button, copy the Debug String from the textbox and include it in your issue on github.");
+	if (isInGame()) {
+		setData();
+		currentActionOutput.value = getDebugString();
 	}
 }
 

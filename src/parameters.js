@@ -5,7 +5,6 @@
 
 //DEFENSE CONSTANTS
 var FOLD_CONSTANT = 10; //Lower -> Earlier Fold. Default: 10
-var SUJI_MODIFIER = 1; //Higher Value: Suji is worth more
 
 //CALLS
 var CALL_CONSTANT = 3; //Amount of han (Open Yaku + Dora) that is needed for calls (to accelerate high value hands). Default: 3
@@ -13,19 +12,18 @@ var CALL_YAKU_THRESHOLD = 0.01; //How many Yakus does the hand need to call for 
 var CALL_KAN_CONSTANT = 60; //Higher Value: Higher Threshold for calling Kans. Default: 60
 var EFFICIENCY_THRESHOLD = 1; // If efficiency of hand is below this threshhold (& dealer): Call if hand has open yaku.
 
-//HAND EVALUATION CONSTANTS
+//HAND EVALUATION CONSTANTS. Higher number => more important.
 var EFFICIENCY_VALUE = 1; // 0 -> ignore Efficiency (lol). Default: 1
 var YAKU_VALUE = 0.5; // 0 -> ignore Yaku. Default: 0.5
 var DORA_VALUE = 0.3; // 0 -> ignore Dora. Default: 0.3
 var SAFETY_VALUE = 0.5; // 0 -> Ignore Safety. Default: 0.5
-var PAIR_VALUE = 0.5; //Value for the first pair when evaluating the hand (Triples are 1). Default: 0.5
 var WAIT_VALUE = 0.3; //Value for good waits when tenpai. Maximum: 1. Default: 0.3
 
 //STRATEGY CONSTANTS
-var CHIITOITSU = 5; //Number of Pairs in Hand to go for chiitoitsu
-var THIRTEEN_ORPHANS = 10; //Number of Honor/Terminals in hand to go for 13 orphans
-var RIICHI_TILES_LEFT = 6; //How many tiles need to be left for calling Riichi
-var WAITS_FOR_RIICHI = 3; //Waits needed to call Riichi at the start of the game. Goes down over time. Default: 3
+var CHIITOITSU = 5; //Number of Pairs in Hand to go for chiitoitsu. Default: 5
+var THIRTEEN_ORPHANS = 10; //Number of Honor/Terminals in hand to go for 13 orphans (Not yet implemented). Default: 10
+var RIICHI_TILES_LEFT = 6; //Minimum amount of tiles that need to be left for calling Riichi. Default: 6
+var WAITS_FOR_RIICHI = 3; //Minimum amount of waits needed to call Riichi. Value is for start of the game. Goes down over time. Default: 3
 
 //LOGGING
 var LOG_AMOUNT = 3; //Amount of Messages to log for Tile Priorities
@@ -66,7 +64,7 @@ var startTime = 0;
 var winValues = [];
 var TEST_DANGER_LEVEL = 50;
 var testCallTile = {};
-var testPlayerRiichi = -1;
+var testPlayerRiichi = [0, 0, 0, 0];
 var testPlayerHand = [];
 var testStartTime = 0;
 

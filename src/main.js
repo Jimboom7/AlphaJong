@@ -105,6 +105,7 @@ function mainOwnTurn() {
 	var operations = getOperationList();
 
 	log("##### OWN TURN #####");
+	log("Debug String: " + getDebugString());
 	log("Current Danger Level: " + getCurrentDangerLevel());
 
 	determineStrategy(); //Get the Strategy for the current situation. After calls so it does not reset folds

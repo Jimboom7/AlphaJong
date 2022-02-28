@@ -109,7 +109,7 @@ function isDisconnect() {
 }
 
 function isPlayerRiichi(player) {
-	return testPlayerRiichi == player;
+	return testPlayerRiichi[player] == 1;
 }
 
 function isInGame() {

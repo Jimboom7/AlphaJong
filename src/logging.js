@@ -15,20 +15,28 @@ function log(t) {
 
 //Print all tiles in hand
 function printHand(hand) {
-	var handString = "";
+	var handString = getStringForTiles(hand);
+	log("Hand:" + handString);
+}
+
+//Get String for array of tiles
+function getStringForTiles(tiles) {
+	var tilesString = "";
 	var oldType = "";
-	hand.forEach(function (tile) {
+	tiles.forEach(function (tile) {
 		if (getNameForType(tile.type) != oldType) {
-			handString += oldType + " ";
+			tilesString += oldType;
 			oldType = getNameForType(tile.type);
 		}
-		handString += tile.index;
 		if (tile.dora == 1) {
-			handString += "!";
+			tilesString += "0";
+		}
+		else {
+			tilesString += tile.index;
 		}
 	});
-	handString += oldType;
-	log("Hand:" + handString);
+	tilesString += oldType;
+	return tilesString;
 }
 
 //Print tile name
@@ -44,7 +52,7 @@ function printTilePriority(tiles) {
 }
 
 //Input string to get an array of tiles (e.g. "123m456p789s1z")
-function getHandFromString(inputString) {
+function getTilesFromString(inputString) {
 	var numbers = [];
 	var tiles = [];
 	for (let input of inputString) {
@@ -133,4 +141,47 @@ function getNameForType(type) {
 		default:
 			return "?";
 	}
+}
+
+//returns a string for the current state of the game
+function getDebugString() {
+	var debugString = "";
+	debugString += getStringForTiles(dora) + "|";
+	debugString += getStringForTiles(ownHand) + "|";
+	debugString += getStringForTiles(calls[0]) + "|";
+	debugString += getStringForTiles(calls[1]) + "|";
+	debugString += getStringForTiles(calls[2]) + "|";
+	debugString += getStringForTiles(calls[3]) + "|";
+	debugString += getStringForTiles(discards[0]) + "|";
+	debugString += getStringForTiles(discards[1]) + "|";
+	debugString += getStringForTiles(discards[2]) + "|";
+	debugString += getStringForTiles(discards[3]) + "|";
+	debugString += (isPlayerRiichi(0) * 1) + "," + (isPlayerRiichi(1) * 1) + "," + (isPlayerRiichi(2) * 1) + "," + (isPlayerRiichi(3) * 1) + "|";
+	debugString += seatWind + "|";
+	debugString += roundWind + "|";
+	debugString += tilesLeft;
+	return debugString;
+}
+
+//Reads a debugString and sets the game state accordingly
+function readDebugString(debugString) {
+	var debugArray = debugString.split("|");
+	if (debugArray.length != 14) {
+		log("Failed to read debug String!");
+	}
+	dora = getTilesFromString(debugArray[0]);
+	ownHand = getTilesFromString(debugArray[1]);
+	calls[0] = getTilesFromString(debugArray[2]);
+	calls[1] = getTilesFromString(debugArray[3]);
+	calls[2] = getTilesFromString(debugArray[4]);
+	calls[3] = getTilesFromString(debugArray[5]);
+	discards[0] = getTilesFromString(debugArray[6]);
+	discards[1] = getTilesFromString(debugArray[7]);
+	discards[2] = getTilesFromString(debugArray[8]);
+	discards[3] = getTilesFromString(debugArray[9]);
+	testPlayerRiichi = debugArray[10].split(",");
+	seatWind = debugArray[11];
+	roundWind = debugArray[12];
+	tilesLeft = debugArray[13];
+	testPlayerHand = [13 - calls[0].length, 13 - calls[1].length, 13 - calls[2].length, 13 - calls[3].length];
 }
