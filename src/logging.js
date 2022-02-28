@@ -151,37 +151,23 @@ function getDebugString() {
 	debugString += getStringForTiles(calls[0]) + "|";
 	debugString += getStringForTiles(calls[1]) + "|";
 	debugString += getStringForTiles(calls[2]) + "|";
-	debugString += getStringForTiles(calls[3]) + "|";
+	if (getNumberOfPlayers() == 4) {
+		debugString += getStringForTiles(calls[3]) + "|";
+	}
 	debugString += getStringForTiles(discards[0]) + "|";
 	debugString += getStringForTiles(discards[1]) + "|";
 	debugString += getStringForTiles(discards[2]) + "|";
-	debugString += getStringForTiles(discards[3]) + "|";
-	debugString += (isPlayerRiichi(0) * 1) + "," + (isPlayerRiichi(1) * 1) + "," + (isPlayerRiichi(2) * 1) + "," + (isPlayerRiichi(3) * 1) + "|";
+	if (getNumberOfPlayers() == 4) {
+		debugString += getStringForTiles(discards[3]) + "|";
+	}
+	if (getNumberOfPlayers() == 4) {
+		debugString += (isPlayerRiichi(0) * 1) + "," + (isPlayerRiichi(1) * 1) + "," + (isPlayerRiichi(2) * 1) + "," + (isPlayerRiichi(3) * 1) + "|";
+	}
+	else {
+		debugString += (isPlayerRiichi(0) * 1) + "," + (isPlayerRiichi(1) * 1) + "," + (isPlayerRiichi(2) * 1) + "|";
+	}
 	debugString += seatWind + "|";
 	debugString += roundWind + "|";
 	debugString += tilesLeft;
 	return debugString;
-}
-
-//Reads a debugString and sets the game state accordingly
-function readDebugString(debugString) {
-	var debugArray = debugString.split("|");
-	if (debugArray.length != 14) {
-		log("Failed to read debug String!");
-	}
-	dora = getTilesFromString(debugArray[0]);
-	ownHand = getTilesFromString(debugArray[1]);
-	calls[0] = getTilesFromString(debugArray[2]);
-	calls[1] = getTilesFromString(debugArray[3]);
-	calls[2] = getTilesFromString(debugArray[4]);
-	calls[3] = getTilesFromString(debugArray[5]);
-	discards[0] = getTilesFromString(debugArray[6]);
-	discards[1] = getTilesFromString(debugArray[7]);
-	discards[2] = getTilesFromString(debugArray[8]);
-	discards[3] = getTilesFromString(debugArray[9]);
-	testPlayerRiichi = debugArray[10].split(",");
-	seatWind = debugArray[11];
-	roundWind = debugArray[12];
-	tilesLeft = debugArray[13];
-	testPlayerHand = [13 - calls[0].length, 13 - calls[1].length, 13 - calls[2].length, 13 - calls[3].length];
 }

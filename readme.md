@@ -47,7 +47,7 @@ The project contains a testclass with simple "Nani Kiru?" testcases.
 
 ## Issues
 
-When creating an issue on a suboptimal play by this AI, please include the Debug String of that turn. To get it go to the correct turn in the replay and click the "Debug" button in the GUI. A screenshot of the state of the game is also helpful.
+When creating an issue on a suboptimal play by this AI, please include the Debug String of that turn. To get it go to the correct turn in the replay and click the "Debug" button in the GUI (if the button is not visible you need to set the DEBUG_BUTTON parameter to true). A screenshot of the state of the game is also helpful.
 
 ## Disclaimer
 

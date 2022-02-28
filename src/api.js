@@ -14,7 +14,7 @@ function preventAFK() {
 	app.NetAgent.sendReq2Lobby('Lobby', 'heatbeat', { no_operation_counter: 0 }); //Prevent Server-side AFK
 
 	if (typeof view == 'undefined' || typeof view.DesktopMgr == 'undefined' ||
-		typeof view.DesktopMgr.Inst == 'undefined') {
+		typeof view.DesktopMgr.Inst == 'undefined' || view.DesktopMgr.Inst == 'null') {
 		return;
 	}
 	view.DesktopMgr.Inst.hangupCount = 0;

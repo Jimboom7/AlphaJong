@@ -26,7 +26,7 @@ function getTileDanger(tile) {
 			continue;
 		}
 
-		dangerPerPlayer[i] = getWaitScoreForTileAndPlayer(i, tile);
+		dangerPerPlayer[i] = getWaitScoreForTileAndPlayer(i, tile); //Suji, Walls and general knowledge about remaining tiles.
 
 		if (dangerPerPlayer[i] <= 0) {
 			continue;
@@ -38,6 +38,9 @@ function getTileDanger(tile) {
 		//Is the player going for a flush of that type? -> 30% more dangerous
 		if (isGoingForFlush(i, tile.type)) {
 			dangerPerPlayer[i] *= 1.3;
+		}
+		else if (isGoingForFlush(i, 0) || isGoingForFlush(i, 1) || isGoingForFlush(i, 2)) { //Is the player going for any other flush? -> 30% safer
+			dangerPerPlayer[i] /= 1.3;
 		}
 
 		//Danger is at least 5
@@ -134,6 +137,7 @@ function getLastTileInDiscard(player, tile) {
 }
 
 //Returns the safety of a tile
+//Based on the tile danger, but with exponential growth
 function getTileSafety(tile) {
 	return 1 - (Math.pow(getTileDanger(tile) / 10, 2) / 100);
 }
@@ -159,6 +163,7 @@ function getWaitScoreForTile(tile) {
 }
 
 //Returns a score how likely this tile can form the last triple/pair for a player
+//Suji, Walls and general knowledge about remaining tiles.
 function getWaitScoreForTileAndPlayer(player, tile) {
 	var tile0 = getNumberOfTilesAvailable(tile.index, tile.type);
 	var tile0Public = tile0 + getNumberOfTilesInTileArray(ownHand, tile.index, tile.type);
