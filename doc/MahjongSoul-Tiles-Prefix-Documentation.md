@@ -27,4 +27,4 @@ All Honor tiles begins with a **z**.
 When evaluting entire hand, everything will be shortened where possible.
 
 Example: `27m 79p 3345!679s 35z 1s`.
-![27m 79p 3345!679s 35z 1s](./doc/hand-evalution-example.png?raw=true "Hand Evaluation Image for 27m 79p 3345!679s 35z 1s")
+![27m 79p 3345!679s 35z 1s](./hand-evalution-example.png?raw=true "Hand Evaluation Image for 27m 79p 3345!679s 35z 1s")
