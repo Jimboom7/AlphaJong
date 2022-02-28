@@ -6,22 +6,22 @@ Prefix comes in this format: `{Number}{Suit}`.
 
 ## Suits
 
-**m** - Money (Man, 萬子).
-**p** - Drums (Pin, 筒). The circle tiles.
-**s** - Bamboo (Sō, 索子).
+`m` - Money (Man, 萬子).<br/>
+`p` - Drums (Pin, 筒). The circle tiles.<br/>
+`s` - Bamboo (Sō, 索子).
 
 **Red Fives** - Red fives have a `!` between the prefix and number. Example: `5!s` is a 5-Red Bamboo. 
 
 ### Honor Tiles
-All Honor tiles begins with a **z**.
+All Honor tiles begins with a `z`.
 
-**1z** - East (ton, 東).
-**2z** - South (Nan, 南).
-**3z** - West (Shā, 西).
-**4z** - North (Pei, 北)
-**5z** - White Dragon. The blank-tile.
-**6z** - Green Dragon (hatsu, 發).
-**7z** - Red Dragon (chun, 中).
+`1z` - East (ton, 東).<br/>
+`2z` - South (Nan, 南).<br/>
+`3z` - West (Shā, 西).<br/>
+`4z` - North (Pei, 北)<br/>
+`5z` - White Dragon. The blank-tile.<br/>
+`6z` - Green Dragon (hatsu, 發).<br/>
+`7z` - Red Dragon (chun, 中).
 
 ## Hand Evaluation
 When evaluting entire hand, everything will be shortened where possible.
