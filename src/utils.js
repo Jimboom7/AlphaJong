@@ -535,7 +535,7 @@ function shouldRiichi(waits, yaku, handDora) {
 	// Don't Riichi when: Last round with bad waits & would lose place with -1000
 	if(isLastGame() && waits < WAITS_FOR_RIICHI && ((getDistanceToPlayer(1) > -1000 && getDistanceToPlayer(1) <= 0) ||
 	(getDistanceToPlayer(2) > -1000 && getDistanceToPlayer(2) <= 0) ||
-	(getNumberOfPlayer() > 3 && getDistanceToPlayer(3) > -1000 && getDistanceToPlayer(3) <= 0))) {
+	(getNumberOfPlayers() > 3 && getDistanceToPlayer(3) > -1000 && getDistanceToPlayer(3) <= 0))) {
 		log("Decline Riichi because distance to next player is < 1000 in last game.");
 		return false;
 	}
