@@ -127,6 +127,10 @@ function sendKitaCall() {
 	app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.babei, moqie: moqie, timeuse: 2 });
 }
 
+function sendAbortiveDrawCall() {
+	app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.jiuzhongjiupai, index: 0, timeuse: 2 });
+}
+                
 function callDiscard(tileNumber) {
 	view.DesktopMgr.Inst.players[0]._choose_pai = view.DesktopMgr.Inst.players[0].hand[tileNumber];
 	view.DesktopMgr.Inst.players[0].DoDiscardTile();

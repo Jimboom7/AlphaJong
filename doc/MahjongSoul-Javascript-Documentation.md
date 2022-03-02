@@ -80,16 +80,16 @@ Generally: **app.NetAgent.sendReq2MJ(type, command, data)** - sends a requests t
 For calls etc. The operation "names" and IDs are in this variable: **mjcore.E_PlayOperation**  
 0: "none"  
 1: "dapai"  
-2: "eat" -> CHI  
-3: "peng" -> PON  
-4: "an_gang" -> KAN (Ankan)  
-5: "ming_gang" -> KAN (Daiminkan)  
-6: "add_gang" -> KAN (Shouminkan)  
-7: "liqi" -> RIICHI  
-8: "zimo" _> TSUMO  
-9: "rong" -> RON  
-10: "jiuzhongjiupai" -> ???  
-11: "babei" -> KITA  
+2: "eat" -> Chi  
+3: "peng" -> Pon  
+4: "an_gang" -> Kan (Ankan)  
+5: "ming_gang" -> Kan (Daiminkan)  
+6: "add_gang" -> Kan (Shouminkan)  
+7: "liqi" -> Riichi  
+8: "zimo" _> Tsumo  
+9: "rong" -> Ron  
+10: "jiuzhongjiupai" -> Kyuushu Kyuuhai (Abortive Draw)  
+11: "babei" -> Kita  
 
 ### Laya
 Laya is the engine used by Mahjong Soul. The documentation can be found here: [Documentation (layabox.com)](http://layaair.ldc.layabox.com/api/English/). Not sure if this is of any use, AlphaJong doesn't touch this at the moment.

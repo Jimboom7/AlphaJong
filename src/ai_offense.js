@@ -184,6 +184,10 @@ function callKita() { // 3 player only
 	sendKitaCall();
 }
 
+function callAbortiveDraw() { // Kyuushu Kyuuhai, 9 Honors or Terminals in starting Hand
+	sendAbortiveDrawCall();
+}
+
 function callRiichi(tiles) {
 	var operations = getOperationList();
 	var combination = [];
