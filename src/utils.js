@@ -268,24 +268,14 @@ function getNumberOfTilesAvailable(index, type) {
 	return 4 - visibleTiles.filter(tile => tile.index == index && tile.type == type).length;
 }
 
+//Return if a tile is furiten
+function isTileFuriten(index, type) {
+	return discards[0].some(tile => tile.index == index && tile.type == type);
+}
+
 //Return number of specific non furiten tiles available
-function getNumberOfNonFuritenTilesAvailable(index, type, lastTiles) {
-	if (typeof lastTiles != "undefined" && lastTiles.length == 2) { // Sequence furiten
-		lastTiles = sortTiles(lastTiles);
-		if (lastTiles[0].type == lastTiles[1].type && lastTiles[1].index - lastTiles[0].index == 1) { //Is it a 2-tile sequence
-			if (index == lastTiles[1].index + 1 && type == lastTiles[1].type) { //Upper Tile -> Check if lower tile is furiten
-				if (discards[0].some(tile => tile.index == lastTiles[0].index - 1 && tile.type == type)) {
-					return 0;
-				}
-			}
-			else if (index == lastTiles[0].index - 1 && type == lastTiles[0].type) { //Upper Tile -> Check if lower tile is furiten
-				if (discards[0].some(tile => tile.index == lastTiles[1].index + 1 && tile.type == type)) {
-					return 0;
-				}
-			}
-		}
-	}
-	if (discards[0].some(tile => tile.index == index && tile.type == type)) { //Same tile furiten
+function getNumberOfNonFuritenTilesAvailable(index, type) {
+	if (isTileFuriten(index, type)) {
 		return 0;
 	}
 	return getNumberOfTilesAvailable(index, type);
@@ -578,6 +568,14 @@ function isLastGame() {
 		return getRound() == 3 || getRoundWind() > 1; //East 4 or South X
 	}
 	return (getRound() == 2 && getRoundWind() > 1) || getRoundWind() > 2; //South 3 or West X
+}
+
+//Check if Hand is complete
+function isWinningHand(numberOfTriples, numberOfPairs) {
+	if (strategy == STRATEGIES.CHIITOITSU) {
+		return numberOfPairs == 7;
+	}
+	return numberOfTriples == 4 && numberOfPairs == 1;
 }
 
 //Returns the binomialCoefficient for two numbers. Needed for chance to draw tile calculation. Fails if a faculty of > 134 is needed (should not be the case since there are 134 tiles)

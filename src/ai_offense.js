@@ -302,20 +302,26 @@ function getHandValues(hand, tile) {
 	var yaku = baseYaku;
 	var waits = 0;
 
+	var isHandFuriten = false;
 	var valueForTile = []; //List of tiles and their value, for second step
 	var tileCombinations = []; //List of combinations for second step
 	for (let newTile of newTiles1) {
 
-		var numberOfTiles1 = getNumberOfNonFuritenTilesAvailable(newTile.index, newTile.type, removeTilesFromTileArray(hand, triples.concat(pairs)));
-		if (numberOfTiles1 <= 0) {
-			continue;
-		}
-
+		var numberOfTiles1 = getNumberOfTilesAvailable(newTile.index, newTile.type, removeTilesFromTileArray(hand, triples.concat(pairs)));
 		hand.push(newTile);
 
 		var combinations2 = getTriplesAndPairs(hand);
 		var triples2 = combinations2.triples;
 		var pairs2 = combinations2.pairs;
+
+		if (numberOfTiles1 <= 0) { //No Tile available?
+			if (isTileFuriten() && isWinningHand(parseInt((triples2.length / 3)) + callTriples, pairs2.length / 2)) { //CHeck if the hand would be winning and be in furiten
+				waits = 0;
+				isHandFuriten = true;
+			}
+			hand.pop();
+			continue;
+		}
 
 		var e2 = parseInt((triples2.length / 3)) + callTriples;
 		e2 = e2 > 3.5 ? 3.5 : e2;
@@ -355,8 +361,14 @@ function getHandValues(hand, tile) {
 			if (y2.closed > 0) {
 				yaku.closed += y2.closed * chance;
 			}
-			if (parseInt((triples2.length / 3)) + callTriples == 4 && pairs2.length == 2) {
-				waits += numberOfTiles1 * ((3 - (getWaitScoreForTile(newTile) / 90)) / 2); //Factor waits by "uselessness" for opponents
+			if (!isHandFuriten && isWinningHand(parseInt((triples2.length / 3)) + callTriples, pairs2.length / 2)) {
+				if (isTileFuriten(newTile.index, newTile.type)) { // Furiten
+					waits = 0;
+					isHandFuriten = true;
+				}
+				else {
+					waits += numberOfTiles1 * ((3 - (getWaitScoreForTile(newTile) / 90)) / 2); //Factor waits by "uselessness" for opponents
+				}
 			}
 		}
 
@@ -381,8 +393,7 @@ function getHandValues(hand, tile) {
 		else {
 			var newChance = (binomialCoefficient(numberOfTiles1, 1) * binomialCoefficient(numberOfTiles2, 1)) / binomialCoefficient(availableTiles.length, 2);
 		}
-		//Old (wrong) formula
-		//var newChance = ((numberOfTiles1 + numberOfTiles2) / availableTiles.length) * ((numberOfTiles1 + numberOfTiles2) / (availableTiles.length - 1));
+
 		chance = (numberOfTiles1 / availableTiles.length);
 
 		hand.push(tileCombination.tile1);
@@ -428,7 +439,7 @@ function getHandValues(hand, tile) {
 			if (y3.closed > 0) {
 				yaku.closed += y3.closed * newChance;
 			}
-			if (parseInt((triples3.length / 3)) + callTriples == 4 && pairs3.length == 2) {
+			if (!isHandFuriten && isWinningHand(parseInt((triples3.length / 3)) + callTriples, pairs3.length / 2)) {
 				waits += numberOfTiles2 * ((3 - (getWaitScoreForTile(tileCombination.tile2) / 90)) / 2) * chance; //Factor waits by "uselessness" for opponents
 			}
 		}
