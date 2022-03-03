@@ -439,7 +439,6 @@ function runTestcase() {
 
 			expected = ["3m", "7p"];
 			break;
-
 		default:
 			testsRunning = false;
 			return;

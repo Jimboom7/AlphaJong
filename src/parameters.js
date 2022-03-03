@@ -38,7 +38,8 @@ var run = false; //Is the bot running
 const STRATEGIES = { //ENUM of strategies
 	GENERAL: 'General',
 	CHIITOITSU: 'Chiitoitsu',
-	FOLD: 'Fold'
+	FOLD: 'Fold',
+	THIRTEEN_ORPHANS: 'Thirteen_Orphans'
 }
 var strategy = STRATEGIES.GENERAL; //Current strategy
 var strategyAllowsCalls = true; //Does the current strategy allow calls?

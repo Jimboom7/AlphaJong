@@ -13,7 +13,6 @@ var thirteen_orphan_set = "19m19p19s1234567z";
 var max_missing_orphan_count = 2; // If an orphan has been discarded more than this time (and is not in hand), we don't go for thirteen orphan.
 // Ie. 'Red Dragon' is not in hand, but been discarded 3-times on field. We stop going for thirteen orphan.
 
-
 // Used at the start of a match to see if we can go for thirteen orphansm
 function startCanDoThirteenOrphan(){
     var ownTerminalHonors = getAllTerminalHonorFromHand(ownHand)
@@ -74,6 +73,28 @@ function canDoThirteenOrphan(){
     }
 
     return true;
+}
+
+// Returns a Tile[], all possible discards for thirteen orphan strategy.
+// TODO: With efficieny/defense in mind, if we want it to output a single Tile object instead.
+function findPossibleDiscards(){
+    var ownTerminalHonors = getAllTerminalHonorFromHand(ownHand)
+    var uniqueTerminalHonors = ownTerminalHonors.filter(function(t, i) {
+        return ownTerminalHonors.indexOf(t) == i;
+    });
+
+    var handClone = ownHand;
+    for (var i = 0; i < uniqueTerminalHonors.length; ++i){
+        // Remove any first occurance of the terminal/honors from the hand.
+        // (Aka, we don't want those to be thrown)
+        var firstOccurance = handClone.findIndex((t) => t == uniqueTerminalHonors[i]);
+        if (firstOccurance >= 0){
+            handClone.splice(firstOccurance, 1);
+        }
+    }
+
+    // Return the things to be thrown from hand.
+    return handClone;
 }
 
 // Return all orphan discards
