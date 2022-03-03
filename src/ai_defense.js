@@ -39,8 +39,13 @@ function getTileDanger(tile) {
 		if (isGoingForFlush(i, tile.type)) {
 			dangerPerPlayer[i] *= 1.3;
 		}
-		else if (isGoingForFlush(i, 0) || isGoingForFlush(i, 1) || isGoingForFlush(i, 2)) { //Is the player going for any other flush? -> 30% safer
-			dangerPerPlayer[i] /= 1.3;
+		else if (isGoingForFlush(i, 0) || isGoingForFlush(i, 1) || isGoingForFlush(i, 2)) { //Is the player going for any other flush?
+			if(tile.type == 3) {
+				dangerPerPlayer[i] *= 1.2; //Honor tiles are also dangerous
+			}
+			else {
+				dangerPerPlayer[i] /= 1.2; //Other tiles are less dangerous
+			}
 		}
 
 		//Danger is at least 5
@@ -70,7 +75,7 @@ function getPlayerDangerLevel(player) {
 	}
 
 	if (getNumberOfPlayerHand(player) < 13) { //Some Calls
-		var dangerLevel = parseInt(185 - (getNumberOfPlayerHand(player) * 8) - (tilesLeft * 1.5));
+		var dangerLevel = parseInt(190 - (getNumberOfPlayerHand(player) * 8) - (tilesLeft * 1.75));
 	}
 	else {
 		dangerLevel = 15 - tilesLeft; //Full hand without Riichi -> Nearly always safe
@@ -97,6 +102,10 @@ function getPlayerDangerLevel(player) {
 
 	if (isGoingForFlush(player, 0) || isGoingForFlush(player, 1) || isGoingForFlush(player, 2)) {
 		dangerLevel += 10;
+	}
+
+	if(tilesLeft > 50) {
+		dangerLevel *= 0.5 + ((70 - tilesLeft) / 40); //Danger scales over the first few turns.
 	}
 
 	return dangerLevel;
@@ -172,7 +181,7 @@ function getWaitScoreForTileAndPlayer(player, tile) {
 	var score = 0;
 
 	//Same tile
-	score += tile0 * (tile0Public + 1) * 6;
+	score += tile0 * (tile0Public + 1) * 5;
 
 	if (getNumberOfPlayerHand(player) == 1 || tile.type == 3) {
 		return score * factor; //Return normalized result
@@ -190,11 +199,13 @@ function getWaitScoreForTileAndPlayer(player, tile) {
 	var tileU3Public = tileU3 + getNumberOfTilesInTileArray(ownHand, tile.index + 3, tile.type);
 	var factorU = getFuritenValue(player, { index: tile.index + 3, type: tile.type });
 
-	score += (tileL1 * tileL2) * (tile0Public + tileL3Public) * factorL;
-	score += (tileU1 * tileU2) * (tile0Public + tileU3Public) * factorU;
+	//Ryanmen Waits
+	score += ((tileL1 * tileL2) * (tile0Public + tileL3Public) * factorL) * 1.2; //Ryanmen waits are most common -> scale them with 1.2
+	score += ((tileU1 * tileU2) * (tile0Public + tileU3Public) * factorU) * 1.2;
 
-	//Lower + Upper Tile -> lower * upper
-	score += tileL1 * tileU1 * tile0Public;
+	//Bridge Wait
+	score += (tileL1 * tileU1 * tile0Public) * 0.8; //Bridge waits are not so common -> scale them with 0.8
+
 	score *= factor;
 
 	if (score > 180) {
