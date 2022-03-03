@@ -120,6 +120,7 @@ function getCurrentDangerLevel() { //Most Dangerous Player counts extra
 }
 
 //Returns the number of turns ago when the tile was most recently discarded
+//TODO: Should also check melds for discards
 function getMostRecentDiscardDanger(tile, player) {
 	var danger = 99;
 	for (var i = 0; i < getNumberOfPlayers(); i++) {

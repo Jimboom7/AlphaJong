@@ -14,7 +14,7 @@ function preventAFK() {
 	app.NetAgent.sendReq2Lobby('Lobby', 'heatbeat', { no_operation_counter: 0 }); //Prevent Server-side AFK
 
 	if (typeof view == 'undefined' || typeof view.DesktopMgr == 'undefined' ||
-		typeof view.DesktopMgr.Inst == 'undefined' || view.DesktopMgr.Inst == 'null') {
+		typeof view.DesktopMgr.Inst == 'undefined' || view.DesktopMgr.Inst == null) {
 		return;
 	}
 	view.DesktopMgr.Inst.hangupCount = 0;
@@ -147,7 +147,8 @@ function getNumberOfPlayerHand(player) {
 }
 
 function isEndscreenShown() {
-	return view.DesktopMgr.Inst.gameEndResult != null;
+	return this != null && view != null && view.DesktopMgr != null &&
+	view.DesktopMgr.Inst != null && view.DesktopMgr.Inst.gameEndResult != null;
 }
 
 function isDisconnect() {
@@ -161,8 +162,9 @@ function isPlayerRiichi(player) {
 
 function isInGame() {
 	try {
-		return this != null && view != null && view.DesktopMgr != null && view.DesktopMgr.Inst != null && view.DesktopMgr.player_link_state != null;
-	}
+		return this != null && view != null && view.DesktopMgr != null &&
+		view.DesktopMgr.Inst != null && view.DesktopMgr.player_link_state != null &&
+		view.DesktopMgr.Inst.active && !isEndscreenShown()}
 	catch {
 		return false;
 	}
@@ -191,8 +193,8 @@ function hasPlayerHandChanged(player) {
 //Sets a variable for each pai in a players hand
 function rememberPlayerHand(player) {
 	var player_correct = getCorrectPlayerNumber(player);
-	for (let hand of view.DesktopMgr.Inst.players[player_correct].hand) {
-		hand.old = true;
+	for (let tile of view.DesktopMgr.Inst.players[player_correct].hand) {
+		tile.old = true;
 	}
 }
 

@@ -61,6 +61,7 @@ function main() {
 		return;
 	}
 	if (!isInGame()) {
+		checkForEnd();
 		currentActionOutput.value = "Waiting for Game to start.";
 		log("Game is not running, sleep 2 seconds.");
 		errorCounter++;
@@ -88,7 +89,6 @@ function main() {
 			lastTilesLeft = getTilesLeft();
 			errorCounter = 0;
 		}
-		checkForEnd();
 		log("Waiting for own turn, sleep 1 second.");
 		currentActionOutput.value = "Waiting for own turn.";
 		setTimeout(main, 1000);
@@ -212,7 +212,7 @@ function setData() {
 
 //Search for Game
 function startGame() {
-	if (!isInGame() && run) {
+	if (!isInGame() && run && AUTORUN) {
 		log("Searching for Game in Room " + ROOM);
 		currentActionOutput.value = "Searching for Game...";
 		searchForGame();

@@ -445,7 +445,7 @@ function runTestcase() {
 			expected = ["3p"];
 			break;
 		case 54:
-			log("Testcase 54: TestComplex Furiten");
+			log("Testcase 54: Test Complex Furiten");
 			dora = [{ index: 1, type: 1, dora: false }];
 			ownHand = getTilesFromString("1113456m666999s1z"); // 3 tile wait (2m, 3m, 6m) in furiten
 			discards = [[{ index: 2, type: 1, dora: false, doraValue: 0 }], [], [], []];
