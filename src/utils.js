@@ -270,7 +270,12 @@ function getNumberOfTilesAvailable(index, type) {
 
 //Return if a tile is furiten
 function isTileFuriten(index, type) {
-	return discards[0].some(tile => tile.index == index && tile.type == type); //TODO: Should also include tiles in melds from other players that the player discarded
+	for(i = 1; i < getNumberOfPlayers(); i++) { //Check if melds from other player contain discarded tiles of player 0
+		if(calls[i].some(tile => tile.index == index && tile.type == type && tile.from == localPosition2Seat(0))) {
+			return true;
+		}
+	}
+	return discards[0].some(tile => tile.index == index && tile.type == type);
 }
 
 //Return number of specific non furiten tiles available

@@ -10,7 +10,7 @@ Compatible with both 3 and 4 player mode.
 * Grab the latest [release of this project](https://github.com/Jimboom7/AlphaJong/releases) and install it in your browser extension. (For Tampermonkey you can enter the download url at utilities -> Install from URL).
 * Open [Mahjong Soul](https://mahjongsoul.game.yo-star.com/) (make sure you are logged in already).
 * Go into a game and click "Start Bot" in the GUI at the top.
-* You can check "Autostart" to let the bot automatically start a new games.
+* You can check "Autostart" to let the bot automatically start new games.
 * Logging is output to the browser console (Ctrl + Shift + J [Chrome] or Ctrl + Shift + K [Firefox])
 
 ### GUI

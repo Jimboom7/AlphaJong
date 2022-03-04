@@ -182,11 +182,7 @@ function setData() {
 
 	calls = [];
 	for (var j = 0; j < getNumberOfPlayers(); j++) { //Get Calls for all Players
-		var temp_calls = [];
-		for (let calls of getCallsOfPlayer(j)) {
-			temp_calls.push(calls.val);
-		}
-		calls.push(temp_calls);
+		calls.push(getCallsOfPlayer(j));
 	}
 
 	if (tilesLeft < getTilesLeft()) { //Check if new round/reload

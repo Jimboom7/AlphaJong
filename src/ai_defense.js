@@ -120,12 +120,14 @@ function getCurrentDangerLevel() { //Most Dangerous Player counts extra
 }
 
 //Returns the number of turns ago when the tile was most recently discarded
-//TODO: Should also check melds for discards
 function getMostRecentDiscardDanger(tile, player) {
 	var danger = 99;
 	for (var i = 0; i < getNumberOfPlayers(); i++) {
 		var r = getLastTileInDiscard(i, tile);
-		if (player == i && r != null) {
+		if (player == i && r != null) { //Tile is in own discards
+			return 0;
+		}
+		if(wasTileCalledFromOtherPlayers(player, tile)) { //The tile was discarded and called by someone else
 			return 0;
 		}
 		if (r != null && r.numberOfPlayerHandChanges[player] < danger) {
@@ -144,6 +146,21 @@ function getLastTileInDiscard(player, tile) {
 		}
 	}
 	return null;
+}
+
+//Checks if a tile has been called by someone
+function wasTileCalledFromOtherPlayers(player, tile) {
+	for(var i = 0; i < getNumberOfPlayers(); i++) {
+		if (i == player) { //Skip own melds
+			continue;
+		}
+		for (let t of calls[i]) { //Look through all melds and check where the tile came from
+			if (t.from == localPosition2Seat(getCorrectPlayerNumber(player)) && tile.index == t.index && tile.type == t.type) {
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 //Returns the safety of a tile

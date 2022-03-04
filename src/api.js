@@ -58,7 +58,17 @@ function getDiscardsOfPlayer(player) {
 
 function getCallsOfPlayer(player) {
 	player = getCorrectPlayerNumber(player);
-	return view.DesktopMgr.Inst.players[player].container_ming.pais;
+
+	callArray = [];
+	//Mark the tiles with the player who discarded the tile
+	for(let ming of view.DesktopMgr.Inst.players[player].container_ming.mings) {
+		for(var i = 0; i < ming.from.length; i++) {
+			ming.pais[i].from = ming.from[i];
+			callArray.push(ming.pais[i]);
+		}
+	}
+
+	return callArray;
 }
 
 function getTilesLeft() {
