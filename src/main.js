@@ -128,7 +128,7 @@ function mainOwnTurn() {
 			case getOperations().babei:
 				callKita();
 				break;
-            case getOperations().jiuzhongjiupai:
+			case getOperations().jiuzhongjiupai:
 				callAbortiveDraw();
 				break;
 		}

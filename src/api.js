@@ -59,10 +59,10 @@ function getDiscardsOfPlayer(player) {
 function getCallsOfPlayer(player) {
 	player = getCorrectPlayerNumber(player);
 
-	callArray = [];
+	var callArray = [];
 	//Mark the tiles with the player who discarded the tile
-	for(let ming of view.DesktopMgr.Inst.players[player].container_ming.mings) {
-		for(var i = 0; i < ming.from.length; i++) {
+	for (let ming of view.DesktopMgr.Inst.players[player].container_ming.mings) {
+		for (var i = 0; i < ming.from.length; i++) {
 			ming.pais[i].from = ming.from[i];
 			callArray.push(ming.pais[i]);
 		}
@@ -140,7 +140,7 @@ function sendKitaCall() {
 function sendAbortiveDrawCall() {
 	app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.jiuzhongjiupai, index: 0, timeuse: 2 });
 }
-                
+
 function callDiscard(tileNumber) {
 	view.DesktopMgr.Inst.players[0]._choose_pai = view.DesktopMgr.Inst.players[0].hand[tileNumber];
 	view.DesktopMgr.Inst.players[0].DoDiscardTile();
@@ -158,7 +158,7 @@ function getNumberOfPlayerHand(player) {
 
 function isEndscreenShown() {
 	return this != null && view != null && view.DesktopMgr != null &&
-	view.DesktopMgr.Inst != null && view.DesktopMgr.Inst.gameEndResult != null;
+		view.DesktopMgr.Inst != null && view.DesktopMgr.Inst.gameEndResult != null;
 }
 
 function isDisconnect() {
@@ -173,8 +173,9 @@ function isPlayerRiichi(player) {
 function isInGame() {
 	try {
 		return this != null && view != null && view.DesktopMgr != null &&
-		view.DesktopMgr.Inst != null && view.DesktopMgr.player_link_state != null &&
-		view.DesktopMgr.Inst.active && !isEndscreenShown()}
+			view.DesktopMgr.Inst != null && view.DesktopMgr.player_link_state != null &&
+			view.DesktopMgr.Inst.active && !isEndscreenShown()
+	}
 	catch {
 		return false;
 	}

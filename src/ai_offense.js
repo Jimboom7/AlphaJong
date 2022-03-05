@@ -86,7 +86,7 @@ function callTriple(combinations, operation) {
 	}
 	averageSafety /= numOfTiles;
 
-	if (getFoldThreshold(newHandValue.value, false) > averageSafety) {
+	if (getFoldThreshold(newHandValue.value, false) > averageSafety || getFoldThreshold(newHandValue.value, false) > newHandValue.safety) {
 		strategyAllowsCalls = false;
 	}
 
@@ -236,21 +236,35 @@ function callRiichi(tiles) {
 	discardTile(tiles[0].tile);
 }
 
-//Discard the safest tile in hand
-function discardFold() {
-	var tileDangers = getHandDanger(ownHand);
-	var tile;
-	var maxDanger = 1000;
-	log("Danger Levels:");
-	for (let tileDanger of tileDangers) {
-		log(getTileName(tileDanger.tile) + " : " + tileDanger.danger);
-		if (tileDanger.danger < maxDanger) {
-			tile = tileDanger.tile;
-			maxDanger = tileDanger.danger;
+//Discard either: The safest tile in hand if full fold
+//Or the safest tile at the top of the list if one turn fold
+function discardFold(tiles) {
+	if (strategy != STRATEGIES.FOLD) { //Not in full Fold mode yet: Discard a relatively safe tile with high priority
+		for (let tile of tiles) {
+			var foldThreshold = getFoldThreshold(tile.value, true);
+			if (tile.value + 0.1 > tiles[0].value) { //If next tile is not much worse in value than the top priority discard
+				if (tile.safety > foldThreshold) { //Tile that is safe enough exists
+					log("Tile Priorities: ");
+					printTilePriority(tiles);
+					discardTile(tile.tile);
+					return tile.tile;
+				}
+			}
 		}
+		// No safe tile with high priority found: Full Fold.
+		log("Hand is very dangerous, fold until the end of this round.");
+		strategy = STRATEGIES.FOLD;
+		strategyAllowsCalls = false;
 	}
-	discardTile(tile);
-	return tile;
+
+	tiles.sort(function (p1, p2) {
+		return p2.safety - p1.safety;
+	});
+	log("Fold Tile Priorities: ");
+	printTilePriority(tiles);
+
+	discardTile(tiles[0].tile);
+	return tiles[0].tile;
 }
 
 //Remove the given Tile from Hand
@@ -292,7 +306,7 @@ function getTilePriorities(inputHand) {
 
 	}
 
-	tiles = tiles.sort(function (p1, p2) {
+	tiles.sort(function (p1, p2) {
 		return p2.value - p1.value;
 	});
 	return tiles;
@@ -302,7 +316,7 @@ function getTilePriorities(inputHand) {
 //This function takes a 13 tile hand as input. It then looks for tiles that could potentially improve the hand. After that it does the same with more tiles.
 //In each step scores for efficiency, yaku, dora, waits etc. are calculated and in the end final values are returned.
 //Could also be done with real recursion, but in practise the runtime is too long.
-function getHandValues(hand, tile) {
+function getHandValues(hand, discardedTile) {
 	var newTiles1 = getUsefulTilesForDouble(hand); //For all single tiles: Find tiles that make them doubles
 
 	var combinations = getTriplesAndPairs(hand);
@@ -466,16 +480,12 @@ function getHandValues(hand, tile) {
 		hand.pop();
 		hand.pop();
 	}
-	var value = getTileValue(tile, efficiency, yaku, doraValue, waits);
-	return { tile: tile, value: value, efficiency: efficiency, dora: doraValue, yaku: yaku, waits: waits };
+	var safety = getTileSafety(discardedTile);
+	var value = getTileValue(efficiency, yaku, doraValue, waits, safety);
+	return { tile: discardedTile, value: value, efficiency: efficiency, dora: doraValue, yaku: yaku, waits: waits, safety: safety };
 }
 
-function getTileValue(tile, efficiency, yakus, doraValue, waits) {
-	var safety = 1;
-	if (typeof tile != "undefined") { //In case only the hand value is evaluated and no discard simulated
-		safety = getTileSafety(tile);
-	}
-
+function getTileValue(efficiency, yakus, doraValue, waits, safety) {
 	var yaku = yakus.open;
 	if (isClosed) {
 		yaku = yakus.closed;
@@ -534,10 +544,11 @@ function chiitoitsuPriorities() {
 			}
 			oldTile = tile;
 		});
-		var value = getTileValue(ownHand[i], efficiency, yaku, doraValue, waits);
-		tiles.push({ tile: ownHand[i], value: value, efficiency: efficiency, dora: doraValue, yaku: yaku, waits: waits });
+		var safety = getTileSafety(ownHand[i]);
+		var value = getTileValue(efficiency, yaku, doraValue, waits, safety);
+		tiles.push({ tile: ownHand[i], value: value, efficiency: efficiency, dora: doraValue, yaku: yaku, waits: waits, safety: safety });
 	}
-	tiles = tiles.sort(function (p1, p2) {
+	tiles.sort(function (p1, p2) {
 		return p2.value - p1.value;
 	});
 	return tiles;
@@ -551,9 +562,7 @@ function discard() {
 	var tiles = getTilePriorities(ownHand);
 
 	if (strategy == STRATEGIES.FOLD || shouldFold(tiles)) {
-		//strategy = STRATEGIES.FOLD;
-		//strategyAllowsCalls = false;
-		return discardFold();
+		return discardFold(tiles);
 	}
 
 	log("Tile Priorities: ");
@@ -579,8 +588,8 @@ function getDiscardTile(tiles) {
 	if (tiles[0].yaku.open >= 1 || isClosed) {
 		return tile;
 	}
-	
-	var highestYaku = -1; 
+
+	var highestYaku = -1;
 	for (let t of tiles) {
 		var foldThreshold = getFoldThreshold(t.value, false);
 		if (t.yaku.open > highestYaku + 0.01 && t.yaku.open / 3 > highestYaku && t.safety > foldThreshold) {

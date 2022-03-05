@@ -120,7 +120,7 @@ function initGui() {
 	debugButton.onclick = function () {
 		showDebugString();
 	};
-	if(DEBUG_BUTTON) {
+	if (DEBUG_BUTTON) {
 		guiSpan.appendChild(debugButton);
 	}
 

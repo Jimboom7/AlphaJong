@@ -40,7 +40,7 @@ function getTileDanger(tile) {
 			dangerPerPlayer[i] *= 1.3;
 		}
 		else if (isGoingForFlush(i, 0) || isGoingForFlush(i, 1) || isGoingForFlush(i, 2)) { //Is the player going for any other flush?
-			if(tile.type == 3) {
+			if (tile.type == 3) {
 				dangerPerPlayer[i] *= 1.2; //Honor tiles are also dangerous
 			}
 			else {
@@ -104,7 +104,7 @@ function getPlayerDangerLevel(player) {
 		dangerLevel += 10;
 	}
 
-	if(tilesLeft > 50) {
+	if (tilesLeft > 50) {
 		dangerLevel *= 0.5 + ((70 - tilesLeft) / 40); //Danger scales over the first few turns.
 	}
 
@@ -127,7 +127,7 @@ function getMostRecentDiscardDanger(tile, player) {
 		if (player == i && r != null) { //Tile is in own discards
 			return 0;
 		}
-		if(wasTileCalledFromOtherPlayers(player, tile)) { //The tile was discarded and called by someone else
+		if (wasTileCalledFromOtherPlayers(player, tile)) { //The tile was discarded and called by someone else
 			return 0;
 		}
 		if (r != null && r.numberOfPlayerHandChanges[player] < danger) {
@@ -150,7 +150,7 @@ function getLastTileInDiscard(player, tile) {
 
 //Checks if a tile has been called by someone
 function wasTileCalledFromOtherPlayers(player, tile) {
-	for(var i = 0; i < getNumberOfPlayers(); i++) {
+	for (var i = 0; i < getNumberOfPlayers(); i++) {
 		if (i == player) { //Skip own melds
 			continue;
 		}
@@ -166,6 +166,9 @@ function wasTileCalledFromOtherPlayers(player, tile) {
 //Returns the safety of a tile
 //Based on the tile danger, but with exponential growth
 function getTileSafety(tile) {
+	if (typeof tile == 'undefined') {
+		return 1;
+	}
 	return 1 - (Math.pow(getTileDanger(tile) / 10, 2) / 100);
 }
 
