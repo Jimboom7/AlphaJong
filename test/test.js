@@ -452,6 +452,36 @@ function runTestcase() {
 
 			expected = ["3m", "6m"];
 			break;
+		case 55:
+			log("Testcase 55: Thirteen Orphans");
+			dora = [{ index: 1, type: 1, dora: false }];
+			ownHand = getTilesFromString("1559m19s1234567z5m");
+
+			expected = ["5m"];
+			updateAvailableTiles();
+			determineStrategy();
+			break;
+		case 56:
+			log("Testcase 56: Thirteen Orphans - safest discard");
+			dora = [{ index: 1, type: 1, dora: false }];
+			ownHand = getTilesFromString("159m159p19s12345z5s");
+			discards = [[], getTilesFromString("46m456p"), getTilesFromString("456m456p"), getTilesFromString("222m5p")];
+
+			TEST_DANGER_LEVEL = 50;
+			expected = ["5p"];
+			determineStrategy();
+			break;
+		case 57:
+			log("Testcase 57: Thirteen Orphans - abandon strategy"); //6z all gone -> change strategy
+			dora = [{ index: 1, type: 1, dora: false }];
+			ownHand = getTilesFromString("159m159p19s12345z5s");
+			discards = [[], getTilesFromString("12345z66z"), getTilesFromString("34566z"), getTilesFromString("222m55p5z")];
+			TEST_DANGER_LEVEL = 50;
+
+			expected = ["5z"];
+			updateAvailableTiles();
+			determineStrategy();
+			break;
 		default:
 			testsRunning = false;
 			return;
