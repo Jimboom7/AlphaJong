@@ -174,7 +174,7 @@ function getTileSafety(tile) {
 
 //Returns true if the player is going for a flush of a given type
 function isGoingForFlush(player, type) {
-	if (calls[player].length <= 3 || calls[player].some(tile => tile.type != type && tile.type != 3)) { //Not enough or different calls -> false
+	if (calls[player].length < 6 || calls[player].some(tile => tile.type != type && tile.type != 3)) { //Not enough or different calls -> false
 		return false;
 	}
 	if (discards[player].filter(tile => tile.type == type).length >= (discards[player].length / 6)) { //Many discards of that type -> false

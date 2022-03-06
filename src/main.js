@@ -185,11 +185,14 @@ function setData() {
 		calls.push(getCallsOfPlayer(j));
 	}
 
-	if (tilesLeft < getTilesLeft()) { //Check if new round/reload
-		isClosed = true;
-		if (calls[0].length > 0) {
+	isClosed = true;
+	for (let tile of calls[0]) { //Is hand closed? Also consider closed Kans
+		if(tile.from != localPosition2Seat(0)) {
 			isClosed = false;
+			break;
 		}
+	}
+	if (tilesLeft < getTilesLeft()) { //Check if new round/reload
 		setAutoCallWin(true);
 		strategy = STRATEGIES.GENERAL;
 		strategyAllowsCalls = true;
