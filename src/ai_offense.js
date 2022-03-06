@@ -4,7 +4,6 @@
 //################################
 
 //Look at Hand etc. and decide for a strategy.
-//TODO: Thirteen Orphans
 function determineStrategy() {
 
 	if (strategy != STRATEGIES.FOLD) {
@@ -14,6 +13,10 @@ function determineStrategy() {
 
 		if ((pairs == 6 || (pairs >= CHIITOITSU && handTriples < 2)) && isClosed) { //Check for Chiitoitsu
 			strategy = STRATEGIES.CHIITOITSU;
+			strategyAllowsCalls = false;
+		}
+		else if(canDoThirteenOrphans()) {
+			strategy = STRATEGIES.THIRTEEN_ORPHANS;
 			strategyAllowsCalls = false;
 		}
 		else {
@@ -295,6 +298,9 @@ function getTilePriorities(inputHand) {
 	if (strategy == STRATEGIES.CHIITOITSU) {
 		return chiitoitsuPriorities();
 	}
+	else if (strategy == STRATEGIES.THIRTEEN_ORPHANS) {
+		return thirteenOrphansPriorities();
+	}
 
 	var tiles = [];
 	for (var i = 0; i < inputHand.length; i++) { //Create 13 Tile hands
@@ -554,8 +560,81 @@ function chiitoitsuPriorities() {
 	return tiles;
 }
 
+//Get Thirteen Orphans Priorities -> Look for Honors/1/9
+//Returns Array of tiles with priorities (value, safety etc.)
+function thirteenOrphansPriorities() {
 
-//Parameter: Tiles with information (efficiency, yaku, dora)
+	var tiles = [];
+	for (var i = 0; i < ownHand.length; i++) { //Simulate discard of every tile
+
+		var hand = [...ownHand];
+		hand.splice(i, 1);
+
+        var ownTerminalHonors = getAllTerminalHonorFromHand(hand);
+        var uniqueTerminalHonors = ownTerminalHonors.filter(function(t, i) {
+            return ownTerminalHonors.indexOf(t) == i;
+        });
+        var efficiency = uniqueTerminalHonors.length - 9; //Minus 9 to be more in line with the usual efficiency of tiles (around 4: Is Tenpai)
+        if(ownTerminalHonors.length > uniqueTerminalHonors.length) { //At least one terminal/honor twice
+            efficiency + 0.25;
+        }
+        var doraValue = getNumberOfDoras(hand);
+        var yaku = {open: 5, closed: 5}; //5 is enough; with more it would never fold the hand
+        var waits = 0; //Waits dont really matter for thirteen orphans, not much choice anyway
+        var safety = getTileSafety(ownHand[i]);
+        var value = getTileValue(efficiency, yaku, doraValue, waits, safety);
+
+		tiles.push({ tile: ownHand[i], value: value, efficiency: efficiency, dora: doraValue, yaku: yaku, waits: waits, safety: safety });
+
+	}
+
+	tiles.sort(function (p1, p2) {
+		return p2.value - p1.value;
+	});
+	return tiles;
+}
+
+// Used during the match to see if its still viable to go for thirteen orphans.
+function canDoThirteenOrphans(){
+
+    // PARAMETERS
+    var thirteen_orphans_set = "19m19p19s1234567z";
+    var max_missing_orphans_count = 2; // If an orphan has been discarded more than this time (and is not in hand), we don't go for thirteen orphan.
+    // Ie. 'Red Dragon' is not in hand, but been discarded 3-times on field. We stop going for thirteen orphan.
+
+    if(!isClosed) { //Already called some tiles? Can't do thirteen orphans
+        return false;
+    }
+
+    var ownTerminalHonors = getAllTerminalHonorFromHand(ownHand);
+
+    // Filter out all duplicate terminal/honors
+    var uniqueTerminalHonors = ownTerminalHonors.filter(function(t, i) {
+        return ownTerminalHonors.indexOf(t) == i;
+    });
+
+    // Fails if we do not have enough unique orphans.
+    if (uniqueTerminalHonors.length < THIRTEEN_ORPHANS){
+        return false;
+    }
+
+    // Get list of missing orphans.
+    var thirteenOrphansTiles = getTilesFromString(thirteen_orphans_set);
+    var missingOrphans = thirteenOrphansTiles.filter(function(t) {
+        return !uniqueTerminalHonors.includes(t);
+      });
+
+    // Check if there are enough required orphans in the pool.
+    for(let uniqueOrphan of missingOrphans) {
+        if(getNumberOfNonFuritenTilesAvailable(uniqueOrphan.index, uniqueOrphan.type) < max_missing_orphans_count) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
 //Discards the "best" tile
 function discard() {
 

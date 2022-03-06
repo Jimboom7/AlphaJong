@@ -447,6 +447,26 @@ function getUsefulTilesForDouble(tileArray) {
 	return tiles;
 }
 
+// Returns Tile[], where all are terminal/honors.
+function getAllTerminalHonorFromHand(hand){
+    return hand.filter(tile => isTerminalOrHonor(tile));
+}
+
+//Honor tile or index 1/9
+function isTerminalOrHonor(tile){
+    // Honor tiles
+    if (tile.type == 3){
+        return true;
+    }
+
+    // 1 or 9.
+    if (tile.index == 1 || tile.index == 9){
+        return true;
+    }
+
+    return false;
+}
+
 //Return a safety value which is the threshold for folding (safety lower than this value -> fold)
 function getFoldThreshold(value, strict) {
 	var factor = FOLD_CONSTANT;
@@ -493,6 +513,12 @@ function shouldFold(tiles) {
 function shouldRiichi(waits, yaku, handDora) {
 	var worthlessHand = yaku.closed + handDora <= 2 - (waits / 6);
 	var lotsOfDoraIndicators = dora.length >= 4 - (waits / 4);
+
+	//Thirteen Orphans
+	if (strategy == STRATEGIES.THIRTEEN_ORPHANS) {
+		log("Decline Riichi because of Thirteen Orphan strategy.");
+		return false;
+	}
 
 	//No waits
 	if (waits < 1) {
@@ -543,9 +569,9 @@ function shouldRiichi(waits, yaku, handDora) {
 	}
 
 	// Don't Riichi when: Last round with bad waits & would lose place with -1000
-	if (isLastGame() && waits < WAITS_FOR_RIICHI && ((getDistanceToPlayer(1) > -1000 && getDistanceToPlayer(1) <= 0) ||
-		(getDistanceToPlayer(2) > -1000 && getDistanceToPlayer(2) <= 0) ||
-		(getNumberOfPlayers() > 3 && getDistanceToPlayer(3) > -1000 && getDistanceToPlayer(3) <= 0))) {
+	if (isLastGame() && waits < WAITS_FOR_RIICHI && ((getDistanceToPlayer(1) >= -1000 && getDistanceToPlayer(1) <= 0) ||
+		(getDistanceToPlayer(2) >= -1000 && getDistanceToPlayer(2) <= 0) ||
+		(getNumberOfPlayers() > 3 && getDistanceToPlayer(3) >= -1000 && getDistanceToPlayer(3) <= 0))) {
 		log("Decline Riichi because distance to next player is < 1000 in last game.");
 		return false;
 	}
