@@ -156,9 +156,10 @@ function pushTileAndCheckDora(tiles, arrayToPush, tile) {
 		nonDoraTile.dora = false;
 		nonDoraTile.doraValue = getTileDoraValue(nonDoraTile);
 		arrayToPush.push(nonDoraTile);
-		return;
+		return nonDoraTile;
 	}
 	arrayToPush.push(tile);
+	return tile;
 }
 
 //Return the best combination of 3-tile Sequences, Triplets and pairs in array of tiles
@@ -181,15 +182,18 @@ function getBestCombinationOfTiles(inputTiles, possibleCombinations, chosenCombi
 			continue;
 		}
 		if ("tile3" in tiles) {
-			pushTileAndCheckDora(cs.pairs.concat(cs.triples), cs.triples, tiles.tile1);
-			pushTileAndCheckDora(cs.pairs.concat(cs.triples), cs.triples, tiles.tile2);
-			pushTileAndCheckDora(cs.pairs.concat(cs.triples), cs.triples, tiles.tile3);
-			hand = removeTilesFromTileArray(hand, [tiles.tile1, tiles.tile2, tiles.tile3]);
+			var tt = pushTileAndCheckDora(cs.pairs.concat(cs.triples), cs.triples, tiles.tile1);
+			hand = removeTilesFromTileArray(hand, [tt]);
+			tt = pushTileAndCheckDora(cs.pairs.concat(cs.triples), cs.triples, tiles.tile2);
+			hand = removeTilesFromTileArray(hand, [tt]);
+			tt = pushTileAndCheckDora(cs.pairs.concat(cs.triples), cs.triples, tiles.tile3);
+			hand = removeTilesFromTileArray(hand, [tt]);
 		}
 		else {
-			pushTileAndCheckDora(cs.pairs.concat(cs.triples), cs.pairs, tiles.tile1);
-			pushTileAndCheckDora(cs.pairs.concat(cs.triples), cs.pairs, tiles.tile2);
-			hand = removeTilesFromTileArray(hand, [tiles.tile1, tiles.tile2]);
+			var tt = pushTileAndCheckDora(cs.pairs.concat(cs.triples), cs.pairs, tiles.tile1);
+			hand = removeTilesFromTileArray(hand, [tt]);
+			tt = pushTileAndCheckDora(cs.pairs.concat(cs.triples), cs.pairs, tiles.tile2);
+			hand = removeTilesFromTileArray(hand, [tt]);
 		}
 		var anotherChoice = getBestCombinationOfTiles(hand, possibleCombinations.slice(i + 1), cs);
 		if (anotherChoice.triples.length > chosenCombinations.triples.length ||
@@ -448,23 +452,23 @@ function getUsefulTilesForDouble(tileArray) {
 }
 
 // Returns Tile[], where all are terminal/honors.
-function getAllTerminalHonorFromHand(hand){
-    return hand.filter(tile => isTerminalOrHonor(tile));
+function getAllTerminalHonorFromHand(hand) {
+	return hand.filter(tile => isTerminalOrHonor(tile));
 }
 
 //Honor tile or index 1/9
-function isTerminalOrHonor(tile){
-    // Honor tiles
-    if (tile.type == 3){
-        return true;
-    }
+function isTerminalOrHonor(tile) {
+	// Honor tiles
+	if (tile.type == 3) {
+		return true;
+	}
 
-    // 1 or 9.
-    if (tile.index == 1 || tile.index == 9){
-        return true;
-    }
+	// 1 or 9.
+	if (tile.index == 1 || tile.index == 9) {
+		return true;
+	}
 
-    return false;
+	return false;
 }
 
 //Return a safety value which is the threshold for folding (safety lower than this value -> fold)

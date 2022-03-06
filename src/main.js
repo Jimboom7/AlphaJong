@@ -187,7 +187,7 @@ function setData() {
 
 	isClosed = true;
 	for (let tile of calls[0]) { //Is hand closed? Also consider closed Kans
-		if(tile.from != localPosition2Seat(0)) {
+		if (tile.from != localPosition2Seat(0)) {
 			isClosed = false;
 			break;
 		}
