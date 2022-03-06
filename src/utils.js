@@ -268,24 +268,19 @@ function getNumberOfTilesAvailable(index, type) {
 	return 4 - visibleTiles.filter(tile => tile.index == index && tile.type == type).length;
 }
 
-//Return number of specific non furiten tiles available
-function getNumberOfNonFuritenTilesAvailable(index, type, lastTiles) {
-	if (typeof lastTiles != "undefined" && lastTiles.length == 2) { // Sequence furiten
-		lastTiles = sortTiles(lastTiles);
-		if (lastTiles[0].type == lastTiles[1].type && lastTiles[1].index - lastTiles[0].index == 1) { //Is it a 2-tile sequence
-			if (index == lastTiles[1].index + 1 && type == lastTiles[1].type) { //Upper Tile -> Check if lower tile is furiten
-				if (discards[0].some(tile => tile.index == lastTiles[0].index - 1 && tile.type == type)) {
-					return 0;
-				}
-			}
-			else if (index == lastTiles[0].index - 1 && type == lastTiles[0].type) { //Upper Tile -> Check if lower tile is furiten
-				if (discards[0].some(tile => tile.index == lastTiles[1].index + 1 && tile.type == type)) {
-					return 0;
-				}
-			}
+//Return if a tile is furiten
+function isTileFuriten(index, type) {
+	for (var i = 1; i < getNumberOfPlayers(); i++) { //Check if melds from other player contain discarded tiles of player 0
+		if (calls[i].some(tile => tile.index == index && tile.type == type && tile.from == localPosition2Seat(0))) {
+			return true;
 		}
 	}
-	if (discards[0].some(tile => tile.index == index && tile.type == type)) { //Same tile furiten
+	return discards[0].some(tile => tile.index == index && tile.type == type);
+}
+
+//Return number of specific non furiten tiles available
+function getNumberOfNonFuritenTilesAvailable(index, type) {
+	if (isTileFuriten(index, type)) {
 		return 0;
 	}
 	return getNumberOfTilesAvailable(index, type);
@@ -452,9 +447,12 @@ function getUsefulTilesForDouble(tileArray) {
 	return tiles;
 }
 
-//Return true if: Not last place and the danger level is too high
-function shouldFold(tiles) {
+//Return a safety value which is the threshold for folding (safety lower than this value -> fold)
+function getFoldThreshold(value, strict) {
 	var factor = FOLD_CONSTANT;
+	if (strict) {
+		factor /= 5;
+	}
 	if (isLastGame()) { //Fold earlier when first/later when last in last game
 		if (getDistanceToLast() > 0) {
 			factor *= 1.5; //Last Place -> Later Fold
@@ -465,16 +463,26 @@ function shouldFold(tiles) {
 		}
 	}
 	factor *= seatWind == 1 ? 1.1 : 1; //Fold later as dealer
-	log("Would fold this hand below " + Number((1 - (((tiles[0].value * tiles[0].value * factor) + (factor / 3)) / 100))).toFixed(2) + " safety.");
+	return Number((1 - (((value * value * factor) + (factor / 3)) / 100))).toFixed(2)
+}
 
-	var top3Safety = -1;
-	if (typeof tiles[2] != "undefined") {
-		top3Safety = (getTileSafety(tiles[0].tile) + getTileSafety(tiles[1].tile) + getTileSafety(tiles[2].tile)) / 3;
+//Return true if: Not last place and the danger level is too high
+function shouldFold(tiles) {
+
+	if ((tilesLeft < 4 && tiles[0].efficiency < 3.5) ||
+		(tilesLeft < 8 && tiles[0].efficiency < 3) ||
+		(tilesLeft < 12 && tiles[0].efficiency < 2)) {
+		log("Hand is too far from tenpai before end of game. Fold!");
+		strategy = STRATEGIES.FOLD;
+		strategyAllowsCalls = false;
+		return true;
 	}
 
-	var valueFactor = 1 - ((tiles[0].value * tiles[0].value * factor) + (factor / 3)) / 100;
-	if (valueFactor > getTileSafety(tiles[0].tile) && valueFactor > top3Safety) {
-		log("Tile Safety " + getTileSafety(tiles[0].tile) + " of " + getTileName(tiles[0].tile) + " is too dangerous. FOLD!");
+	var foldThreshold = getFoldThreshold(tiles[0].value, false);
+	log("Would fold this hand below " + foldThreshold + " safety.");
+
+	if (foldThreshold > tiles[0].safety) {
+		log("Tile Safety " + tiles[0].safety + " of " + getTileName(tiles[0].tile) + " is too dangerous. Fold this turn!");
 		return true;
 	}
 	return false;
@@ -483,59 +491,61 @@ function shouldFold(tiles) {
 //Decide whether to call Riichi
 //Based on: https://mahjong.guide/2018/01/28/mahjong-fundamentals-5-riichi/
 function shouldRiichi(waits, yaku, handDora) {
+	var worthlessHand = yaku.closed + handDora <= 2 - (waits / 6);
+	var lotsOfDoraIndicators = dora.length >= 4 - (waits / 4);
 
 	//No waits
-	if(waits == 0) {
+	if (waits < 1) {
 		log("Decline Riichi because of no waits.");
 		return false;
 	}
 
 	// Last Place (in last game)? -> Yolo
-	if(isLastGame() && getDistanceToLast() > 0) {
+	if (isLastGame() && getDistanceToLast() > 0) {
 		log("Accept Riichi because of last place in last game.");
 		return true;
 	}
 
 	// Already large lead of more than 10000 points
-	if(isLastGame() && getDistanceToFirst() < -10000) {
+	if (isLastGame() && getDistanceToFirst() < -10000) {
 		log("Decline Riichi because of huge lead in last game.");
 		return false;
 	}
 
 	// Not Dealer & bad Wait & Riichi is only yaku
-	if(seatWind != 1 && waits < WAITS_FOR_RIICHI && yaku.closed + handDora <= 1 && dora.length < 3) {
+	if (seatWind != 1 && waits < WAITS_FOR_RIICHI && worthlessHand && !lotsOfDoraIndicators) {
 		log("Decline Riichi because of worthless hand, bad waits and not dealer.");
 		return false;
 	}
 
 	// High Danger and hand not worth much
-	if(getCurrentDangerLevel() > 60 && yaku.closed + handDora <= 1) {
+	if (getCurrentDangerLevel() > 50 + (waits * 2) && worthlessHand) {
 		log("Decline Riichi because of worthless hand and high danger.");
 		return false;
 	}
 
 	// Hand already has high value and enough yaku
-	if(yaku.closed >= 1 && yaku.closed + handDora > 5) {
+	if (yaku.closed >= 1 && yaku.closed + handDora > 4 + (waits / 4)) {
 		log("Decline Riichi because of high value hand with enough yaku.");
 		return false;
 	}
 
 	// Hand already has high value and no yaku
-	if(yaku.closed < 1 && handDora >= 2) {
+	if (yaku.closed < 1 && handDora >= 2) {
 		log("Accept Riichi because of high value hand without yaku.");
 		return true;
 	}
 
-	// Number of Kans(Dora Indicators) - more = higher score
-	if(dora.length >= 3) {
+	// Number of Kans(Dora Indicators) -> more are higher chance for uradora
+	if (lotsOfDoraIndicators) {
 		log("Accept Riichi because of multiple dora indicators.");
 		return true;
 	}
 
 	// Don't Riichi when: Last round with bad waits & would lose place with -1000
-	if(isLastGame() && waits < WAITS_FOR_RIICHI && ((getDistanceToPlayer(1) > -1000 && getDistanceToPlayer(1) <= 0) ||
-	(getDistanceToPlayer(2) > -1000 && getDistanceToPlayer(2) <= 0) ||
-	(getNumberOfPlayers() > 3 && getDistanceToPlayer(3) > -1000 && getDistanceToPlayer(3) <= 0))) {
+	if (isLastGame() && waits < WAITS_FOR_RIICHI && ((getDistanceToPlayer(1) > -1000 && getDistanceToPlayer(1) <= 0) ||
+		(getDistanceToPlayer(2) > -1000 && getDistanceToPlayer(2) <= 0) ||
+		(getNumberOfPlayers() > 3 && getDistanceToPlayer(3) > -1000 && getDistanceToPlayer(3) <= 0))) {
 		log("Decline Riichi because distance to next player is < 1000 in last game.");
 		return false;
 	}
@@ -578,6 +588,14 @@ function isLastGame() {
 		return getRound() == 3 || getRoundWind() > 1; //East 4 or South X
 	}
 	return (getRound() == 2 && getRoundWind() > 1) || getRoundWind() > 2; //South 3 or West X
+}
+
+//Check if Hand is complete
+function isWinningHand(numberOfTriples, numberOfPairs) {
+	if (strategy == STRATEGIES.CHIITOITSU) {
+		return numberOfPairs == 7;
+	}
+	return numberOfTriples == 4 && numberOfPairs == 1;
 }
 
 //Returns the binomialCoefficient for two numbers. Needed for chance to draw tile calculation. Fails if a faculty of > 134 is needed (should not be the case since there are 134 tiles)

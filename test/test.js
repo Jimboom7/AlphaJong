@@ -326,27 +326,26 @@ function runTestcase() {
 			log("Testcase 37: Test Ittsuu");
 			dora = [{ index: 1, type: 1, dora: false }];
 			ownHand = getTilesFromString("12345689m67s777z");
-			discards = [[{ index: 6, type: 0, dora: false, doraValue: 0 }], [], [], []];
 
 			expected = ["6s", "7s"];
 			break;
 		case 38:
 			log("Testcase 38: Test Sanankou");
 			dora = [{ index: 1, type: 1, dora: false }];
-			ownHand = getTilesFromString("22233367m3488p88s");
-			discards = [[{ index: 2, type: 0, dora: false, doraValue: 0 }], [], [], []];
+			ownHand = getTilesFromString("22233368m2488p88s");
+			discards = [getTilesFromString("2p"), [], [], []];
 
-			expected = ["3p"];
+			expected = ["8m"];
 			break;
 		case 39:
 			isClosed = false;
 			log("Testcase 39: Test Toitoi");
 			dora = [{ index: 1, type: 1, dora: false }];
-			ownHand = getTilesFromString("333666m788p88s");
-			discards = [[], [{ index: 6, type: 0, dora: false, doraValue: 0 }, { index: 6, type: 0, dora: false, doraValue: 0 }], [{ index: 9, type: 0, dora: false, doraValue: 0 }], []];
+			ownHand = getTilesFromString("333666m688p88s");
+			discards = [[], [{ index: 8, type: 0, dora: false, doraValue: 0 }, { index: 6, type: 0, dora: false, doraValue: 0 }], [{ index: 9, type: 0, dora: false, doraValue: 0 }], []];
 			calls = [[{ index: 1, type: 1, dora: false, doraValue: 0 }, { index: 1, type: 1, dora: false, doraValue: 0 }, { index: 1, type: 1, dora: false, doraValue: 0 }], [], [], []];
 
-			expected = ["7p"];
+			expected = ["6p"];
 			break;
 		case 40:
 			log("Testcase 40: Test Chinitsu");
@@ -438,6 +437,20 @@ function runTestcase() {
 			ownHand = getTilesFromString("113m223457p12379s");
 
 			expected = ["3m", "7p"];
+			break;
+		case 53:
+			log("Testcase 53: Test Pair Furiten");
+			readDebugString("6z|3m33p406777s77z|576m||231m|999s|93p261z1s|8s2z91s2p|1s9p51z2p|35z1m94p|0,0,0,0|1|1|48");
+
+			expected = ["3p"];
+			break;
+		case 54:
+			log("Testcase 54: Test Complex Furiten");
+			dora = [{ index: 1, type: 1, dora: false }];
+			ownHand = getTilesFromString("1113456m666999s1z"); // 3 tile wait (2m, 3m, 6m) in furiten
+			discards = [[{ index: 2, type: 1, dora: false, doraValue: 0 }], [], [], []];
+
+			expected = ["3m", "6m"];
 			break;
 		default:
 			testsRunning = false;
@@ -616,7 +629,7 @@ function isTenpai(triplesAndPairs, doubles, efficiency) {
 	if (strategy == STRATEGIES.CHIITOITSU) {
 		return parseInt(triplesAndPairs.pairs.length / 2) >= 6;
 	}
-	return tenpai = (efficiency >= 3.5 && ((parseInt(triplesAndPairs.triples.length / 3) == 3 && parseInt(triplesAndPairs.pairs.length / 2) >= 1 && ((parseInt(doubles.length / 2) >= 1) || parseInt(triplesAndPairs.pairs.length / 2) >= 2)) || parseInt(triplesAndPairs.triples.length / 3) == 4));
+	return efficiency >= 3.5 && ((parseInt(triplesAndPairs.triples.length / 3) == 3 && parseInt(triplesAndPairs.pairs.length / 2) >= 1 && ((parseInt(doubles.length / 2) >= 1) || parseInt(triplesAndPairs.pairs.length / 2) >= 2)) || parseInt(triplesAndPairs.triples.length / 3) == 4);
 }
 
 

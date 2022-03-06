@@ -6,6 +6,9 @@
 //Returns the closed and open yaku value of the hand
 function getYaku(inputHand, inputCalls) {
 
+	//Remove 4th tile from Kans, which could lead to false yaku calculation
+	inputCalls = inputCalls.filter(tile => !tile.kan);
+
 	var hand = inputHand.concat(inputCalls); //Add calls to hand
 
 	var yakuOpen = 0;
@@ -283,7 +286,7 @@ function getSanshokuDouko(triplets) {
 function getSanshokuDoujun(sequences) {
 	for (var i = 1; i <= 7; i++) {
 		if (sequences.filter(tile => tile.index == i || tile.index == i + 1 || tile.index == i + 2).length >= 9) {
-			return { open: 2, closed: 1 };
+			return { open: 1, closed: 2 };
 		}
 	}
 	return { open: 0, closed: 0 };

@@ -61,6 +61,7 @@ function main() {
 		return;
 	}
 	if (!isInGame()) {
+		checkForEnd();
 		currentActionOutput.value = "Waiting for Game to start.";
 		log("Game is not running, sleep 2 seconds.");
 		errorCounter++;
@@ -88,7 +89,6 @@ function main() {
 			lastTilesLeft = getTilesLeft();
 			errorCounter = 0;
 		}
-		checkForEnd();
 		log("Waiting for own turn, sleep 1 second.");
 		currentActionOutput.value = "Waiting for own turn.";
 		setTimeout(main, 1000);
@@ -128,7 +128,7 @@ function mainOwnTurn() {
 			case getOperations().babei:
 				callKita();
 				break;
-            case getOperations().jiuzhongjiupai:
+			case getOperations().jiuzhongjiupai:
 				callAbortiveDraw();
 				break;
 		}
@@ -182,18 +182,17 @@ function setData() {
 
 	calls = [];
 	for (var j = 0; j < getNumberOfPlayers(); j++) { //Get Calls for all Players
-		var temp_calls = [];
-		for (let calls of getCallsOfPlayer(j)) {
-			temp_calls.push(calls.val);
-		}
-		calls.push(temp_calls);
+		calls.push(getCallsOfPlayer(j));
 	}
 
-	if (tilesLeft < getTilesLeft()) { //Check if new round/reload
-		isClosed = true;
-		if (calls[0].length > 0) {
+	isClosed = true;
+	for (let tile of calls[0]) { //Is hand closed? Also consider closed Kans
+		if(tile.from != localPosition2Seat(0)) {
 			isClosed = false;
+			break;
 		}
+	}
+	if (tilesLeft < getTilesLeft()) { //Check if new round/reload
 		setAutoCallWin(true);
 		strategy = STRATEGIES.GENERAL;
 		strategyAllowsCalls = true;
@@ -212,7 +211,7 @@ function setData() {
 
 //Search for Game
 function startGame() {
-	if (!isInGame() && run) {
+	if (!isInGame() && run && AUTORUN) {
 		log("Searching for Game in Room " + ROOM);
 		currentActionOutput.value = "Searching for Game...";
 		searchForGame();

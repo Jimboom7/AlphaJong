@@ -14,7 +14,7 @@ function preventAFK() {
 	app.NetAgent.sendReq2Lobby('Lobby', 'heatbeat', { no_operation_counter: 0 }); //Prevent Server-side AFK
 
 	if (typeof view == 'undefined' || typeof view.DesktopMgr == 'undefined' ||
-		typeof view.DesktopMgr.Inst == 'undefined' || view.DesktopMgr.Inst == 'null') {
+		typeof view.DesktopMgr.Inst == 'undefined' || view.DesktopMgr.Inst == null) {
 		return;
 	}
 	view.DesktopMgr.Inst.hangupCount = 0;
@@ -58,7 +58,23 @@ function getDiscardsOfPlayer(player) {
 
 function getCallsOfPlayer(player) {
 	player = getCorrectPlayerNumber(player);
-	return view.DesktopMgr.Inst.players[player].container_ming.pais;
+
+	var callArray = [];
+	//Mark the tiles with the player who discarded the tile
+	for (let ming of view.DesktopMgr.Inst.players[player].container_ming.mings) {
+		for (var i = 0; i < ming.pais.length; i++) {
+			ming.pais[i].from = ming.from[i];
+			if(i == 3) {
+				ming.pais[i].kan = true;
+			}
+			else {
+				ming.pais[i].kan = false;
+			}
+			callArray.push(ming.pais[i]);
+		}
+	}
+
+	return callArray;
 }
 
 function getTilesLeft() {
@@ -130,7 +146,7 @@ function sendKitaCall() {
 function sendAbortiveDrawCall() {
 	app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.jiuzhongjiupai, index: 0, timeuse: 2 });
 }
-                
+
 function callDiscard(tileNumber) {
 	view.DesktopMgr.Inst.players[0]._choose_pai = view.DesktopMgr.Inst.players[0].hand[tileNumber];
 	view.DesktopMgr.Inst.players[0].DoDiscardTile();
@@ -147,7 +163,8 @@ function getNumberOfPlayerHand(player) {
 }
 
 function isEndscreenShown() {
-	return view.DesktopMgr.Inst.gameEndResult != null;
+	return this != null && view != null && view.DesktopMgr != null &&
+		view.DesktopMgr.Inst != null && view.DesktopMgr.Inst.gameEndResult != null;
 }
 
 function isDisconnect() {
@@ -161,7 +178,9 @@ function isPlayerRiichi(player) {
 
 function isInGame() {
 	try {
-		return this != null && view != null && view.DesktopMgr != null && view.DesktopMgr.Inst != null && view.DesktopMgr.player_link_state != null;
+		return this != null && view != null && view.DesktopMgr != null &&
+			view.DesktopMgr.Inst != null && view.DesktopMgr.player_link_state != null &&
+			view.DesktopMgr.Inst.active && !isEndscreenShown()
 	}
 	catch {
 		return false;
@@ -191,8 +210,8 @@ function hasPlayerHandChanged(player) {
 //Sets a variable for each pai in a players hand
 function rememberPlayerHand(player) {
 	var player_correct = getCorrectPlayerNumber(player);
-	for (let hand of view.DesktopMgr.Inst.players[player_correct].hand) {
-		hand.old = true;
+	for (let tile of view.DesktopMgr.Inst.players[player_correct].hand) {
+		tile.old = true;
 	}
 }
 

@@ -39,8 +39,13 @@ function getTileDanger(tile) {
 		if (isGoingForFlush(i, tile.type)) {
 			dangerPerPlayer[i] *= 1.3;
 		}
-		else if (isGoingForFlush(i, 0) || isGoingForFlush(i, 1) || isGoingForFlush(i, 2)) { //Is the player going for any other flush? -> 30% safer
-			dangerPerPlayer[i] /= 1.3;
+		else if (isGoingForFlush(i, 0) || isGoingForFlush(i, 1) || isGoingForFlush(i, 2)) { //Is the player going for any other flush?
+			if (tile.type == 3) {
+				dangerPerPlayer[i] *= 1.2; //Honor tiles are also dangerous
+			}
+			else {
+				dangerPerPlayer[i] /= 1.2; //Other tiles are less dangerous
+			}
 		}
 
 		//Danger is at least 5
@@ -70,7 +75,7 @@ function getPlayerDangerLevel(player) {
 	}
 
 	if (getNumberOfPlayerHand(player) < 13) { //Some Calls
-		var dangerLevel = parseInt(185 - (getNumberOfPlayerHand(player) * 8) - (tilesLeft * 1.5));
+		var dangerLevel = parseInt(190 - (getNumberOfPlayerHand(player) * 8) - (tilesLeft * 1.75));
 	}
 	else {
 		dangerLevel = 15 - tilesLeft; //Full hand without Riichi -> Nearly always safe
@@ -99,6 +104,10 @@ function getPlayerDangerLevel(player) {
 		dangerLevel += 10;
 	}
 
+	if (tilesLeft > 50) {
+		dangerLevel *= 0.5 + ((70 - tilesLeft) / 40); //Danger scales over the first few turns.
+	}
+
 	return dangerLevel;
 }
 
@@ -115,7 +124,10 @@ function getMostRecentDiscardDanger(tile, player) {
 	var danger = 99;
 	for (var i = 0; i < getNumberOfPlayers(); i++) {
 		var r = getLastTileInDiscard(i, tile);
-		if (player == i && r != null) {
+		if (player == i && r != null) { //Tile is in own discards
+			return 0;
+		}
+		if (wasTileCalledFromOtherPlayers(player, tile)) { //The tile was discarded and called by someone else
 			return 0;
 		}
 		if (r != null && r.numberOfPlayerHandChanges[player] < danger) {
@@ -136,15 +148,33 @@ function getLastTileInDiscard(player, tile) {
 	return null;
 }
 
+//Checks if a tile has been called by someone
+function wasTileCalledFromOtherPlayers(player, tile) {
+	for (var i = 0; i < getNumberOfPlayers(); i++) {
+		if (i == player) { //Skip own melds
+			continue;
+		}
+		for (let t of calls[i]) { //Look through all melds and check where the tile came from
+			if (t.from == localPosition2Seat(getCorrectPlayerNumber(player)) && tile.index == t.index && tile.type == t.type) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 //Returns the safety of a tile
 //Based on the tile danger, but with exponential growth
 function getTileSafety(tile) {
+	if (typeof tile == 'undefined') {
+		return 1;
+	}
 	return 1 - (Math.pow(getTileDanger(tile) / 10, 2) / 100);
 }
 
 //Returns true if the player is going for a flush of a given type
 function isGoingForFlush(player, type) {
-	if (calls[player].length <= 3 || calls[player].some(tile => tile.type != type && tile.type != 3)) { //Not enough or different calls -> false
+	if (calls[player].length < 6 || calls[player].some(tile => tile.type != type && tile.type != 3)) { //Not enough or different calls -> false
 		return false;
 	}
 	if (discards[player].filter(tile => tile.type == type).length >= (discards[player].length / 6)) { //Many discards of that type -> false
@@ -172,7 +202,7 @@ function getWaitScoreForTileAndPlayer(player, tile) {
 	var score = 0;
 
 	//Same tile
-	score += tile0 * (tile0Public + 1) * 6;
+	score += tile0 * (tile0Public + 1) * 5;
 
 	if (getNumberOfPlayerHand(player) == 1 || tile.type == 3) {
 		return score * factor; //Return normalized result
@@ -190,11 +220,13 @@ function getWaitScoreForTileAndPlayer(player, tile) {
 	var tileU3Public = tileU3 + getNumberOfTilesInTileArray(ownHand, tile.index + 3, tile.type);
 	var factorU = getFuritenValue(player, { index: tile.index + 3, type: tile.type });
 
-	score += (tileL1 * tileL2) * (tile0Public + tileL3Public) * factorL;
-	score += (tileU1 * tileU2) * (tile0Public + tileU3Public) * factorU;
+	//Ryanmen Waits
+	score += ((tileL1 * tileL2) * (tile0Public + tileL3Public) * factorL) * 1.2; //Ryanmen waits are most common -> scale them with 1.2
+	score += ((tileU1 * tileU2) * (tile0Public + tileU3Public) * factorU) * 1.2;
 
-	//Lower + Upper Tile -> lower * upper
-	score += tileL1 * tileU1 * tile0Public;
+	//Bridge Wait
+	score += (tileL1 * tileU1 * tile0Public) * 0.8; //Bridge waits are not so common -> scale them with 0.8
+
 	score *= factor;
 
 	if (score > 180) {
