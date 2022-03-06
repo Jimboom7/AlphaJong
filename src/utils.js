@@ -156,9 +156,10 @@ function pushTileAndCheckDora(tiles, arrayToPush, tile) {
 		nonDoraTile.dora = false;
 		nonDoraTile.doraValue = getTileDoraValue(nonDoraTile);
 		arrayToPush.push(nonDoraTile);
-		return;
+		return nonDoraTile;
 	}
 	arrayToPush.push(tile);
+	return tile;
 }
 
 //Return the best combination of 3-tile Sequences, Triplets and pairs in array of tiles
@@ -181,15 +182,18 @@ function getBestCombinationOfTiles(inputTiles, possibleCombinations, chosenCombi
 			continue;
 		}
 		if ("tile3" in tiles) {
-			pushTileAndCheckDora(cs.pairs.concat(cs.triples), cs.triples, tiles.tile1);
-			pushTileAndCheckDora(cs.pairs.concat(cs.triples), cs.triples, tiles.tile2);
-			pushTileAndCheckDora(cs.pairs.concat(cs.triples), cs.triples, tiles.tile3);
-			hand = removeTilesFromTileArray(hand, [tiles.tile1, tiles.tile2, tiles.tile3]);
+			var tt = pushTileAndCheckDora(cs.pairs.concat(cs.triples), cs.triples, tiles.tile1);
+			hand = removeTilesFromTileArray(hand, [tt]);
+			tt = pushTileAndCheckDora(cs.pairs.concat(cs.triples), cs.triples, tiles.tile2);
+			hand = removeTilesFromTileArray(hand, [tt]);
+			tt = pushTileAndCheckDora(cs.pairs.concat(cs.triples), cs.triples, tiles.tile3);
+			hand = removeTilesFromTileArray(hand, [tt]);
 		}
 		else {
-			pushTileAndCheckDora(cs.pairs.concat(cs.triples), cs.pairs, tiles.tile1);
-			pushTileAndCheckDora(cs.pairs.concat(cs.triples), cs.pairs, tiles.tile2);
-			hand = removeTilesFromTileArray(hand, [tiles.tile1, tiles.tile2]);
+			var tt = pushTileAndCheckDora(cs.pairs.concat(cs.triples), cs.pairs, tiles.tile1);
+			hand = removeTilesFromTileArray(hand, [tt]);
+			tt = pushTileAndCheckDora(cs.pairs.concat(cs.triples), cs.pairs, tiles.tile2);
+			hand = removeTilesFromTileArray(hand, [tt]);
 		}
 		var anotherChoice = getBestCombinationOfTiles(hand, possibleCombinations.slice(i + 1), cs);
 		if (anotherChoice.triples.length > chosenCombinations.triples.length ||
@@ -447,6 +451,26 @@ function getUsefulTilesForDouble(tileArray) {
 	return tiles;
 }
 
+// Returns Tile[], where all are terminal/honors.
+function getAllTerminalHonorFromHand(hand) {
+	return hand.filter(tile => isTerminalOrHonor(tile));
+}
+
+//Honor tile or index 1/9
+function isTerminalOrHonor(tile) {
+	// Honor tiles
+	if (tile.type == 3) {
+		return true;
+	}
+
+	// 1 or 9.
+	if (tile.index == 1 || tile.index == 9) {
+		return true;
+	}
+
+	return false;
+}
+
 //Return a safety value which is the threshold for folding (safety lower than this value -> fold)
 function getFoldThreshold(value, strict) {
 	var factor = FOLD_CONSTANT;
@@ -493,6 +517,12 @@ function shouldFold(tiles) {
 function shouldRiichi(waits, yaku, handDora) {
 	var worthlessHand = yaku.closed + handDora <= 2 - (waits / 6);
 	var lotsOfDoraIndicators = dora.length >= 4 - (waits / 4);
+
+	//Thirteen Orphans
+	if (strategy == STRATEGIES.THIRTEEN_ORPHANS) {
+		log("Decline Riichi because of Thirteen Orphan strategy.");
+		return false;
+	}
 
 	//No waits
 	if (waits < 1) {
@@ -543,9 +573,9 @@ function shouldRiichi(waits, yaku, handDora) {
 	}
 
 	// Don't Riichi when: Last round with bad waits & would lose place with -1000
-	if (isLastGame() && waits < WAITS_FOR_RIICHI && ((getDistanceToPlayer(1) > -1000 && getDistanceToPlayer(1) <= 0) ||
-		(getDistanceToPlayer(2) > -1000 && getDistanceToPlayer(2) <= 0) ||
-		(getNumberOfPlayers() > 3 && getDistanceToPlayer(3) > -1000 && getDistanceToPlayer(3) <= 0))) {
+	if (isLastGame() && waits < WAITS_FOR_RIICHI && ((getDistanceToPlayer(1) >= -1000 && getDistanceToPlayer(1) <= 0) ||
+		(getDistanceToPlayer(2) >= -1000 && getDistanceToPlayer(2) <= 0) ||
+		(getNumberOfPlayers() > 3 && getDistanceToPlayer(3) >= -1000 && getDistanceToPlayer(3) <= 0))) {
 		log("Decline Riichi because distance to next player is < 1000 in last game.");
 		return false;
 	}
