@@ -7,10 +7,8 @@
 var FOLD_CONSTANT = 10; //Lower -> Earlier Fold. Default: 10
 
 //CALLS
-var CALL_CONSTANT = 2.5; //Amount of han (Open Yaku + Dora) that is needed for calls (to accelerate high value hands). Default: 3
-var CALL_YAKU_THRESHOLD = 0.01; //How many Yakus does the hand need to call for tiles? Default: 0.01 (aka medium chance for yaku soon)
+var CALL_CONSTANT = 3; //Amount of han (Open Yaku + Dora) that is needed for calls (to accelerate high value hands). Default: 3
 var CALL_KAN_CONSTANT = 60; //Higher Value: Higher Threshold for calling Kans. Default: 60
-var EFFICIENCY_THRESHOLD = 1.5; // If efficiency of hand is below this threshhold (& dealer): Call if hand has open yaku.
 
 //HAND EVALUATION CONSTANTS. Higher number => more important.
 var EFFICIENCY_VALUE = 1; // 0 -> ignore Efficiency (lol). Default: 1
@@ -25,10 +23,10 @@ var THIRTEEN_ORPHANS = 10; //Number of Honor/Terminals in hand to go for 13 orph
 var RIICHI_TILES_LEFT = 6; //Minimum amount of tiles that need to be left for calling Riichi. Default: 6
 var WAITS_FOR_RIICHI = 5; //Amount of waits that is considered good enough for calling Riichi. Default: 5
 
-//LOGGING
+//MISC
 var LOG_AMOUNT = 3; //Amount of Messages to log for Tile Priorities
 var DEBUG_BUTTON = false; //Display a Debug Button in the GUI
-
+var LOW_SPEC_MODE = false; //Decrease calculation time
 
 
 

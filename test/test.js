@@ -246,7 +246,7 @@ function runTestcase() {
 			dora = [{ index: 1, type: 1, dora: false }];
 			ownHand = getTilesFromString("11189m13789p123s");
 			discards = [[], getTilesFromString("1m"), getTilesFromString("1m"), getTilesFromString("1m")];
-			expected = ["9m"];
+			expected = ["8m", "9m"];
 			break;
 		case 28:
 			log("Testcase 28: Open Hand");

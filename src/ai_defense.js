@@ -202,7 +202,7 @@ function getWaitScoreForTileAndPlayer(player, tile) {
 	var score = 0;
 
 	//Same tile
-	score += tile0 * (tile0Public + 1) * 5;
+	score += tile0 * (tile0Public + 1) * 6;
 
 	if (getNumberOfPlayerHand(player) == 1 || tile.type == 3) {
 		return score * factor; //Return normalized result
@@ -221,11 +221,11 @@ function getWaitScoreForTileAndPlayer(player, tile) {
 	var factorU = getFuritenValue(player, { index: tile.index + 3, type: tile.type });
 
 	//Ryanmen Waits
-	score += ((tileL1 * tileL2) * (tile0Public + tileL3Public) * factorL) * 1.2; //Ryanmen waits are most common -> scale them with 1.2
-	score += ((tileU1 * tileU2) * (tile0Public + tileU3Public) * factorU) * 1.2;
+	score += (tileL1 * tileL2) * (tile0Public + tileL3Public) * factorL;
+	score += (tileU1 * tileU2) * (tile0Public + tileU3Public) * factorU;
 
 	//Bridge Wait
-	score += (tileL1 * tileU1 * tile0Public) * 0.8; //Bridge waits are not so common -> scale them with 0.8
+	score += (tileL1 * tileU1 * tile0Public);
 
 	score *= factor;
 

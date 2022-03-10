@@ -89,7 +89,7 @@ function callTriple(combinations, operation) {
 	}
 	averageSafety /= numOfTiles;
 
-	if (getFoldThreshold(newHandValue.value, false) > averageSafety || getFoldThreshold(newHandValue.value, false) > newHandValue.safety) {
+	if (getFoldThreshold(newHandValue, false) > averageSafety || getFoldThreshold(newHandValue, false) > newHandValue.safety) {
 		strategyAllowsCalls = false;
 	}
 
@@ -99,8 +99,8 @@ function callTriple(combinations, operation) {
 		return false;
 	}
 
-	if (newHandValue.yaku.open < CALL_YAKU_THRESHOLD) { //Yaku chance is too bad
-		log("Not enough Yaku! Declined! " + newHandValue.yaku.open + "<" + CALL_YAKU_THRESHOLD);
+	if (newHandValue.yaku.open < 0.01) { //Yaku chance is too bad
+		log("Not enough Yaku! Declined! " + newHandValue.yaku.open + "<0.01");
 		declineCall(operation);
 		return false;
 	}
@@ -123,7 +123,7 @@ function callTriple(combinations, operation) {
 		return false;
 	}
 
-	if (handValue.efficiency < EFFICIENCY_THRESHOLD && seatWind == 1) { //Low hand efficiency & dealer? -> Go for a fast win
+	if (handValue.efficiency < 1.5 && seatWind == 1) { //Low hand efficiency & dealer? -> Go for a fast win
 		log("Call accepted because of bad hand and dealer position!");
 	}
 	else if (newHandValue.yaku.open + getNumberOfDoras(ownHand) >= CALL_CONSTANT && handValue.yaku.open + handValue.dora > newHandValue.yaku.open + newHandValue.dora * 0.7) { //High value hand? -> Go for a fast win
@@ -246,7 +246,7 @@ function callRiichi(tiles) {
 function discardFold(tiles) {
 	if (strategy != STRATEGIES.FOLD) { //Not in full Fold mode yet: Discard a relatively safe tile with high priority
 		for (let tile of tiles) {
-			var foldThreshold = getFoldThreshold(tile.value, true);
+			var foldThreshold = getFoldThreshold(tile, true);
 			if (tile.value + 0.1 > tiles[0].value) { //If next tile is not much worse in value than the top priority discard
 				if (tile.safety > foldThreshold) { //Tile that is safe enough exists
 					log("Tile Priorities: ");
@@ -373,6 +373,9 @@ function getHandValues(hand, discardedTile) {
 
 		var newTiles2 = getUsefulTilesForTriple(hand);
 		for (let newTile2 of newTiles2) {
+			if (LOW_SPEC_MODE && newTile.type != newTile2.type) { //In Low Spec Mode: Ignore some combinations that are unlikely to improve the hand -> Less calculation time
+				continue;
+			}
 			if (tileCombinations.some(t => (getTileName(t.tile1) == getTileName(newTile2) && getTileName(t.tile2) == getTileName(newTile)) || (getTileName(t.tile1) == getTileName(newTile) && getTileName(t.tile2) == getTileName(newTile2)))) { //Don't calculate combinations multiple times
 				continue;
 			}
@@ -391,7 +394,8 @@ function getHandValues(hand, discardedTile) {
 		}
 
 		var y2 = baseYaku;
-		if (e2 > 0) { //If this tile forms a new triple
+		var winning = isWinningHand(parseInt((triples2.length / 3)) + callTriples, pairs2.length / 2);
+		if (e2 > 0 || winning) { //If this tile forms a new triple
 			efficiency += e2 * chance;
 			y2 = getYaku(hand, calls[0]);
 			y2.open -= baseYaku.open;
@@ -402,7 +406,7 @@ function getHandValues(hand, discardedTile) {
 			if (y2.closed > 0) {
 				yaku.closed += y2.closed * chance;
 			}
-			if (!isHandFuriten && isWinningHand(parseInt((triples2.length / 3)) + callTriples, pairs2.length / 2)) {
+			if (!isHandFuriten && winning) {
 				if (isTileFuriten(newTile.index, newTile.type)) { // Furiten
 					waits = 0;
 					isHandFuriten = true;
@@ -413,7 +417,7 @@ function getHandValues(hand, discardedTile) {
 			}
 		}
 
-		valueForTile.push({ tile: newTile, efficiency: e2, dora: d2, yaku: y2 });
+		valueForTile.push({ tile: newTile, efficiency: e2, dora: d2, yaku: y2, winning: winning });
 
 		hand.pop();
 	}
@@ -437,18 +441,27 @@ function getHandValues(hand, discardedTile) {
 
 		chance = (numberOfTiles1 / availableTiles.length);
 
-		hand.push(tileCombination.tile1);
-		hand.push(tileCombination.tile2);
-
 		var tile1Value = valueForTile.find(t => getTileName(t.tile) == getTileName(tileCombination.tile1));
 		var tile2Value = valueForTile.find(t => getTileName(t.tile) == getTileName(tileCombination.tile2));
 
 		if (tile2Value == undefined) {
-			tile2Value = { efficiency: 0, dora: 0, yaku: { open: 0, closed: 0 } };
+			tile2Value = { efficiency: 0, dora: 0, yaku: { open: 0, closed: 0 }, winning: false };
 		}
 
-		var oldEfficiency = tile1Value.efficiency + tile2Value.efficiency;
-		oldEfficiency = oldEfficiency > 1 ? 1 : oldEfficiency;
+		if (tile1Value.winning || tile2Value.winning) {
+			continue;
+		}
+
+		hand.push(tileCombination.tile1);
+		hand.push(tileCombination.tile2);
+
+		if(tileCombination.tile1.index == tileCombination.tile2.index && tileCombination.tile1.type == tileCombination.tile2.type) {
+			var oldEfficiency = tile1Value.efficiency;
+		}
+		else {
+			var oldEfficiency = tile1Value.efficiency + tile2Value.efficiency;
+			oldEfficiency = oldEfficiency > 1 ? 1 : oldEfficiency;
+		}
 		var oldDora = tile1Value.dora + tile2Value.dora;
 		var oldYaku = { open: tile1Value.yaku.open + tile2Value.yaku.open, closed: tile1Value.yaku.closed + tile2Value.yaku.closed };
 
@@ -468,8 +481,8 @@ function getHandValues(hand, discardedTile) {
 		if (d3 > 0) {
 			doraValue += d3 * newChance;
 		}
-
-		if (e3 > 0) { //If this tile forms a new triple
+		var winning = isWinningHand(parseInt((triples3.length / 3)) + callTriples, pairs3.length / 2);
+		if (e3 > 0 || winning) { //If this tile forms a new triple
 			efficiency += e3 * newChance;
 			var y3 = getYaku(hand, calls[0]);
 			y3.open -= (baseYaku.open + oldYaku.open);
@@ -480,7 +493,7 @@ function getHandValues(hand, discardedTile) {
 			if (y3.closed > 0) {
 				yaku.closed += y3.closed * newChance;
 			}
-			if (!isHandFuriten && isWinningHand(parseInt((triples3.length / 3)) + callTriples, pairs3.length / 2)) {
+			if (!isHandFuriten && winning) {
 				waits += numberOfTiles2 * ((3 - (getWaitScoreForTile(tileCombination.tile2) / 90)) / 2) * chance; //Factor waits by "uselessness" for opponents
 			}
 		}
@@ -501,7 +514,14 @@ function getTileValue(efficiency, yakus, doraValue, waits, safety) {
 
 	efficiency += (waits / (11 - (WAIT_VALUE * 10)));
 
-	return ((efficiency * EFFICIENCY_VALUE) + (yaku * YAKU_VALUE) + (doraValue * DORA_VALUE) + (safety * SAFETY_VALUE)) / (EFFICIENCY_VALUE + YAKU_VALUE + DORA_VALUE + SAFETY_VALUE);
+	var placementFactor = 1;
+
+	if (isLastGame() && getDistanceToFirst() < -10000) { //Huge lead in last game
+		placementFactor = 1.5;
+	}
+
+	return ((efficiency * EFFICIENCY_VALUE * placementFactor) + (yaku * YAKU_VALUE) + (doraValue * DORA_VALUE) +
+			(safety * SAFETY_VALUE * placementFactor)) / ((EFFICIENCY_VALUE * placementFactor) + YAKU_VALUE + DORA_VALUE + (SAFETY_VALUE * placementFactor));
 }
 
 //Get Chiitoitsu Priorities -> Look for Pairs
@@ -678,7 +698,7 @@ function getDiscardTile(tiles) {
 
 	var highestYaku = -1;
 	for (let t of tiles) {
-		var foldThreshold = getFoldThreshold(t.value, false);
+		var foldThreshold = getFoldThreshold(t, false);
 		if (t.yaku.open > highestYaku + 0.01 && t.yaku.open / 3 > highestYaku && t.safety > foldThreshold) {
 			tile = t.tile;
 			highestYaku = t.yaku.open;

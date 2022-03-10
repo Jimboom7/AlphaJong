@@ -18,7 +18,7 @@ function getYaku(inputHand, inputCalls) {
 
 	var triplesAndPairs = getTriplesAndPairs(hand);
 	var triplets = getTripletsAsArray(hand);
-	var sequences = getBestSequenceCombination(hand);
+	var sequences = getBestSequenceCombination(inputHand).concat(getBestSequenceCombination(inputCalls));
 
 	//Yakuhai
 	//Wind/Dragon Triples
@@ -49,7 +49,7 @@ function getYaku(inputHand, inputCalls) {
 
 	//Iipeikou (Identical Sequences in same type)
 	//Closed
-	var iipeikou = getIipeikou(triplesAndPairs.triples);
+	var iipeikou = getIipeikou(sequences);
 	yakuOpen += iipeikou.open;
 	yakuClosed += iipeikou.closed;
 

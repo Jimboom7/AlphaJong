@@ -472,7 +472,13 @@ function isTerminalOrHonor(tile) {
 }
 
 //Return a safety value which is the threshold for folding (safety lower than this value -> fold)
-function getFoldThreshold(value, strict) {
+function getFoldThreshold(tilePrio, strict) {
+	var han = tilePrio.yaku.open + tilePrio.dora;
+	if(isClosed) {
+		han = tilePrio.yaku.closed + tilePrio.dora;
+	}
+	var value = tilePrio.value + ((han - 2)/10);
+
 	var factor = FOLD_CONSTANT;
 	if (strict) {
 		factor /= 5;
@@ -487,12 +493,18 @@ function getFoldThreshold(value, strict) {
 		}
 	}
 	factor *= seatWind == 1 ? 1.1 : 1; //Fold later as dealer
-	return Number((1 - (((value * value * factor) + (factor / 3)) / 100))).toFixed(2)
+	var threshold = Number((1 - (((value * value * factor) + (factor / 3)) / 100))).toFixed(2);
+	if(threshold > 0.9) {
+		threshold = 0.9;
+	}
+	else if(threshold < 0) {
+		threshold = 0;
+	}
+	return threshold;
 }
 
-//Return true if: Not last place and the danger level is too high
+//Return true if danger is too high in relation to the value of the hand
 function shouldFold(tiles) {
-
 	if ((tilesLeft < 4 && tiles[0].efficiency < 3.5) ||
 		(tilesLeft < 8 && tiles[0].efficiency < 3) ||
 		(tilesLeft < 12 && tiles[0].efficiency < 2)) {
@@ -502,7 +514,7 @@ function shouldFold(tiles) {
 		return true;
 	}
 
-	var foldThreshold = getFoldThreshold(tiles[0].value, false);
+	var foldThreshold = getFoldThreshold(tiles[0], false);
 	log("Would fold this hand below " + foldThreshold + " safety.");
 
 	if (foldThreshold > tiles[0].safety) {
@@ -515,8 +527,8 @@ function shouldFold(tiles) {
 //Decide whether to call Riichi
 //Based on: https://mahjong.guide/2018/01/28/mahjong-fundamentals-5-riichi/
 function shouldRiichi(waits, yaku, handDora) {
-	var worthlessHand = yaku.closed + handDora <= 2 - (waits / 6);
-	var lotsOfDoraIndicators = dora.length >= 4 - (waits / 4);
+	var badWait = waits < WAITS_FOR_RIICHI;
+	var lotsOfDoraIndicators = dora.length >= 3;
 
 	//Thirteen Orphans
 	if (strategy == STRATEGIES.THIRTEEN_ORPHANS) {
@@ -543,13 +555,13 @@ function shouldRiichi(waits, yaku, handDora) {
 	}
 
 	// Not Dealer & bad Wait & Riichi is only yaku
-	if (seatWind != 1 && waits < WAITS_FOR_RIICHI && worthlessHand && !lotsOfDoraIndicators) {
+	if (seatWind != 1 && badWait && yaku.closed + handDora < 1 && !lotsOfDoraIndicators) {
 		log("Decline Riichi because of worthless hand, bad waits and not dealer.");
 		return false;
 	}
 
-	// High Danger and hand not worth much
-	if (getCurrentDangerLevel() > 50 + (waits * 2) && worthlessHand) {
+	// High Danger and hand not worth much or bad wait
+	if (getCurrentDangerLevel() > 50 && (yaku.closed + handDora < 2 || badWait)) {
 		log("Decline Riichi because of worthless hand and high danger.");
 		return false;
 	}
@@ -573,7 +585,7 @@ function shouldRiichi(waits, yaku, handDora) {
 	}
 
 	// Don't Riichi when: Last round with bad waits & would lose place with -1000
-	if (isLastGame() && waits < WAITS_FOR_RIICHI && ((getDistanceToPlayer(1) >= -1000 && getDistanceToPlayer(1) <= 0) ||
+	if (isLastGame() && badWait && ((getDistanceToPlayer(1) >= -1000 && getDistanceToPlayer(1) <= 0) ||
 		(getDistanceToPlayer(2) >= -1000 && getDistanceToPlayer(2) <= 0) ||
 		(getNumberOfPlayers() > 3 && getDistanceToPlayer(3) >= -1000 && getDistanceToPlayer(3) <= 0))) {
 		log("Decline Riichi because distance to next player is < 1000 in last game.");
