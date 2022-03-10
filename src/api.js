@@ -122,15 +122,18 @@ function getTileForCall() {
 
 function makeCall(type) {
 	app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { type: type, index: 0, timeuse: 2 });
+	view.DesktopMgr.Inst.WhenDoOperation();
 }
 
 function makeCallWithOption(type, option) {
 	app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { type: type, index: option, timeuse: 2 });
+	view.DesktopMgr.Inst.WhenDoOperation();
 }
 
 function declineCall(operation) {
 	if (operation == getOperationList()[getOperationList().length - 1].type) { //Is last operation -> Send decline Command
 		app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { cancel_operation: true, timeuse: 2 });
+		view.DesktopMgr.Inst.WhenDoOperation();
 	}
 }
 
@@ -141,10 +144,12 @@ function sendRiichiCall(tile, moqie) {
 function sendKitaCall() {
 	var moqie = view.DesktopMgr.Inst.mainrole.last_tile.val.toString() == "4z";
 	app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.babei, moqie: moqie, timeuse: 2 });
+	view.DesktopMgr.Inst.WhenDoOperation()
 }
 
 function sendAbortiveDrawCall() {
 	app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.jiuzhongjiupai, index: 0, timeuse: 2 });
+	view.DesktopMgr.Inst.WhenDoOperation()
 }
 
 function callDiscard(tileNumber) {
