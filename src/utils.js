@@ -474,10 +474,10 @@ function isTerminalOrHonor(tile) {
 //Return a safety value which is the threshold for folding (safety lower than this value -> fold)
 function getFoldThreshold(tilePrio, strict) {
 	var han = tilePrio.yaku.open + tilePrio.dora;
-	if(isClosed) {
+	if (isClosed) {
 		han = tilePrio.yaku.closed + tilePrio.dora;
 	}
-	var value = tilePrio.value + ((han - 2)/10);
+	var value = tilePrio.value + ((han - 2) / 10);
 
 	var factor = FOLD_CONSTANT;
 	if (strict) {
@@ -494,10 +494,10 @@ function getFoldThreshold(tilePrio, strict) {
 	}
 	factor *= seatWind == 1 ? 1.1 : 1; //Fold later as dealer
 	var threshold = Number((1 - (((value * value * factor) + (factor / 3)) / 100))).toFixed(2);
-	if(threshold > 0.9) {
+	if (threshold > 0.9) {
 		threshold = 0.9;
 	}
-	else if(threshold < 0) {
+	else if (threshold < 0) {
 		threshold = 0;
 	}
 	return threshold;

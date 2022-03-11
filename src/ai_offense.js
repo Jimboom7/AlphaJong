@@ -455,7 +455,7 @@ function getHandValues(hand, discardedTile) {
 		hand.push(tileCombination.tile1);
 		hand.push(tileCombination.tile2);
 
-		if(tileCombination.tile1.index == tileCombination.tile2.index && tileCombination.tile1.type == tileCombination.tile2.type) {
+		if (tileCombination.tile1.index == tileCombination.tile2.index && tileCombination.tile1.type == tileCombination.tile2.type) {
 			var oldEfficiency = tile1Value.efficiency;
 		}
 		else {
@@ -521,7 +521,7 @@ function getTileValue(efficiency, yakus, doraValue, waits, safety) {
 	}
 
 	return ((efficiency * EFFICIENCY_VALUE * placementFactor) + (yaku * YAKU_VALUE) + (doraValue * DORA_VALUE) +
-			(safety * SAFETY_VALUE * placementFactor)) / ((EFFICIENCY_VALUE * placementFactor) + YAKU_VALUE + DORA_VALUE + (SAFETY_VALUE * placementFactor));
+		(safety * SAFETY_VALUE * placementFactor)) / ((EFFICIENCY_VALUE * placementFactor) + YAKU_VALUE + DORA_VALUE + (SAFETY_VALUE * placementFactor));
 }
 
 //Get Chiitoitsu Priorities -> Look for Pairs
@@ -602,7 +602,7 @@ function thirteenOrphansPriorities() {
 		});
 		var efficiency = uniqueTerminalHonors.length - 9; //Minus 9 to be more in line with the usual efficiency of tiles (around 4: Is Tenpai)
 		if (ownTerminalHonors.length > uniqueTerminalHonors.length) { //At least one terminal/honor twice
-			efficiency + 0.25;
+			efficiency += 0.25;
 		}
 		var doraValue = getNumberOfDoras(hand);
 		var yaku = { open: 5, closed: 5 }; //5 is enough; with more it would never fold the hand

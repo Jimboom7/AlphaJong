@@ -144,12 +144,12 @@ function sendRiichiCall(tile, moqie) {
 function sendKitaCall() {
 	var moqie = view.DesktopMgr.Inst.mainrole.last_tile.val.toString() == "4z";
 	app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.babei, moqie: moqie, timeuse: 2 });
-	view.DesktopMgr.Inst.WhenDoOperation()
+	view.DesktopMgr.Inst.WhenDoOperation();
 }
 
 function sendAbortiveDrawCall() {
 	app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.jiuzhongjiupai, index: 0, timeuse: 2 });
-	view.DesktopMgr.Inst.WhenDoOperation()
+	view.DesktopMgr.Inst.WhenDoOperation();
 }
 
 function callDiscard(tileNumber) {
