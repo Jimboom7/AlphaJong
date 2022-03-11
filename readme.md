@@ -1,8 +1,10 @@
 ## About The Project
 
 This project is a Mahjong AI for [Mahjong Soul](https://mahjongsoul.game.yo-star.com/) that runs directly in any browser. Everything was written from scratch in native JavaScript without any libraries.  
-The AI does not use machine learning, but conventional algorithms. Simply said it's simulating some turns (with heuristics to save calculation time) and looking for the best move.  
-Compatible with both 3 and 4 player mode.
+The AI does not use machine learning, but conventional algorithms. Simply said it's simulating some turns and looking for the best move.  
+Compatible with both 3 and 4 player mode.  
+[日本語版readmeはこちら.](https://github.com/Jimboom7/AlphaJong/blob/master/readme_jp.md)  
+不幸的是，没有中文的readme.  
 
 ## Getting Started
 
@@ -31,9 +33,9 @@ The default parameters are usually fine. If you want to modify the behaviour of 
 
 ## Statistics
 
-![Stats](https://i.imgur.com/ii4TmYj.png)
+![Stats](https://i.imgur.com/30p4yAN.png)
 
-The stats contain many games by older versions of the bot and should be better in the latest version. Best rank was Expert 1* around 1000 points.
+The bot is able to reach Master rank.
 
 ![Yakuman](https://i.imgur.com/j6j2f2V.png)
 
@@ -44,10 +46,6 @@ The project contains a testclass with simple "Nani Kiru?" testcases.
 ## Known Problems
 
 -Sometimes the game disconnects you for AFK. This usually happens if the window is minimized or you switch to another tab for a while (not having focus is fine, as long as the window is open). If that happens the bot will try to reconnect by reloading the page.
-
-## Issues
-
-When creating an issue on a suboptimal play by this AI, please include the Debug String of that turn. To get it go to the correct turn in the replay and click the "Debug" button in the GUI (if the button is not visible you need to set the DEBUG_BUTTON parameter to true). A screenshot of the state of the game is also helpful.
 
 ## Disclaimer
 
