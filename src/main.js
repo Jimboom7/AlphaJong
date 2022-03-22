@@ -129,7 +129,10 @@ function mainOwnTurn() {
 				callRon();
 				break;
 			case getOperations().babei:
-				callKita();
+				if(callKita()) {
+					setTimeout(main, 1000);
+					return;
+				}
 				break;
 			case getOperations().jiuzhongjiupai:
 				callAbortiveDraw();
