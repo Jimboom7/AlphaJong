@@ -182,7 +182,9 @@ function callKan(operation, tileForCall) {
 		log("Kan accepted!");
 	}
 	else {
-		declineCall(operation);
+		if(operation == getOperations().ming_gang) { // Decline call for closed/added Kans is not working, just skip it and discard normally
+			declineCall(operation);
+		}
 		log("Kan declined!");
 	}
 }
