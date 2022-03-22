@@ -198,7 +198,9 @@ function callTsumo() {
 }
 
 function callKita() { // 3 player only
-	sendKitaCall();
+	if(strategy != STRATEGIES.THIRTEEN_ORPHANS && strategy != STRATEGIES.FOLD) {
+		sendKitaCall();
+	}
 }
 
 function callAbortiveDraw() { // Kyuushu Kyuuhai, 9 Honors or Terminals in starting Hand
