@@ -2,9 +2,9 @@
 
 このプロジェクトは、ブラウザで[雀魂 -じゃんたま-](https://game.mahjongsoul.com/)用の麻雀AIです。 ライブラリは使わず、すべてネイティブのジャバスクリプトで作りました。  
 AIは機械学習ではなく、従来のアルゴリズムを用いている。 簡単に言うといくつかのターンをシミュレートして、最適な手を探しているのです。  
-3人プレイ、4人プレイの両モードに対応。  
+三人麻雀と四人麻雀の両モードに対応。  
 [Click here for the English readme.](https://github.com/Jimboom7/AlphaJong/blob/master/readme.md)  
-不幸的是，没有中文的readme.  
+[中文自述在这里.](https://github.com/Jimboom7/AlphaJong/blob/master/readme_cn.md)  
 
 ## 使用方法
 
