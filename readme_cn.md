@@ -4,7 +4,7 @@
 这个Ai目前不使用深度学习方式，而是使用传统的算法。简单地说，它可以在模拟一些回合，依据所打出的牌来寻找最佳的行动。 
 目前AI支持3麻和4麻模式。  
 [Click here for the English readme.](https://github.com/Jimboom7/AlphaJong/blob/master/readme.md)  
-[日本語版readmeはこちら.](https://github.com/Jimboom7/AlphaJong/blob/master/readme_jp.md)  
+[日本語のリードミーはこちら.](https://github.com/Jimboom7/AlphaJong/blob/master/readme_jp.md)  
 
 ## 如何启动
 
@@ -33,7 +33,7 @@
 
 ## 统计
 
-!![1TB%80YVKEQ(IOL@DX1C72C](https://i.imgur.com/i8huL5J.png)
+![1TB%80YVKEQ(IOL@DX1C72C](https://i.imgur.com/i8huL5J.png)
 
 目前这个AI可以上分到雀豪段位，雀豪之后的路需要大家自己调自己整。
 

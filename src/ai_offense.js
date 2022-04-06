@@ -206,7 +206,11 @@ function callKita() { // 3 player only
 }
 
 function callAbortiveDraw() { // Kyuushu Kyuuhai, 9 Honors or Terminals in starting Hand
-	if (!canDoThirteenOrphans) {
+	if (canDoThirteenOrphans()) {
+		return;
+	}
+	var handValue = getHandValues(ownHand);
+	if(handValue.value < 1.2) { //Hand is bad -> abort game
 		sendAbortiveDrawCall();
 	}
 }
