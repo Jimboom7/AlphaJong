@@ -182,7 +182,7 @@ function callKan(operation, tileForCall) {
 		log("Kan accepted!");
 	}
 	else {
-		if(operation == getOperations().ming_gang) { // Decline call for closed/added Kans is not working, just skip it and discard normally
+		if (operation == getOperations().ming_gang) { // Decline call for closed/added Kans is not working, just skip it and discard normally
 			declineCall(operation);
 		}
 		log("Kan declined!");
@@ -198,7 +198,7 @@ function callTsumo() {
 }
 
 function callKita() { // 3 player only
-	if(strategy != STRATEGIES.THIRTEEN_ORPHANS && strategy != STRATEGIES.FOLD) {
+	if (strategy != STRATEGIES.THIRTEEN_ORPHANS && strategy != STRATEGIES.FOLD) {
 		sendKitaCall();
 		return true;
 	}
@@ -210,7 +210,7 @@ function callAbortiveDraw() { // Kyuushu Kyuuhai, 9 Honors or Terminals in start
 		return;
 	}
 	var handValue = getHandValues(ownHand);
-	if(handValue.value < 1.2) { //Hand is bad -> abort game
+	if (handValue.value < 1.2) { //Hand is bad -> abort game
 		sendAbortiveDrawCall();
 	}
 }
@@ -349,6 +349,9 @@ function getHandValues(hand, discardedTile) {
 	var efficiency = baseEfficiency;
 	var baseDora = getNumberOfDoras(triples.concat(pairs, calls[0]));
 	var doraValue = baseDora;
+	if (getNumberOfPlayers() == 3) {
+		doraValue += getNumberOfKitaOfPlayer(0) * getTileDoraValue({ index: 4, type: 3 });
+	}
 	var baseYaku = getYaku(hand, calls[0]);
 	var yaku = baseYaku;
 	var waits = 0;
@@ -546,6 +549,9 @@ function chiitoitsuPriorities() {
 		var pairsValue = pairs.length / 2;
 		var handWithoutPairs = removeTilesFromTileArray(newHand, pairs);
 		var doraValue = getNumberOfDoras(pairs);
+		if (getNumberOfPlayers() == 3) {
+			doraValue += getNumberOfKitaOfPlayer(0) * getTileDoraValue({ index: 4, type: 3 });
+		}
 		var waits = 0;
 
 		var efficiency = pairsValue / 2;

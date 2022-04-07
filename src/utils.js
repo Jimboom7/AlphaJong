@@ -329,6 +329,12 @@ function updateAvailableTiles() {
 function getTileDoraValue(tile) {
 	var dr = 0;
 
+	if (getNumberOfPlayers() == 3) {
+		if (tile.type == 3 && tile.index == 4) { //North Tiles
+			dr = 1;
+		}
+	}
+
 	for (let d of dora) {
 		if (d.type == tile.type && getHigherTileIndex(d) == tile.index) {
 			dr++;
@@ -348,6 +354,9 @@ function getHigherTileIndex(tile) {
 			return 1;
 		}
 		return tile.index == 7 ? 5 : tile.index + 1;
+	}
+	if (getNumberOfPlayers() == 3 && tile.index == 1 && tile.type == 1) {
+		return 9; // 3 player mode: 1 man indicator means 9 man is dora
 	}
 	return tile.index == 9 ? 1 : tile.index + 1;
 }

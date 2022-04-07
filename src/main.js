@@ -112,7 +112,7 @@ function mainOwnTurn() {
 
 	isConsideringCall = true;
 	for (let operation of operations) { //Priority Operations: Should be done before discard on own turn
-		if(getOperationList().length == 0) {
+		if (getOperationList().length == 0) {
 			break;
 		}
 		switch (operation.type) {
@@ -129,7 +129,7 @@ function mainOwnTurn() {
 				callRon();
 				break;
 			case getOperations().babei:
-				if(callKita()) {
+				if (callKita()) {
 					setTimeout(main, 1000);
 					return;
 				}
@@ -141,7 +141,7 @@ function mainOwnTurn() {
 	}
 
 	for (let operation of operations) {
-		if(getOperationList().length == 0) {
+		if (getOperationList().length == 0) {
 			break;
 		}
 		switch (operation.type) {

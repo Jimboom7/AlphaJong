@@ -100,6 +100,11 @@ function getPlayerDangerLevel(player) {
 
 	dangerLevel += getNumberOfDoras(calls[player]) * 10;
 
+	//3 player mode: More dangerous when more kita
+	if (getNumberOfPlayers() == 3) {
+		dangerLevel += (getNumberOfKitaOfPlayer(player) * getTileDoraValue({ index: 4, type: 3 })) * 10;
+	}
+
 	if (isGoingForFlush(player, 0) || isGoingForFlush(player, 1) || isGoingForFlush(player, 2)) {
 		dangerLevel += 10;
 	}
