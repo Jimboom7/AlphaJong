@@ -152,7 +152,7 @@ function getBestSequenceCombination(inputHand) {
 //More or less a workaround for a problem with the getBestCombinationOfTiles function...
 function pushTileAndCheckDora(tiles, arrayToPush, tile) {
 	if (tile.dora && tiles.some(t => t.type == tile.type && t.dora)) {
-		nonDoraTile = { ...tile };
+		var nonDoraTile = { ...tile };
 		nonDoraTile.dora = false;
 		nonDoraTile.doraValue = getTileDoraValue(nonDoraTile);
 		arrayToPush.push(nonDoraTile);
@@ -576,7 +576,7 @@ function shouldRiichi(waits, yaku, handDora) {
 	}
 
 	// Hand already has high value and enough yaku
-	if (yaku.closed >= 1 && yaku.closed + handDora > 4 + (waits / 4)) {
+	if (yaku.closed >= 1 && yaku.closed + handDora > 3 + (waits / 4)) {
 		log("Decline Riichi because of high value hand with enough yaku.");
 		return false;
 	}

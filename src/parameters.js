@@ -15,7 +15,8 @@ var EFFICIENCY_VALUE = 1; // 0 -> ignore Efficiency (lol). Default: 1
 var YAKU_VALUE = 0.5; // 0 -> ignore Yaku. Default: 0.5
 var DORA_VALUE = 0.3; // 0 -> ignore Dora. Default: 0.3
 var SAFETY_VALUE = 0.5; // 0 -> Ignore Safety. Default: 0.5
-var WAIT_VALUE = 0.3; //Value for good waits when tenpai. Maximum: 1. Default: 0.3
+var WAIT_VALUE = 0.3; // Value for good waits when tenpai. Maximum: 1. Default: 0.3
+var SAKIGIRI_VALUE = 0.3; // 0 -> Never Sakigiri. Default: 0.3
 
 //STRATEGY CONSTANTS
 var CHIITOITSU = 5; //Number of Pairs in Hand to go for chiitoitsu. Default: 5

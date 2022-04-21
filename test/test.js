@@ -482,6 +482,15 @@ function runTestcase() {
 			updateAvailableTiles();
 			determineStrategy();
 			break;
+		case 58:
+			log("Testcase 58: Sakigiri");
+			dora = [{ index: 1, type: 1, dora: false }];
+			ownHand = getTilesFromString("112445999m5559p9s");
+			discards = [[], getTilesFromString("3333p9s"), getTilesFromString("2222s9s"), getTilesFromString("9s")];
+			TEST_DANGER_LEVEL = 0;
+
+			expected = ["9p"];
+			break;
 		default:
 			testsRunning = false;
 			return;

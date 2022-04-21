@@ -84,7 +84,7 @@ function callTriple(combinations, operation) {
 	var numOfTiles = 0;
 
 	for (let tile of newHand) {
-		averageSafety += getTileSafety(tile);
+		averageSafety += getTileSafety(tile, newHand);
 		numOfTiles++;
 	}
 	averageSafety /= numOfTiles;
@@ -520,7 +520,7 @@ function getHandValues(hand, discardedTile) {
 		hand.pop();
 		hand.pop();
 	}
-	var safety = getTileSafety(discardedTile);
+	var safety = getTileSafety(discardedTile, hand);
 	var value = getTileValue(efficiency, yaku, doraValue, waits, safety);
 	return { tile: discardedTile, value: value, efficiency: efficiency, dora: doraValue, yaku: yaku, waits: waits, safety: safety };
 }
@@ -594,7 +594,7 @@ function chiitoitsuPriorities() {
 			}
 			oldTile = tile;
 		});
-		var safety = getTileSafety(ownHand[i]);
+		var safety = getTileSafety(ownHand[i], newHand);
 		var value = getTileValue(efficiency, yaku, doraValue, waits, safety);
 		tiles.push({ tile: ownHand[i], value: value, efficiency: efficiency, dora: doraValue, yaku: yaku, waits: waits, safety: safety });
 	}
@@ -629,7 +629,7 @@ function thirteenOrphansPriorities() {
 		var doraValue = getNumberOfDoras(hand);
 		var yaku = { open: 5, closed: 5 }; //5 is enough; with more it would never fold the hand
 		var waits = 0; //Waits dont really matter for thirteen orphans, not much choice anyway
-		var safety = getTileSafety(ownHand[i]);
+		var safety = getTileSafety(ownHand[i], hand);
 		var value = getTileValue(efficiency, yaku, doraValue, waits, safety);
 
 		tiles.push({ tile: ownHand[i], value: value, efficiency: efficiency, dora: doraValue, yaku: yaku, waits: waits, safety: safety });

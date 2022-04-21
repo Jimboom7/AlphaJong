@@ -3,19 +3,9 @@
 // Defensive part of the AI
 //################################
 
-//Get Dangerlevels for all tiles in hand
-function getHandDanger(hand) {
-	var handDanger = [];
-	for (let tile of hand) {
-		var tileDanger = getTileDanger(tile);
-		handDanger.push({ tile: tile, danger: tileDanger });
-	}
-	return handDanger;
-}
-
 //Returns danger of tile for all players as a number from 0-100
 //Takes into account Genbutsu (Furiten for opponents), Suji, Walls and general knowledge about remaining tiles.
-function getTileDanger(tile) {
+function getTileDanger(tile, hand) {
 	var dangerPerPlayer = [0, 100, 100, 100];
 	if (getNumberOfPlayers() == 3) {
 		dangerPerPlayer = [0, 100, 100];
@@ -26,7 +16,7 @@ function getTileDanger(tile) {
 			continue;
 		}
 
-		dangerPerPlayer[i] = getWaitScoreForTileAndPlayer(i, tile); //Suji, Walls and general knowledge about remaining tiles.
+		dangerPerPlayer[i] = getWaitScoreForTileAndPlayer(i, tile, true); //Suji, Walls and general knowledge about remaining tiles.
 
 		if (dangerPerPlayer[i] <= 0) {
 			continue;
@@ -55,6 +45,9 @@ function getTileDanger(tile) {
 
 		//Multiply with Danger Level
 		dangerPerPlayer[i] *= getPlayerDangerLevel(i) / 100;
+	}
+	for (var i = 1; i < getNumberOfPlayers(); i++) { // Check for Sakigiri for each player
+		dangerPerPlayer[i] += shouldKeepSafeTile(i, hand, tile);
 	}
 
 	var dangerNumber = ((dangerPerPlayer[1] + dangerPerPlayer[2] + dangerPerPlayer[3] + Math.max.apply(null, dangerPerPlayer)) / 4); //Most dangerous player counts twice
@@ -125,12 +118,15 @@ function getCurrentDangerLevel() { //Most Dangerous Player counts extra
 }
 
 //Returns the number of turns ago when the tile was most recently discarded
-function getMostRecentDiscardDanger(tile, player) {
+function getMostRecentDiscardDanger(tile, player, includeOthers) {
 	var danger = 99;
 	for (var i = 0; i < getNumberOfPlayers(); i++) {
 		var r = getLastTileInDiscard(i, tile);
 		if (player == i && r != null) { //Tile is in own discards
 			return 0;
+		}
+		if (!includeOthers) {
+			continue;
 		}
 		if (wasTileCalledFromOtherPlayers(player, tile)) { //The tile was discarded and called by someone else
 			return 0;
@@ -170,11 +166,11 @@ function wasTileCalledFromOtherPlayers(player, tile) {
 
 //Returns the safety of a tile
 //Based on the tile danger, but with exponential growth
-function getTileSafety(tile) {
+function getTileSafety(tile, hand) {
 	if (typeof tile == 'undefined') {
 		return 1;
 	}
-	return 1 - (Math.pow(getTileDanger(tile) / 10, 2) / 100);
+	return 1 - (Math.pow(getTileDanger(tile, hand) / 10, 2) / 100);
 }
 
 //Returns true if the player is going for a flush of a given type
@@ -192,17 +188,18 @@ function isGoingForFlush(player, type) {
 function getWaitScoreForTile(tile) {
 	var score = 0;
 	for (var i = 1; i < getNumberOfPlayers(); i++) {
-		score += getWaitScoreForTileAndPlayer(i, tile);
+		score += getWaitScoreForTileAndPlayer(i, tile, true);
 	}
 	return score / 3;
 }
 
 //Returns a score how likely this tile can form the last triple/pair for a player
 //Suji, Walls and general knowledge about remaining tiles.
-function getWaitScoreForTileAndPlayer(player, tile) {
+//If "includeOthers" parameter is set to true it will also check if other players recently discarded relevant tiles
+function getWaitScoreForTileAndPlayer(player, tile, includeOthers) {
 	var tile0 = getNumberOfTilesAvailable(tile.index, tile.type);
 	var tile0Public = tile0 + getNumberOfTilesInTileArray(ownHand, tile.index, tile.type);
-	var factor = getFuritenValue(player, tile);
+	var factor = getFuritenValue(player, tile, includeOthers);
 
 	var score = 0;
 
@@ -215,7 +212,7 @@ function getWaitScoreForTileAndPlayer(player, tile) {
 
 	var tileL3 = getNumberOfTilesAvailable(tile.index - 3, tile.type);
 	var tileL3Public = tileL3 + getNumberOfTilesInTileArray(ownHand, tile.index - 3, tile.type);
-	var factorL = getFuritenValue(player, { index: tile.index - 3, type: tile.type });
+	var factorL = getFuritenValue(player, { index: tile.index - 3, type: tile.type }, includeOthers);
 
 	var tileL2 = getNumberOfTilesAvailable(tile.index - 2, tile.type);
 	var tileL1 = getNumberOfTilesAvailable(tile.index - 1, tile.type);
@@ -223,7 +220,7 @@ function getWaitScoreForTileAndPlayer(player, tile) {
 	var tileU2 = getNumberOfTilesAvailable(tile.index + 2, tile.type);
 	var tileU3 = getNumberOfTilesAvailable(tile.index + 3, tile.type);
 	var tileU3Public = tileU3 + getNumberOfTilesInTileArray(ownHand, tile.index + 3, tile.type);
-	var factorU = getFuritenValue(player, { index: tile.index + 3, type: tile.type });
+	var factorU = getFuritenValue(player, { index: tile.index + 3, type: tile.type }, includeOthers);
 
 	//Ryanmen Waits
 	score += (tileL1 * tileL2) * (tile0Public + tileL3Public) * factorL;
@@ -244,8 +241,8 @@ function getWaitScoreForTileAndPlayer(player, tile) {
 }
 
 //Returns 0 if tile is 100% furiten, 1 if not. Value between 0-1 is returned if furiten tile was not called some turns ago.
-function getFuritenValue(player, tile) {
-	var danger = getMostRecentDiscardDanger(tile, player);
+function getFuritenValue(player, tile, includeOthers) {
+	var danger = getMostRecentDiscardDanger(tile, player, includeOthers);
 	if (danger == 0) {
 		return 0;
 	}
@@ -300,4 +297,32 @@ function initialDiscardedTilesSafety() {
 			}
 		}
 	}
+}
+
+//Returns a value which indicates how important it is to keep the given tile early (Sakigiri something else)
+function shouldKeepSafeTile(player, hand, discardTile) {
+	if (discards[player].length < 3) { // Not many discards yet (very early) => ignore Sakigiri
+		return 0;
+	}
+	if (getPlayerDangerLevel(player) > 0) { // Obviously don't sakigiri when the player could already be in tenpai
+		return 0;
+	}
+	if (getLastTileInDiscard(player, discardTile) == null && getWaitScoreForTileAndPlayer(player, discardTile, false) >= 20) { // Tile is not safe, has no value for sakigiri
+		return 0;
+	}
+	var safeTiles = 0;
+	for (let tile of hand) { // How many safe tiles do we currently have?
+		if (getLastTileInDiscard(player, tile) != null || getWaitScoreForTileAndPlayer(player, tile, false) < 20) {
+			safeTiles++;
+		}
+	}
+
+	var sakigiri = (2 - safeTiles) * (SAKIGIRI_VALUE * 10);
+	if (sakigiri < 0) { // More than 2 safe tiles: Sakigiri not necessary
+		return 0;
+	}
+	if (getSeatWind(player) == 1) { // Player is dealer
+		sakigiri *= 1.5;
+	}
+	return sakigiri;
 }
