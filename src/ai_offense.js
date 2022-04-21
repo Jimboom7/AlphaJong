@@ -118,7 +118,13 @@ function callTriple(combinations, operation) {
 	}
 
 	if (handValue.waits > 1 && newHandValue.waits < handValue.waits + 1) { //Call results in worse waits
-		log("Call would result in less waits!");
+		log("Call would result in less waits! Declined!");
+		declineCall(operation);
+		return false;
+	}
+
+	if (isClosed && newHandValue.yaku.open + newHandValue.dora < 2 && newHandValue.efficiency < 3.5 && seatWind != 1) { // Hand is worthless and slow and not dealer. Should prevent cheap yakuhai or tanyao calls
+		log("Hand is cheap and slow! Declined!");
 		declineCall(operation);
 		return false;
 	}
