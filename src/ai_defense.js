@@ -22,8 +22,13 @@ function getTileDanger(tile, hand) {
 			continue;
 		}
 
-		//Is Dora? -> 12,5% more dangerous
-		dangerPerPlayer[i] *= (1 + (getTileDoraValue(tile) / 8));
+		//Is Dora? -> 10% more dangerous
+		dangerPerPlayer[i] *= (1 + (getTileDoraValue(tile) / 10));
+
+		//Is close to Dora? -> 5% more dangerous
+		if (isTileCloseToDora(tile)) {
+			dangerPerPlayer[i] *= 1.05;
+		}
 
 		//Is the player going for a flush of that type? -> 30% more dangerous
 		if (isGoingForFlush(i, tile.type)) {
@@ -325,4 +330,18 @@ function shouldKeepSafeTile(player, hand, discardTile) {
 		sakigiri *= 1.5;
 	}
 	return sakigiri;
+}
+
+//Check if the tile is close to dora
+function isTileCloseToDora(tile) {
+	for (let d of dora) {
+		var doraIndex = getHigherTileIndex(d);
+		if (tile.type == 3 && d.type == 3 && tile.index == doraIndex) {
+			return true;
+		}
+		if (tile.type != 3 && tile.type == d.type && tile.index >= doraIndex - 2 && tile.index <= doraIndex + 2) {
+			return true;
+		}
+	}
+	return false;
 }
