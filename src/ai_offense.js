@@ -141,6 +141,9 @@ function callTriple(combinations, operation) {
 	else if (!isClosed && (newHandValue.yaku.open + newHandValue.dora) >= (handValue.yaku.open + handValue.dora) * 0.9) { //Hand is already open and not much value is lost
 		log("Call accepted because hand is already open!");
 	}
+	else if (newHandValue.efficiency >= 3.5 && (newHandValue.yaku.open + newHandValue.dora) >= (handValue.yaku.open + handValue.dora) * 0.9) { //Hand is already open and not much value is lost
+		log("Call accepted because it makes the hand ready!");
+	}
 	else { //Decline
 		declineCall(operation);
 		log("Call declined because it does not benefit the hand!");
@@ -216,7 +219,7 @@ function callAbortiveDraw() { // Kyuushu Kyuuhai, 9 Honors or Terminals in start
 		return;
 	}
 	var handValue = getHandValues(ownHand);
-	if (handValue.value < 1.2) { //Hand is bad -> abort game
+	if (handValue.priority < 1.2) { //Hand is bad -> abort game
 		sendAbortiveDrawCall();
 	}
 }
@@ -263,7 +266,7 @@ function discardFold(tiles) {
 	if (strategy != STRATEGIES.FOLD) { //Not in full Fold mode yet: Discard a relatively safe tile with high priority
 		for (let tile of tiles) {
 			var foldThreshold = getFoldThreshold(tile, true);
-			if (tile.value + 0.1 > tiles[0].value) { //If next tile is not much worse in value than the top priority discard
+			if (tile.priority + 0.1 > tiles[0].priority) { //If next tile is not much worse in value than the top priority discard
 				if (tile.safety > foldThreshold) { //Tile that is safe enough exists
 					log("Tile Priorities: ");
 					printTilePriority(tiles);
@@ -331,7 +334,7 @@ function getTilePriorities(inputHand) {
 	}
 
 	tiles.sort(function (p1, p2) {
-		return p2.value - p1.value;
+		return p2.priority - p1.priority;
 	});
 	return tiles;
 }
@@ -521,11 +524,11 @@ function getHandValues(hand, discardedTile) {
 		hand.pop();
 	}
 	var safety = getTileSafety(discardedTile, hand);
-	var value = getTileValue(efficiency, yaku, doraValue, waits, safety);
-	return { tile: discardedTile, value: value, efficiency: efficiency, dora: doraValue, yaku: yaku, waits: waits, safety: safety };
+	var priority = calculateTilePriority(efficiency, yaku, doraValue, waits, safety);
+	return { tile: discardedTile, priority: priority, efficiency: efficiency, dora: doraValue, yaku: yaku, waits: waits, safety: safety };
 }
 
-function getTileValue(efficiency, yakus, doraValue, waits, safety) {
+function calculateTilePriority(efficiency, yakus, doraValue, waits, safety) {
 	var yaku = yakus.open;
 	if (isClosed) {
 		yaku = yakus.closed;
@@ -595,11 +598,11 @@ function chiitoitsuPriorities() {
 			oldTile = tile;
 		});
 		var safety = getTileSafety(ownHand[i], newHand);
-		var value = getTileValue(efficiency, yaku, doraValue, waits, safety);
-		tiles.push({ tile: ownHand[i], value: value, efficiency: efficiency, dora: doraValue, yaku: yaku, waits: waits, safety: safety });
+		var priority = calculateTilePriority(efficiency, yaku, doraValue, waits, safety);
+		tiles.push({ tile: ownHand[i], priority: priority, efficiency: efficiency, dora: doraValue, yaku: yaku, waits: waits, safety: safety });
 	}
 	tiles.sort(function (p1, p2) {
-		return p2.value - p1.value;
+		return p2.priority - p1.priority;
 	});
 	return tiles;
 }
@@ -630,14 +633,14 @@ function thirteenOrphansPriorities() {
 		var yaku = { open: 5, closed: 5 }; //5 is enough; with more it would never fold the hand
 		var waits = 0; //Waits dont really matter for thirteen orphans, not much choice anyway
 		var safety = getTileSafety(ownHand[i], hand);
-		var value = getTileValue(efficiency, yaku, doraValue, waits, safety);
+		var priority = calculateTilePriority(efficiency, yaku, doraValue, waits, safety);
 
-		tiles.push({ tile: ownHand[i], value: value, efficiency: efficiency, dora: doraValue, yaku: yaku, waits: waits, safety: safety });
+		tiles.push({ tile: ownHand[i], priority: priority, efficiency: efficiency, dora: doraValue, yaku: yaku, waits: waits, safety: safety });
 
 	}
 
 	tiles.sort(function (p1, p2) {
-		return p2.value - p1.value;
+		return p2.priority - p1.priority;
 	});
 	return tiles;
 }

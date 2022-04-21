@@ -486,7 +486,7 @@ function getFoldThreshold(tilePrio, strict) {
 	if (isClosed) {
 		han = tilePrio.yaku.closed + tilePrio.dora;
 	}
-	var value = tilePrio.value + ((han - 2) / 10);
+	var priority = tilePrio.priority + ((han - 2) / 10);
 
 	var factor = FOLD_CONSTANT;
 	if (strict) {
@@ -502,7 +502,7 @@ function getFoldThreshold(tilePrio, strict) {
 		}
 	}
 	factor *= seatWind == 1 ? 1.1 : 1; //Fold later as dealer
-	var threshold = Number((1 - (((value * value * factor) + (factor / 3)) / 100))).toFixed(2);
+	var threshold = Number((1 - (((priority * priority * factor) + (factor / 3)) / 100))).toFixed(2);
 	if (threshold > 0.9) {
 		threshold = 0.9;
 	}
