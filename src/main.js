@@ -206,6 +206,8 @@ function setData() {
 		strategy = STRATEGIES.GENERAL;
 		strategyAllowsCalls = true;
 		initialDiscardedTilesSafety();
+		riichiTiles = [null, null, null, null];
+		extendMJSoulFunctions();
 	}
 
 	tilesLeft = getTilesLeft();

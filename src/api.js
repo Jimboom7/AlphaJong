@@ -229,3 +229,28 @@ function rememberPlayerHand(player) {
 function isEastRound() {
 	return view.DesktopMgr.Inst.game_config.mode.mode == 1;
 }
+
+// Extend some internal MJSoul functions with additional code
+function extendMJSoulFunctions() {
+	if (functionsExtended) {
+		return;
+	}
+	trackRiichiDiscardTile();
+	functionsExtended = true;
+}
+
+// Track which tile the players discarded on their riichi turn
+function trackRiichiDiscardTile() {
+	for (var i = 1; i < getNumberOfPlayers(); i++) {
+		var player = getCorrectPlayerNumber(i);
+		view.DesktopMgr.Inst.players[player].container_qipai.AddQiPai = (function (_super) { // Extend the MJ-Soul Discard function
+			return function () {
+				if (arguments[1]) { // Contains true when Riichi
+					riichiTiles[seat2LocalPosition(this.player.seat)] = arguments[0]; // Track tile in riichiTiles Variable
+					log("Riichi Discard: " + arguments[0].toString());
+				}
+				return _super.apply(this, arguments); // Call original function
+			};
+		})(view.DesktopMgr.Inst.players[player].container_qipai.AddQiPai);
+	}
+}

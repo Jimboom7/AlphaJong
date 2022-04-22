@@ -42,6 +42,10 @@ function getTileDanger(tile, hand) {
 				dangerPerPlayer[i] /= 1.2; //Other tiles are less dangerous
 			}
 		}
+		//Is Tile close to the tile discarded on the riichi turn? -> 20% more dangerous
+		if (isTileCloseToRiichiTile(i, tile)) {
+			dangerPerPlayer[i] *= 1.2;
+		}
 
 		//Danger is at least 5
 		if (dangerPerPlayer[i] < 5) {
@@ -65,9 +69,6 @@ function getTileDanger(tile, hand) {
 
 //Returns danger level for players. 100: Tenpai (Riichi)
 function getPlayerDangerLevel(player) {
-	if (isDebug()) {
-		return TEST_DANGER_LEVEL;
-	}
 	if (getPlayerLinkState(player) == 0) { //Disconnected -> Safe
 		return 0;
 	}
@@ -130,11 +131,11 @@ function getMostRecentDiscardDanger(tile, player, includeOthers) {
 		if (player == i && r != null) { //Tile is in own discards
 			return 0;
 		}
-		if (!includeOthers) {
-			continue;
-		}
 		if (wasTileCalledFromOtherPlayers(player, tile)) { //The tile was discarded and called by someone else
 			return 0;
+		}
+		if (!includeOthers) {
+			continue;
 		}
 		if (r != null && r.numberOfPlayerHandChanges[player] < danger) {
 			danger = r.numberOfPlayerHandChanges[player];
@@ -253,15 +254,14 @@ function getFuritenValue(player, tile, includeOthers) {
 	}
 	else if (danger == 1) {
 		if (calls[player].length > 0) {
-			return 0.3;
+			return 0.5;
 		}
-		return 0.9;
+		return 0.95;
 	}
 	else if (danger == 2) {
 		if (calls[player].length > 0) {
 			return 0.8;
 		}
-		return 0.95;
 	}
 	return 1;
 }
@@ -330,6 +330,16 @@ function shouldKeepSafeTile(player, hand, discardTile) {
 		sakigiri *= 1.5;
 	}
 	return sakigiri;
+}
+
+//Check if the tile is close to the riichi tile of a player
+function isTileCloseToRiichiTile(player, tile) {
+	if (!isPlayerRiichi(player) || riichiTiles[getCorrectPlayerNumber(player)] == null || riichiTiles[getCorrectPlayerNumber(player)] == 'undefined') {
+		return false;
+	}
+	if (tile.type != 3 && tile.type == riichiTiles[getCorrectPlayerNumber(player)].type) {
+		return tile.index >= riichiTiles[getCorrectPlayerNumber(player)].index - 3 && tile.index <= riichiTiles[getCorrectPlayerNumber(player)].index + 3;
+	}
 }
 
 //Check if the tile is close to dora

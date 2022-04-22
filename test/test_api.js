@@ -135,3 +135,11 @@ function rememberPlayerHand(player) {
 function isEastRound() {
 	return true;
 }
+
+function extendMJSoulFunctions() {
+
+}
+
+function trackRiichiDiscardTile() {
+
+}

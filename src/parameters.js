@@ -55,6 +55,8 @@ var visibleTiles = []; //Tiles that are visible
 var errorCounter = 0; //Counter to check if bot is working
 var lastTilesLeft = 0; //Counter to check if bot is working
 var isConsideringCall = false;
+var riichiTiles = [null, null, null, null]; // Track players discarded tiles on riichi
+var functionsExtended = false;
 
 //TEST
 var testRunning = false;

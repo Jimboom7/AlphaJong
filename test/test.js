@@ -11,9 +11,13 @@ if (isDebug()) {
 	//runBenchmarks();
 }
 
+// @Overwrite from ai_defense
+function getPlayerDangerLevel(player) {
+    return TEST_DANGER_LEVEL[player];
+};
+
 //Test Main
 function runTestcases() {
-
 	if (testsRunning) {
 		currentTest++;
 		setTimeout(runTestcases, 100); //Loop needs to be delayed, otherwise browser crashes
@@ -42,11 +46,12 @@ function resetGlobals() {
 	YAKU_VALUE = 0.5;
 	DORA_VALUE = 0.3;
 	SAFETY_VALUE = 0.5;
-	TEST_DANGER_LEVEL = 1;
+	TEST_DANGER_LEVEL = [0, 0, 0, 0];
 	WAIT_VALUE = 0.3;
 	isClosed = true;
 	testPlayerRiichi = [0, 0, 0, 0];
 	testPlayerHand = [13, 13, 13, 13];
+	riichiTiles = [null, null, null, null];
 	LOG_AMOUNT = 14;
 }
 
@@ -169,7 +174,7 @@ function runTestcase() {
 			strategy = STRATEGIES.FOLD;
 			dora = [{ index: 7, type: 0, dora: false }];
 			ownHand = getTilesFromString("1122m5588p234s111z");
-			TEST_DANGER_LEVEL = 100;
+			TEST_DANGER_LEVEL = [0, 100, 100, 100];
 
 			expected = ["1z"];
 			break;
@@ -181,7 +186,7 @@ function runTestcase() {
 
 			discards = [[], getTilesFromString("1122666m5588p234s"), getTilesFromString("57m"), getTilesFromString("4m2p")];
 			expected = ["2p"];
-			TEST_DANGER_LEVEL = 50;
+			TEST_DANGER_LEVEL = [0, 50, 50, 50];
 			determineStrategy();
 			break;
 		case 19:
@@ -467,7 +472,7 @@ function runTestcase() {
 			ownHand = getTilesFromString("159m159p19s12345z5s");
 			discards = [[], getTilesFromString("46m456p"), getTilesFromString("456m456p"), getTilesFromString("222m5p")];
 
-			TEST_DANGER_LEVEL = 50;
+			TEST_DANGER_LEVEL = [0, 50, 50, 50];
 			expected = ["5p"];
 			determineStrategy();
 			break;
@@ -476,7 +481,7 @@ function runTestcase() {
 			dora = [{ index: 1, type: 1, dora: false }];
 			ownHand = getTilesFromString("159m159p19s12345z5s");
 			discards = [[], getTilesFromString("12345z66z"), getTilesFromString("34566z"), getTilesFromString("222m55p5z")];
-			TEST_DANGER_LEVEL = 50;
+			TEST_DANGER_LEVEL = [0, 50, 50, 50];
 
 			expected = ["5z"];
 			updateAvailableTiles();
@@ -487,15 +492,23 @@ function runTestcase() {
 			dora = [{ index: 1, type: 1, dora: false }];
 			ownHand = getTilesFromString("112445999m5559p9s");
 			discards = [[], getTilesFromString("3333p9s"), getTilesFromString("2222s9s"), getTilesFromString("9s")];
-			TEST_DANGER_LEVEL = 0;
 
 			expected = ["9p"];
+			break;
+		case 59:
+			log("Testcase 59: Issue #36 - Dangerous Discard");
+			readDebugString("6s|345666m334677p33s|||||515z9p199m|5z1m12z9p64z7p|6z21m26z1p7z2p|437z9m45s3m4p|0,0,0,1|4|2|38");
+			SAFETY_VALUE = 0.7;
+			TEST_DANGER_LEVEL = [0, 0, 0, 100];
+			testPlayerRiichi = [0, 0, 0, 1];
+			riichiTiles = [null, null, null, getTileFromString("4p")];
+			expected = ["4p"];
 			break;
 		default:
 			testsRunning = false;
 			return;
 	}
-	updateDiscardedTilesSafety();
+	initialDiscardedTilesSafety();
 	updateAvailableTiles();
 
 	var tile = discard();
