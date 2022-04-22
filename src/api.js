@@ -115,6 +115,12 @@ function getRoundWind() {
 function setAutoCallWin(win) {
 	view.DesktopMgr.Inst.setAutoHule(win);
 	//view.DesktopMgr.Inst.setAutoNoFulu(true) //Auto No Chi/Pon/Kan
+	try {
+		uiscript.UI_DesktopInfo.Inst.refreshFuncBtnShow(uiscript.UI_DesktopInfo.Inst._container_fun.getChildByName("btn_autohu"), view.DesktopMgr.Inst.auto_hule); //Refresh GUI Button
+	}
+	catch {
+		return;
+	}
 }
 
 function getTileForCall() {
@@ -228,6 +234,38 @@ function rememberPlayerHand(player) {
 
 function isEastRound() {
 	return view.DesktopMgr.Inst.game_config.mode.mode == 1;
+}
+
+// Is the player able to join a given room
+function isInRank(room) {
+	var roomData = cfg.desktop.matchmode.get(room);
+	try {
+		var rank = GameMgr.Inst.account_data[roomData.mode < 10 ? "level" : "level3"].id; // 4 player or 3 player rank
+		return (roomData.room == 100) || (roomData.level_limit <= rank && roomData.level_limit_ceil >= rank); // room 100 is casual mode
+	}
+	catch {
+		return roomData.room == 100;
+	}
+}
+
+// Map of all Rooms
+function getRooms() {
+	try {
+		return cfg.desktop.matchmode;
+	}
+	catch {
+		return null;
+	}
+}
+
+// Client language
+function getLanguage() {
+	return GameMgr.client_language;
+}
+
+// Name of a room in client language
+function getRoomName(room) {
+	return room["room_name_" + getLanguage()] + " (" + game.Tools.room_mode_desc(room.mode) + ")";
 }
 
 // Extend some internal MJSoul functions with additional code

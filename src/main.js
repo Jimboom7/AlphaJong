@@ -5,7 +5,7 @@
 
 //GUI can be re-opened by pressing + on the Numpad
 if (!isDebug()) {
-	setTimeout(initGui, 2000);
+	initGui();
 	window.onkeyup = function (e) {
 		var key = e.keyCode ? e.keyCode : e.which;
 
@@ -18,8 +18,8 @@ if (!isDebug()) {
 		log("Autorun start");
 		run = true;
 		setInterval(preventAFK, 30000);
-		waitForMainLobbyLoad();
 	}
+	waitForMainLobbyLoad();
 }
 
 function toggleRun() {
@@ -38,6 +38,7 @@ function toggleRun() {
 
 function waitForMainLobbyLoad() {
 	if (isInGame()) { // In case game is already ongoing after reload
+		refreshRoomSelection();
 		main();
 		return;
 	}
@@ -49,6 +50,7 @@ function waitForMainLobbyLoad() {
 		return;
 	}
 	log("Main Lobby loaded!");
+	refreshRoomSelection();
 	startGame();
 	setTimeout(main, 10000);
 	log("Main Loop started.");

@@ -26,8 +26,8 @@ Is a singleton, view.DesktopMgr.Inst is usually what you want to access.
 **view.DesktopMgr.player_link_state[playerSear]** - Shows disconnects.  
 **view.DesktopMgr.Inst.gameEndResult** - Has data when game is over.  
 **view.DesktopMgr.Inst.players[playerNumber].liqibang._activeInHierarchy** - check player is riichi  
-**return view.DesktopMgr.Inst.game_config.mode.mode** Gamemode: 1 = East Round, 2 = South Round  
-
+**return view.DesktopMgr.Inst.game_config.mode.mode** - Gamemode: 1 = East Round, 2 = South Round  
+**return view.DesktopMgr.Inst.game_config.meta.mode_id** The Room ID (e.g. 4 player Gold East is 8)
 
 ## GameMgr.Inst
 Contains data of everything that is not related to the ongoing game, like player data or connection status.  
@@ -37,6 +37,8 @@ Is a singleton, GameMgr.Inst is usually what you want to access.
 **GameMgr.Inst.clientHeatBeat()** - Function to send a Heatbeat (afk detection).  
 **GameMgr.Inst._last_heatbeat_time** - Timestamp of the last heatbeat.  
 **GameMgr.Inst.login_loading_end** - Is true after the game has finished the initial loading, false otherwise.  
+**GameMgr.Inst.account_data.level** - The rank of the player. Format is 10x0y (or 20x0y) where x is the rank (novice = 1, adept = 2 etc.) and y is the amount of stars.  
+**GameMgr.client_language** - Language of the Client: Can be "en", "chs", "chs_t" or "jp"  
 
 
 ## uiscript
@@ -73,8 +75,8 @@ Generally: **app.NetAgent.sendReq2MJ(type, command, data)** - sends a requests t
 
 ## Others
 **game.Tools.strOfLocalization(number)** - Localized Strings. Might be useful to scan all these to find specific functions in the code(?)  
-**tile.toString()** -Convert a tile to a string (For example "4z").  
-**cfg.desktop.matchmode.get(ROOM_ID)** - More information about the Rooms  
+**tile.toString()** - Convert a tile to a string (For example "4z").  
+**cfg.desktop.matchmode.get(ROOM_ID)** - More information about the Rooms. level_limit contains the required rank for the room (level_limit_ceil is upper rank).  
 
 ### Operation Data
 For calls etc. The operation "names" and IDs are in this variable: **mjcore.E_PlayOperation**  

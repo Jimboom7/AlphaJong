@@ -13,6 +13,11 @@ var debugButton = document.createElement("button");
 var hideButton = document.createElement("button");
 
 function initGui() {
+	if (getRooms() == null) { // Wait for minimal loading to be done
+		setTimeout(initGui, 1000);
+		return;
+	}
+
 	guiDiv.style.position = "absolute";
 	guiDiv.style.zIndex = "100001"; //On top of the game
 	guiDiv.style.left = "0px";
@@ -49,59 +54,13 @@ function initGui() {
 	checkboxLabel.style.marginRight = "5px";
 	guiSpan.appendChild(checkboxLabel);
 
-	var bronzeEastOption = document.createElement("option");
-	bronzeEastOption.text = "Bronze East";
-	bronzeEastOption.value = "2";
-	roomCombobox.appendChild(bronzeEastOption);
-	var bronzeSouthOption = document.createElement("option");
-	bronzeSouthOption.text = "Bronze South";
-	bronzeSouthOption.value = "3";
-	roomCombobox.appendChild(bronzeSouthOption);
-	var silverEastOption = document.createElement("option");
-	silverEastOption.text = "Silver East";
-	silverEastOption.value = "5";
-	roomCombobox.appendChild(silverEastOption);
-	var silverSouthOption = document.createElement("option");
-	silverSouthOption.text = "Silver South";
-	silverSouthOption.value = "6";
-	roomCombobox.appendChild(silverSouthOption);
-	var goldEastOption = document.createElement("option");
-	goldEastOption.text = "Gold East";
-	goldEastOption.value = "8";
-	roomCombobox.appendChild(goldEastOption);
-	var goldSouthOption = document.createElement("option");
-	goldSouthOption.text = "Gold South";
-	goldSouthOption.value = "9";
-	roomCombobox.appendChild(goldSouthOption);
-	var bronzeEast3Option = document.createElement("option");
-	bronzeEast3Option.text = "Bronze East 3P";
-	bronzeEast3Option.value = "17";
-	roomCombobox.appendChild(bronzeEast3Option);
-	var bronzeSouth3Option = document.createElement("option");
-	bronzeSouth3Option.text = "Bronze South 3P";
-	bronzeSouth3Option.value = "18";
-	roomCombobox.appendChild(bronzeSouth3Option);
-	var silverEast3Option = document.createElement("option");
-	silverEast3Option.text = "Silver East 3P";
-	silverEast3Option.value = "19";
-	roomCombobox.appendChild(silverEast3Option);
-	var silverSouth3Option = document.createElement("option");
-	silverSouth3Option.text = "Silver South 3P";
-	silverSouth3Option.value = "20";
-	roomCombobox.appendChild(silverSouth3Option);
-	var goldEast3Option = document.createElement("option");
-	goldEast3Option.text = "Gold East 3P";
-	goldEast3Option.value = "21";
-	roomCombobox.appendChild(goldEast3Option);
-	var goldSouth3Option = document.createElement("option");
-	goldSouth3Option.text = "Gold South 3P";
-	goldSouth3Option.value = "22";
-	roomCombobox.appendChild(goldSouth3Option);
+	refreshRoomSelection();
+
 	roomCombobox.style.marginRight = "15px";
 	roomCombobox.onchange = function () {
 		roomChange();
 	};
-	roomCombobox.value = ROOM;
+
 	if (window.localStorage.getItem("alphajongAutorun") != "true") {
 		roomCombobox.disabled = true;
 	}
@@ -172,4 +131,18 @@ function autorunCheckboxClick() {
 		window.localStorage.setItem("alphajongAutorun", "false");
 		AUTORUN = false;
 	}
+}
+
+// Refresh the contents of the Room Selection Combobox with values appropiate for the rank
+function refreshRoomSelection() {
+	roomCombobox.innerHTML = ""; // Clear old entries
+	getRooms().forEach(function (room) {
+		if (isInRank(room.id) && room.mode != 0) { // Rooms with mode = 0 are 1 Game only, not sure why they are in the code but not selectable in the UI...
+			var option = document.createElement("option");
+			option.text = getRoomName(room);
+			option.value = room.id;
+			roomCombobox.appendChild(option);
+		}
+	});
+	roomCombobox.value = ROOM;
 }

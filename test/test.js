@@ -13,8 +13,8 @@ if (isDebug()) {
 
 // @Overwrite from ai_defense
 function getPlayerDangerLevel(player) {
-    return TEST_DANGER_LEVEL[player];
-};
+	return TEST_DANGER_LEVEL[player];
+}
 
 //Test Main
 function runTestcases() {
