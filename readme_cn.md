@@ -53,3 +53,56 @@
 Ai是违反雀魂的服务条款的。这意味着理论上你可以因为使用这个脚本而被封禁。虽然目前还没有任何被禁止的报告，但你需要知道，这是你自己的风险，我们不对你使用这个AI行为负责。
 
 翻译By:Nifilmjon
+
+## 单词对比
+
+|英文|中文|
+|:---|:---|
+|tile|牌|
+|wall|牌山|
+|stack|一摞(上下两张)|
+|pin(circles)|饼|
+|pinzu|筒子|
+|so(bamboo)|索|
+|sozu|索子|
+|wan(characters)|万|
+|wanzu(manzu)|万子|
+|jihai(honor)|字牌|
+|wind tile|风牌(东南西北)|
+|dragon tile|三元牌(白发中)|
+|dora|宝牌|
+|han||
+|iipin|一饼|
+|ryanpin|二饼|
+|sanpin|三饼|
+|supin|四饼|
+|upin|五饼|
+|ropin|六饼|
+|chiipin|七饼|
+|papin|八饼|
+|chupin|九饼|
+|iiso|一索|
+|ryanso|二索|
+|sanso|三索|
+|suso|四索|
+|uso|五索|
+|roso|六索|
+|chiiso|七索|
+|paso|八索|
+|chuso|九索|
+|iiwan|一万|
+|ryanwan|二万|
+|sanwan|三万|
+|suwan|四万|
+|uwan|五万|
+|rowan|六万|
+|chiiwan|七万|
+|pawan|八万|
+|chuwan|九万|
+|ton(east)|东风|
+|nan(south)|南风|
+|sha(west)|西|
+|pei(north)|北|
+|haku|白|
+|hatsu|发|
+|chun|中|
