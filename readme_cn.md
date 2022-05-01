@@ -114,3 +114,5 @@ Ai是违反雀魂的服务条款的。这意味着理论上你可以因为使用
 |chii|吃|
 |pon|碰|
 |kan|杠|
+|chiitoitsu|七对子|
+|thirteen orphans|国士无双|
