@@ -108,11 +108,20 @@ Ai是违反雀魂的服务条款的。这意味着理论上你可以因为使用
 |chun|中|
 |groups(mentsu)|面子|
 |meld|组(一个顺子、刻子或杠子)|
-|calling(melding)|鸣|
+|call(meld, naki)|鸣|
 |triplets(kotsu)|刻子|
 |sequences(shuntsu)|顺子|
 |chii|吃|
 |pon|碰|
 |kan|杠|
+|ron|荣|
 |chiitoitsu|七对子|
 |thirteen orphans|国士无双|
+|yaku|役|
+|yaku man|役满|
+|yakuhai|役牌|
+|riichi|立直|
+|tanyao|断幺九|
+|pinfu|平和|
+|iipeikou|一盃口|
+|closed|门清|
