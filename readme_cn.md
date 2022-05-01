@@ -71,7 +71,6 @@ Ai是违反雀魂的服务条款的。这意味着理论上你可以因为使用
 |wind tile|风牌(东南西北)|
 |dragon tile|三元牌(白发中)|
 |dora|宝牌|
-|han||
 |iipin|一饼|
 |ryanpin|二饼|
 |sanpin|三饼|
@@ -115,13 +114,40 @@ Ai是违反雀魂的服务条款的。这意味着理论上你可以因为使用
 |pon|碰|
 |kan|杠|
 |ron|荣|
-|chiitoitsu|七对子|
-|thirteen orphans|国士无双|
 |yaku|役|
-|yaku man|役满|
+|han|翻|
+|yakuman|役满|
 |yakuhai|役牌|
 |riichi|立直|
 |tanyao|断幺九|
 |pinfu|平和|
 |iipeikou|一盃口|
+|sanankou|三暗刻|
+|sankantsu|三杠子|
+|toitoi|对对和|
+|chiitoitsu|七对子|
+|sanshoku doukou|三色同刻|
+|sanshoku Doujun|三色同顺|
+|shousangen|小三元|
+|chanta(honchantaiyaochuu)|混全带幺九|
+|honrou|混老头|
+|ikkitsuukan(pure straight)|一气通贯|
+|ryanpeikou|一盃口|
 |closed|门清|
+|junchan(junchantaiyaochuu)|纯全带幺九|
+|honiisou|混一色|
+|chiniisou|清一色|
+|tenpai|听牌|
+|daisangen|大三元|
+|suuankou|四暗刻|
+|tsuuiisou|字一色|
+|ryuuiisou|绿一色|
+|chinroutou|清老头|
+|shousuushii|小四喜|
+|suukantsu|四杠子|
+|chuuren poutou|九莲宝灯|
+|kokushi musou(thirteen orphans)|国士无双|
+|suuankou tanki|四暗刻单骑|
+|kokushi musou juusan menmachi|国士无双十三面|
+|junsei chuuren poutou|纯正九莲宝灯|
+|daisuushii|大四喜|

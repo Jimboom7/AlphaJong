@@ -159,41 +159,53 @@ function getYaku(inputHand, inputCalls) {
 	yakuOpen += daisangen.open;
 	yakuClosed += daisangen.closed;
 
+	//Suuankou
 	//4 Concealed Triplets
 	//Closed
 
+	//Tsuuiisou
 	//All Honours
 	//Open
 
+	//Ryuuiisou
 	//All Green
 	//Open
 
+	//Chinroutou
 	//All Terminals
 	//Open
 
+	//Suushiihou
 	//Four Little Winds
 	//Open
 
+	//Suukantsu
 	//4 Kans
 	//Open
 
+	//Chuuren poutou
 	//9 Gates
 	//Closed
 
+	//Kokushi musou
 	//Thirteen Orphans
 	//Closed
 
 	//Double Yakuman
 
+	//Suuankou tanki
 	//4 Concealed Triplets Single Wait
 	//Closed
 
+	//Kokushi musou juusan menmachi
 	//13 Wait Thirteen Orphans
 	//Closed
 
+	//Junsei chuuren poutou
 	//True Nine Gates
 	//Closed
 
+	//Daisuushii
 	//Four Big Winds
 	//Open
 
