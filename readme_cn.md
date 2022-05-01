@@ -151,5 +151,6 @@ UI非常简单，你可以轻易地控制AI。
 |kokushi musou juusan menmachi|国士无双十三面|
 |junsei chuuren poutou|纯正九莲宝灯|
 |daisuushii|大四喜|
+|furiten|振听|
 
 翻译By: [Nifilmjon](https://github.com/Nifilmjon), [yangruihan](https://github.com/yangruihan)
