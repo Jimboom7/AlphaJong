@@ -106,3 +106,11 @@ Ai是违反雀魂的服务条款的。这意味着理论上你可以因为使用
 |haku|白|
 |hatsu|发|
 |chun|中|
+|groups(mentsu)|面子|
+|meld|组(一个顺子、刻子或杠子)|
+|calling(melding)|鸣|
+|triplets(kotsu)|刻子|
+|sequences(shuntsu)|顺子|
+|chii|吃|
+|pon|碰|
+|kan|杠|
