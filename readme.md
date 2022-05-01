@@ -45,7 +45,7 @@ The project contains a testclass with simple "Nani Kiru?" testcases.
 
 ## Known Problems
 
--Sometimes the game disconnects you for AFK. This usually happens if the window is minimized or you switch to another tab for a while (not having focus is fine, as long as the window is open). If that happens the bot will try to reconnect by reloading the page.
+- Sometimes the game disconnects you for AFK. This usually happens if the window is minimized or you switch to another tab for a while (not having focus is fine, as long as the window is open). If that happens the bot will try to reconnect by reloading the page.
 
 ## Disclaimer
 
