@@ -30,6 +30,13 @@ function getCorrectPlayerNumber(player) {
 	return player;
 }
 
+function isSameTile(tile1, tile2) {
+	if (typeof tile1 == 'undefined' || typeof tile2 == 'undefined') {
+		return false;
+	}
+	return tile1.index == tile2.index && tile1.type == tile2.type;
+}
+
 //Return number of doras in tiles
 function getNumberOfDoras(tiles) {
 	var dr = 0;
@@ -262,9 +269,6 @@ function sortTiles(inputTiles) {
 
 //Return number of specific tiles available
 function getNumberOfTilesAvailable(index, type) {
-	if (index < 1 || index > 9) {
-		return 0;
-	}
 	if (getNumberOfPlayers() == 3 && (index > 1 && index < 9 && type == 1)) {
 		return 0;
 	}
@@ -311,11 +315,12 @@ function updateAvailableTiles() {
 				break;
 			}
 			for (var k = 1; k <= getNumberOfTilesAvailable(j, i); k++) {
+				var isRed = (j == 5 && i != 3 && visibleTiles.concat(availableTiles).filter(tile => tile.type == i && tile.dora).length == 0) ? true : false;
 				availableTiles.push({
 					index: j,
 					type: i,
-					dora: false,
-					doraValue: getTileDoraValue({ index: j, type: i, dora: false })
+					dora: isRed,
+					doraValue: getTileDoraValue({ index: j, type: i, dora: isRed })
 				});
 			}
 		}
@@ -478,6 +483,157 @@ function isTerminalOrHonor(tile) {
 	}
 
 	return false;
+}
+
+function getWaitQuality(tile) {
+	return (3 - (getWaitScoreForTileAndPlayer(0, tile, false) / 90)) / 2;
+}
+
+//Calculate the shanten number. Based on this: https://www.youtube.com/watch?v=69Xhu-OzwHM
+//Fast and accurate, but original hand needs to have 14 or more tiles.
+function calculateShanten(triples, pairs, doubles) {
+	if ((triples * 3) + (pairs * 2) + (doubles * 2) > 14) {
+		doubles = (13 - ((triples * 3) + (pairs * 2))) / 2;
+	}
+	var shanten = 8 - (2 * triples) - (pairs + doubles);
+	if (triples + pairs + doubles >= 5 && pairs == 0) {
+		shanten++;
+	}
+	if (triples + pairs + doubles >= 6) {
+		shanten += triples + pairs + doubles - 5;
+	}
+	if (shanten < 0) {
+		return 0;
+	}
+	return shanten;
+}
+
+// Calculate Score for given han and fu. For higher han values the score is "fluid" to better account for situations where the exact han value is unknown
+// (like when an opponent has around 5.5 han => 10k)
+function calculateScore(player, han, fu = 30) {
+	var score = (fu * Math.pow(2, 2 + han) * 4);
+
+	if (han > 4) {
+		score = 8000;
+	}
+
+	if (han > 5) {
+		score = 8000 + ((han - 5) * 4000);
+	}
+	if (han > 6) {
+		score = 12000 + ((han - 6) * 2000);
+	}
+	if (han > 8) {
+		score = 16000 + ((han - 8) * 2666);
+	}
+	if (han > 11) {
+		score = 24000 + ((han - 11) * 4000);
+	}
+	if (han >= 13) {
+		score = 32000;
+	}
+
+	if (getSeatWind(player) == 1) { //Is Dealer
+		score *= 1.5;
+	}
+
+	return score;
+}
+
+//Calculate the Fu Value for given parameters. NOt 100% accurate, but good enough
+function calculateFu(triples, openTiles, pair, waitTiles, winningTile, ron = true) {
+	var fu = 20;
+
+	var sequences = getSequences(triples);
+	var closedTriplets = getTriplets(triples);
+	var openTriplets = getTriplets(openTiles);
+
+	var kans = removeTilesFromTileArray(openTiles, getTriples(openTiles));
+
+	closedTriplets.forEach(function (t) {
+		if (isTerminalOrHonor(t.tile1)) {
+			if (!isSameTile(t.tile1, winningTile)) {
+				fu += 8;
+			}
+			else { //Ron on that tile: counts as open
+				fu += 4;
+			}
+		}
+		else {
+			if (!isSameTile(t.tile1, winningTile)) {
+				fu += 4;
+			}
+			else { //Ron on that tile: counts as open
+				fu += 2;
+			}
+		}
+	});
+
+	openTriplets.forEach(function (t) {
+		if (isTerminalOrHonor(t.tile1)) {
+			fu += 4;
+		}
+		else {
+			fu += 2;
+		}
+	});
+	for (let tile of calls[0]) { //Is hand closed? Also consider closed Kans
+		if (tile.from != localPosition2Seat(0)) {
+			isClosed = false;
+			break;
+		}
+	}
+
+	//Kans: Add to existing fu of pon
+	kans.forEach(function (tile) {
+		if (openTiles.filter(t => isSameTile(t, tile) && t.from != localPosition2Seat(0)).length > 0) { //Is open
+			if (isTerminalOrHonor(tile)) {
+				fu += 12;
+			}
+			else {
+				fu += 6;
+			}
+		}
+		else { //Closed Kans
+			if (isTerminalOrHonor(tile)) {
+				fu += 28;
+			}
+			else {
+				fu += 14;
+			}
+		}
+	});
+
+
+	if (typeof pair[0] != 'undefined' && isValueTile(pair[0])) {
+		fu += 2;
+		if (pair[0].index == seatWind && seatWind == roundWind) {
+			fu += 2;
+		}
+	}
+
+	if (fu == 20 && (sequences.findIndex(function (t) { //Is there a way to interpret the wait as ryanmen when at 20 fu? -> dont add fu
+		return (isSameTile(t.tile1, winningTile) && t.tile3.index < 9) || (isSameTile(t.tile3, winningTile) && t.tile1.index > 1);
+	}) >= 0)) {
+		fu += 0;
+	} //if we are at more than 20 fu: check if the wait can be interpreted in other ways to add more fu
+	else if ((waitTiles.length != 2 || waitTiles[0].type != waitTiles[1].type || Math.abs(waitTiles[0].index - waitTiles[1].index) != 1)) {
+		if (closedTriplets.findIndex(function (t) { return isSameTile(t.tile1, winningTile); }) < 0) { // 0 fu for shanpon
+			fu += 2;
+		}
+	}
+
+	if (ron && isClosed) {
+		fu += 10;
+	}
+
+	//log("fu:" + fu);
+	return Math.ceil(fu / 10) * 10;
+}
+
+//Is the tile a dragon or valuable wind?
+function isValueTile(tile) {
+	return tile.type == 3 && (tile.index > 4 || tile.index == seatWind || tile.index == roundWind);
 }
 
 //Return a safety value which is the threshold for folding (safety lower than this value -> fold)

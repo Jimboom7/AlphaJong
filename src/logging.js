@@ -46,8 +46,20 @@ function printTile(tile) {
 
 //Print given tile priorities
 function printTilePriority(tiles) {
+	var score = tiles[0].score.open;
+	if (isClosed) {
+		score = tiles[0].score.closed;
+	}
+	log("Expected Value of the Hand without Riichi: " + Number(score).toFixed(0));
 	for (var i = 0; i < tiles.length && i < LOG_AMOUNT; i++) {
-		log(getTileName(tiles[i].tile) + ": Priority: <" + Number(tiles[i].priority).toFixed(3) + "> Efficiency: <" + Number(tiles[i].efficiency).toFixed(3) + "> Yaku Open: <" + Number(tiles[i].yaku.open).toFixed(3) + "> Yaku Closed: <" + Number(tiles[i].yaku.closed).toFixed(3) + "> Dora: <" + Number(tiles[i].dora).toFixed(3) + "> Waits: <" + Number(tiles[i].waits).toFixed(3) + "> Safety: " + Number(tiles[i].safety).toFixed(2));
+		log(getTileName(tiles[i].tile) +
+			": Priority: <" + Number(tiles[i].priority).toFixed(3) +
+			"> Efficiency: <" + Number(tiles[i].improvementFactor).toFixed(3) +
+			"> Yaku Open: <" + Number(tiles[i].yaku.open).toFixed(3) +
+			"> Yaku Closed: <" + Number(tiles[i].yaku.closed).toFixed(3) +
+			"> Dora: <" + Number(tiles[i].dora).toFixed(3) +
+			"> Waits: <" + Number(tiles[i].waits).toFixed(3) +
+			"> Safety: " + Number(tiles[i].safety).toFixed(2));
 	}
 }
 

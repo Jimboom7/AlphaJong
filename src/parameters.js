@@ -11,11 +11,9 @@ var CALL_CONSTANT = 3; //Amount of han (Open Yaku + Dora) that is needed for cal
 var CALL_KAN_CONSTANT = 60; //Higher Value: Higher Threshold for calling Kans. Default: 60
 
 //HAND EVALUATION CONSTANTS. Higher number => more important.
-var EFFICIENCY_VALUE = 1; // 0 -> ignore Efficiency (lol). Default: 1
-var YAKU_VALUE = 0.5; // 0 -> ignore Yaku. Default: 0.5
-var DORA_VALUE = 0.3; // 0 -> ignore Dora. Default: 0.3
-var SAFETY_VALUE = 0.5; // 0 -> Ignore Safety. Default: 0.5
-var WAIT_VALUE = 0.3; // Value for good waits when tenpai. Maximum: 1. Default: 0.3
+var EFFICIENCY_VALUE = 0.5; // From 0-1. Lower: Slower hands. Higher: Daster hands.
+var SCORE_VALUE = 0.5 // From 0-1. Lower: Cheaper hands. Higher: More expensive hands
+var SAFETY_VALUE = 0.5; // From 0-1. Lower: The bot will not pay much attention to safety. Higher: The bot will try to play safer
 var SAKIGIRI_VALUE = 0.3; // 0 -> Never Sakigiri. Default: 0.3
 
 //STRATEGY CONSTANTS

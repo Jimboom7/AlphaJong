@@ -6,7 +6,7 @@ def addFileToString(inputString, filename):
         
     return inputString
     
-VERSION = "1.2.2"
+VERSION = "1.3.0-experimental"
 
 data = "// ==UserScript==\n// @name         AlphaJong\n// @namespace    alphajong\n// @version      " + VERSION + "\n// @description  A Mahjong Soul Bot.\n// @author       Jimboom7\n// @match        https://mahjongsoul.game.yo-star.com/*\n// @match        https://majsoul.com/*\n// @match        https://game.maj-soul.com/*\n// @match        https://majsoul.union-game.com/*\n// @match        https://game.mahjongsoul.com/*\n// ==/UserScript=="
 

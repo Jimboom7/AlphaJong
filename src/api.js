@@ -174,7 +174,7 @@ function getPlayerLinkState(player) {
 	return view.DesktopMgr.player_link_state[localPosition2Seat(player)];
 }
 
-function getNumberOfPlayerHand(player) {
+function getNumberOfTilesInHand(player) {
 	player = getCorrectPlayerNumber(player);
 	return view.DesktopMgr.Inst.players[player].hand.length;
 }

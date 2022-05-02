@@ -339,211 +339,348 @@ function getTilePriorities(inputHand) {
 	return tiles;
 }
 
-//Calculates Priorities for all tiles in the hand.
-//This function takes a 13 tile hand as input. It then looks for tiles that could potentially improve the hand. After that it does the same with more tiles.
-//In each step scores for efficiency, yaku, dora, waits etc. are calculated and in the end final values are returned.
-//Could also be done with real recursion, but in practise the runtime is too long.
+/*Calculates Values for all tiles in the hand.
+As the Core of the AI this function is really complex. The simple explanation:
+It simulates the next two turns, calculates all the important stuff (shanten, dora, yaku, waits etc.) and produces a priority for each tile based on the expected value/shanten in two turns.
+
+In reality it would take far too much time to calculate all the possibilites (availableTiles * (availableTiles - 1) * 2 which can be up to 30000 possibilities).
+Therefore most of the complexity comes from tricks to reduce the runtime:
+At first all the tiles are computed that could improve the hand in the next two turns (which is usually less than 1000).
+Duplicates (for example 3m -> 4m and 4m -> 3m) are marked and will only be computed once, but with twice the value.
+The rest is some math to produce the same result which would result in actually simulating everything (like adding the original value of the hand for all the useless combinations).
+*/
 function getHandValues(hand, discardedTile) {
-	var newTiles1 = getUsefulTilesForDouble(hand); //For all single tiles: Find tiles that make them doubles
-
-	var combinations = getTriplesAndPairs(hand);
-	var triples = combinations.triples;
-	var pairs = combinations.pairs;
-
+	var shanten = 8; //No check for Chiitoitsu in this function, so this is maximum
 
 	var callTriples = parseInt(getTriples(calls[0]).length / 3);
-	var baseEfficiency = parseInt((triples.length / 3)) + callTriples;
-	baseEfficiency = baseEfficiency > 3.5 ? 3.5 : baseEfficiency;
-	baseEfficiency += (pairs.length / 2) > 0 ? 0.5 : 0;
-	var efficiency = baseEfficiency;
-	var baseDora = getNumberOfDoras(triples.concat(pairs, calls[0]));
-	var doraValue = baseDora;
-	if (getNumberOfPlayers() == 3) {
-		doraValue += getNumberOfKitaOfPlayer(0) * getTileDoraValue({ index: 4, type: 3 });
-	}
-	var baseYaku = getYaku(hand, calls[0]);
-	var yaku = baseYaku;
-	var waits = 0;
 
-	var isHandFuriten = false;
-	var valueForTile = []; //List of tiles and their value, for second step
-	var tileCombinations = []; //List of combinations for second step
+	var triplesAndPairs = getTriplesAndPairs(hand);
+	var triples = triplesAndPairs.triples;
+	var pairs = triplesAndPairs.pairs;
+	var doubles = getDoubles(removeTilesFromTileArray(hand, triples.concat(pairs)));
+
+	var baseDora = getNumberOfDoras(triples.concat(pairs, calls[0]));
+	var baseYaku = getYaku(hand, calls[0], triplesAndPairs);
+	var baseShanten = calculateShanten(parseInt(triples.length / 3) + callTriples, parseInt(pairs.length / 2), parseInt(doubles.length / 2));
+
+	if (typeof discardedTile != 'undefined') {
+		hand.push(discardedTile); //Calculate original values
+		var originalCombinations = getTriplesAndPairs(hand);
+		var originalTriples = originalCombinations.triples;
+		var originalPairs = originalCombinations.pairs;
+		var originalDoubles = getDoubles(removeTilesFromTileArray(hand, originalTriples.concat(originalPairs)));
+
+		var originalShanten = calculateShanten(parseInt(originalTriples.length / 3) + callTriples, parseInt(originalPairs.length / 2), parseInt(originalDoubles.length / 2));
+		hand.pop();
+	}
+	else {
+		var originalShanten = baseShanten;
+	}
+
+	var expectedScore = { open: 0, closed: 0 }; //For the expected score (only looking at hands that improve the current hand)
+	var yaku = { open: 0, closed: 0 }; //Expected Yaku
+	var doraValue = 0; //Expected Dora
+	var waits = 0; //Waits when in Tenpai (Or fractions of it when 1 shanten)
+	var fu = 0;
+	var riichiValue = 0; // Only filled when already tenpai: Han value that only considers the winning hands next turn (so no "what if i draw another dora before winning")
+
+	var waitTiles = [];
+	var tileCombinations = []; //List of combinations for second step to save calculation time
+
+	// STEP 1: Create List of combinations of tiles that can improve the hand
+	var newTiles1 = getUsefulTilesForDouble(hand); //For every tile: Find tiles that make them doubles or triples
 	for (let newTile of newTiles1) {
 
-		var numberOfTiles1 = getNumberOfTilesAvailable(newTile.index, newTile.type, removeTilesFromTileArray(hand, triples.concat(pairs)));
-		hand.push(newTile);
-
-		var combinations2 = getTriplesAndPairs(hand);
-		var triples2 = combinations2.triples;
-		var pairs2 = combinations2.pairs;
-
-		if (numberOfTiles1 <= 0) { //No Tile available?
-			if (isTileFuriten() && isWinningHand(parseInt((triples2.length / 3)) + callTriples, pairs2.length / 2)) { //Check if the hand would be winning and be in furiten
-				waits = 0;
-				isHandFuriten = true;
-			}
-			hand.pop();
+		var numberOfTiles1 = getNumberOfTilesAvailable(newTile.index, newTile.type);
+		if (numberOfTiles1 <= 0) { //Skip if tile is dead
 			continue;
 		}
 
-		var e2 = parseInt((triples2.length / 3)) + callTriples;
-		e2 = e2 > 3.5 ? 3.5 : e2;
-		e2 += (pairs2.length / 2) > 0 ? 0.5 : 0;
+		hand.push(newTile);
+		var newTiles2 = getUsefulTilesForDouble(hand).filter(t => getNumberOfTilesAvailable(t.index, t.type) > 0);
+		if (LOW_SPEC_MODE) { //In Low Spec Mode: Ignore some combinations that are unlikely to improve the hand -> Less calculation time
+			newTiles2 = getUsefulTilesForTriple(hand).filter(t => getNumberOfTilesAvailable(t.index, t.type) > 0);
+			//newTiles2 = newTiles2.filter(t => t.type == newTile.type);
+		}
 
-		e2 -= baseEfficiency; //Only additional triples
-		var d2 = getNumberOfDoras(triples2.concat(pairs2, calls[0])) - baseDora; //Check new triples and pairs for dora
+		var newTiles2Objects = [];
+		for (let t of newTiles2) {
+			var dupl1 = tileCombinations.find(tc => isSameTile(tc.tile1, t)); //Check if combination is already in the array
+			var skip = false;
+			if (typeof dupl1 != 'undefined') {
+				var duplicateCombination = dupl1.tiles2.find(t2 => isSameTile(t2.tile2, newTile));
+				if (typeof duplicateCombination != 'undefined') { //If already exists: Set flag to count it twice and set flag to skip the current one
+					duplicateCombination.duplicate = true;
+					skip = true;
+				}
+			}
+			newTiles2Objects.push({ tile2: t, winning: false, furiten: false, triplesAndPairs: null, duplicate: false, skip: skip });
+		};
 
-		var newTiles2 = getUsefulTilesForTriple(hand);
-		for (let newTile2 of newTiles2) {
-			if (LOW_SPEC_MODE && newTile.type != newTile2.type) { //In Low Spec Mode: Ignore some combinations that are unlikely to improve the hand -> Less calculation time
+		tileCombinations.push({ tile1: newTile, tiles2: newTiles2Objects, winning: false, furiten: false, triplesAndPairs: null });
+		hand.pop();
+	}
+
+	//STEP 2: Check if some of these tiles or combinations are winning or in furiten. We need to know this in advance for Step 3
+	for (let tileCombination of tileCombinations) {
+		//Simulate only the first tile drawn for now
+		var tile1 = tileCombination.tile1;
+		hand.push(tile1);
+
+		var triplesAndPairs2 = getTriplesAndPairs(hand);
+
+		var winning = isWinningHand(parseInt((triplesAndPairs2.triples.length / 3)) + callTriples, triplesAndPairs2.pairs.length / 2);
+		if (winning) {
+			waitTiles.push(tile1);
+			//Mark this tile in other combinations as not duplicate and no skip
+			for (let tc of tileCombinations) {
+				tc.tiles2.forEach(function (t2) {
+					if (isSameTile(tile1, t2.tile2)) {
+						t2.duplicate = false;
+						t2.skip = false;
+					}
+				});
+			}
+		}
+		var furiten = (winning && isTileFuriten(tile1.index, tile1.type));
+		tileCombination.winning = winning;
+		tileCombination.furiten = furiten;
+		tileCombination.triplesAndPairs = triplesAndPairs2; //The triplesAndPairs function is really slow, so save this result for later
+
+		hand.pop();
+	}
+
+	var tile1Furiten = tileCombinations.filter(t => t.furiten).length > 0;
+	for (let tileCombination of tileCombinations) { //Now again go through all the first tiles, but also the second tiles
+		hand.push(tileCombination.tile1);
+		for (let tile2Data of tileCombination.tiles2) {
+			if (tile2Data.skip || (tileCombination.winning && !tile1Furiten)) { //Ignore second tile if marked as skip(is a duplicate) or already winning with tile 1
 				continue;
 			}
-			if (tileCombinations.some(t => (getTileName(t.tile1) == getTileName(newTile2) && getTileName(t.tile2) == getTileName(newTile)) || (getTileName(t.tile1) == getTileName(newTile) && getTileName(t.tile2) == getTileName(newTile2)))) { //Don't calculate combinations multiple times
+			hand.push(tile2Data.tile2);
+
+			var triplesAndPairs3 = getTriplesAndPairs(hand);
+
+			var winning2 = isWinningHand(parseInt((triplesAndPairs3.triples.length / 3)) + callTriples, triplesAndPairs3.pairs.length / 2);
+			var furiten2 = winning2 && isTileFuriten(tile2Data.tile2.index, tile2Data.tile2.type);
+			tile2Data.winning = winning2;
+			tile2Data.furiten = furiten2;
+			tile2Data.triplesAndPairs = triplesAndPairs3;
+
+			hand.pop();
+		}
+		hand.pop();
+	}
+
+	var numberOfTotalCombinations = 0;
+	var numberOfTotalWaitCombinations = 0;
+
+	//STEP 3: Check the values when these tiles are drawn.
+	for (let tileCombination of tileCombinations) {
+		var tile1 = tileCombination.tile1;
+		var numberOfTiles1 = getNumberOfTilesAvailable(tile1.index, tile1.type);
+
+		//Simulate only the first tile drawn for now
+		hand.push(tile1);
+
+		var triplesAndPairs2 = tileCombination.triplesAndPairs;
+		var triples2 = triplesAndPairs2.triples;
+		var pairs2 = triplesAndPairs2.pairs;
+
+		var factor;
+		if (tileCombination.winning && !tile1Furiten) { //Hand is winning: Add the values of the hand for most possible ways to draw this:
+			factor = numberOfTiles1 * (availableTiles.length - 1); //Number of ways to draw this tile first and then any of the other tiles
+			//Number of ways to draw a random tile which we don't have in the array and then the winning tile. We only look at the "good tile -> winning tile" combination later.
+			factor += (availableTiles.length - tileCombinations.reduce((pv, cv) => pv + getNumberOfTilesAvailable(cv.tile1.index, cv.tile1.type), 0)) * numberOfTiles1;
+			shanten += (0 - baseShanten) * factor; //Just for completion: We are tenpai
+		}
+		else { // This tile is not winning
+			// For all the tiles we don't consider as a second draw (because they're useless): The shanten value for this tile -> useless tile is just the value after the first draw
+			var doubles2 = getDoubles(removeTilesFromTileArray(hand, triples2.concat(pairs2)));
+			factor = numberOfTiles1 * ((availableTiles.length - 1) - tileCombination.tiles2.reduce(function (pv, cv) { // availableTiles - useful tiles (which we will check later)
+				if (isSameTile(tile1, cv.tile2)) {
+					return pv + getNumberOfTilesAvailable(cv.tile2.index, cv.tile2.type) - 1;
+				}
+				return pv + getNumberOfTilesAvailable(cv.tile2.index, cv.tile2.type);
+			}, 0));
+			shanten += (calculateShanten(parseInt(triples2.length / 3) + callTriples, parseInt(pairs2.length / 2), parseInt(doubles2.length / 2)) - baseShanten) * factor;
+		}
+
+		var thisFu = 30;
+		var thisDora = getNumberOfDoras(triples2.concat(pairs2, calls[0]));
+		var thisYaku = getYaku(hand, calls[0], triplesAndPairs2);
+
+		if (tileCombination.winning && !tile1Furiten) { //For winning tiles: Add waits, fu and the Riichi value (value only for drawing winning tiles)
+			riichiValue += (thisYaku.closed + thisDora + 1 + 0.2 + getUradoraChance()) * factor;
+			if (isClosed || thisYaku.open >= 1) {
+				var thisWait = numberOfTiles1 * getWaitQuality(tile1);
+				waits += thisWait;
+				thisFu = calculateFu(triples2, calls[0], pairs2, removeTilesFromTileArray(hand, triples.concat(pairs).concat(tile1)), tile1);
+				fu += thisFu * thisWait * factor;
+				if (thisFu == 30) {
+					thisYaku.closed += 1;
+				}
+				numberOfTotalWaitCombinations += factor;
+			}
+		}
+
+		if ((tileCombination.winning && !tile1Furiten) || //If this tile improves the hand (or wins): Add the values to our expected values
+			thisDora > baseDora || thisYaku.closed > baseYaku.closed || (isClosed && thisYaku.open > baseYaku.open)) {
+			if (!tileCombination.winning || tile1Furiten) {
+				//This tile in combination with all the tiles we are not checking as second tiles
+				factor = numberOfTiles1 * (availableTiles.length - 1 - tileCombination.tiles2.reduce((pv, cv) => pv + getNumberOfTilesAvailable(cv.tile2.index, cv.tile2.type), 0));
+				//This tile in combination with all the tiles we are not checking as first tiles
+				factor += (availableTiles.length - tileCombinations.reduce((pv, cv) => pv + getNumberOfTilesAvailable(cv.tile1.index, cv.tile1.type), 0)) * numberOfTiles1;
+			}
+			doraValue += thisDora * factor;
+			yaku.open += thisYaku.open * factor;
+			yaku.closed += thisYaku.closed * factor;
+			expectedScore.open += calculateScore(0, thisYaku.open + thisDora, thisFu) * factor;
+			expectedScore.closed += calculateScore(0, thisYaku.closed + thisDora, thisFu) * factor;
+			numberOfTotalCombinations += factor;
+		}
+
+		if (tileCombination.winning && !tile1Furiten) {
+			hand.pop();
+			continue; //No need to check this tile in combination with any of the other tiles, if this is drawn first and already wins
+		}
+
+		var tile2Furiten = tileCombination.tiles2.filter(t => t.furiten).length > 0;
+
+		for (let tile2Data of tileCombination.tiles2) {//Look at second tiles if not already winning
+			var tile2 = tile2Data.tile2;
+			var numberOfTiles2 = getNumberOfTilesAvailable(tile2.index, tile2.type);
+			if (isSameTile(tile1, tile2)) {
+				if (numberOfTiles2 == 1) {
+					continue;
+				}
+				numberOfTiles2--;
+			}
+
+			if (tile2Data.skip) {
 				continue;
 			}
-			tileCombinations.push({ tile1: newTile, tile2: newTile2 });
-		}
 
-		var chance = (numberOfTiles1 / availableTiles.length);
-
-		if (!isClosed && getNumberOfTilesInTileArray(hand, newTile.index, newTile.type) == 3) {
-			chance *= 2; //More value to possible triples when hand is open (can call pons from all players)
-		}
-
-
-		if (d2 > 0) { //If this tile incorporates a new dora into the hand. Either by forming a triple or by extending a straight etc.
-			doraValue += d2 * chance;
-		}
-
-		var y2 = baseYaku;
-		var winning = isWinningHand(parseInt((triples2.length / 3)) + callTriples, pairs2.length / 2);
-		if (e2 > 0 || winning) { //If this tile forms a new triple
-			efficiency += e2 * chance;
-			y2 = getYaku(hand, calls[0]);
-			y2.open -= baseYaku.open;
-			y2.closed -= baseYaku.closed;
-			if (y2.open > 0) {
-				yaku.open += y2.open * chance;
+			var combFactor = numberOfTiles1 * numberOfTiles2; //Number of ways to draw tile 1 first and then tile 2
+			if (tile2Data.duplicate) {
+				combFactor *= 2;
 			}
-			if (y2.closed > 0) {
-				yaku.closed += y2.closed * chance;
+
+			hand.push(tile2); //Simulate second draw
+
+			var triplesAndPairs3 = tile2Data.triplesAndPairs;
+			var triples3 = triplesAndPairs3.triples;
+			var pairs3 = triplesAndPairs3.pairs;
+
+			var thisShanten = 8;
+			var winning = isWinningHand(parseInt((triples3.length / 3)) + callTriples, pairs3.length / 2);
+
+			var thisDora = getNumberOfDoras(triples3.concat(pairs3, calls[0]));
+			var thisYaku = getYaku(hand, calls[0], triplesAndPairs3);
+
+			if (winning && !tile2Furiten) { //If this tile combination wins in 2 turns: calculate waits etc.
+				thisShanten = 0 - baseShanten;
+				if (waitTiles.filter(t => isSameTile(t, tile2)).length == 0) {
+					var newWait = numberOfTiles2 * getWaitQuality(tile2) * ((numberOfTiles1) / availableTiles.length);
+					if (tile2Data.duplicate) {
+						newWait += numberOfTiles1 * getWaitQuality(tile1) * ((numberOfTiles2) / availableTiles.length);
+					}
+					waits += newWait;
+					var secondDiscard = removeTilesFromTileArray(hand, triples3.concat(pairs3))[0];
+
+					if (!tile2Data.duplicate) {
+						var newFu = calculateFu(triples3, calls[0], pairs3, removeTilesFromTileArray(hand, triples.concat(pairs).concat(tile2).concat(secondDiscard)), tile2);
+						if (newFu == 30) {
+							thisYaku.closed += 1;
+						}
+					}
+					else { //Calculate Fu for drawing both tiles in different orders
+						var newFu = calculateFu(triples3, calls[0], pairs3, removeTilesFromTileArray(hand, triples.concat(pairs).concat(tile2).concat(secondDiscard)), tile2);
+						var newFu2 = calculateFu(triples3, calls[0], pairs3, removeTilesFromTileArray(hand, triples.concat(pairs).concat(tile1).concat(secondDiscard)), tile1);
+						if (newFu == 30) {
+							thisYaku.closed += 0.5;
+						}
+						if (newFu2 == 30) {
+							thisYaku.closed += 0.5;
+						}
+					}
+				}
 			}
-			if (!isHandFuriten && winning) {
-				if (isTileFuriten(newTile.index, newTile.type)) { // Furiten
-					waits = 0;
-					isHandFuriten = true;
+			else { //Not winning? Calculate shanten correctly
+				if (winning && tile2Furiten) { //Furiten: We are 1 shanten
+					thisShanten = 1 - baseShanten;
 				}
 				else {
-					waits += numberOfTiles1 * ((3 - (getWaitScoreForTile(newTile) / 90)) / 2); //Factor waits by "uselessness" for opponents
+					var doubles3 = getDoubles(removeTilesFromTileArray(hand, triples3.concat(pairs3)));
+					thisShanten = calculateShanten(parseInt(triples3.length / 3) + callTriples, parseInt(pairs3.length / 2), parseInt(doubles3.length / 2)) - baseShanten;
 				}
 			}
-		}
+			shanten += thisShanten * combFactor;
 
-		valueForTile.push({ tile: newTile, efficiency: e2, dora: d2, yaku: y2, winning: winning });
+			if (((thisDora > baseDora || thisYaku.open > baseYaku.open || //Does this combination improve the hand (in value or in shanten?) -> Add these expected values
+				(isClosed && thisYaku.closed > baseYaku.closed))) ||
+				winning || thisShanten < 0) {
+				doraValue += thisDora * combFactor;
+				yaku.open += thisYaku.open * combFactor;
+				yaku.closed += thisYaku.closed * combFactor;
+				expectedScore.open += calculateScore(0, thisYaku.open + thisDora) * combFactor;
+				expectedScore.closed += calculateScore(0, thisYaku.closed + thisDora) * combFactor;
+				numberOfTotalCombinations += combFactor;
+			}
+
+			hand.pop();
+		}
 
 		hand.pop();
 	}
 
-	//Second "Recursion" after drawing 2 tiles
-	for (let tileCombination of tileCombinations) {
-		var numberOfTiles1 = getNumberOfNonFuritenTilesAvailable(tileCombination.tile1.index, tileCombination.tile1.type);
-		var numberOfTiles2 = getNumberOfNonFuritenTilesAvailable(tileCombination.tile2.index, tileCombination.tile2.type);
-		if (numberOfTiles1 <= 0 || numberOfTiles2 <= 0) {
-			continue;
-		}
-		if (tileCombination.tile1.index == tileCombination.tile2.index && tileCombination.tile1.type == tileCombination.tile2.type) {
-			if (numberOfTiles2 == 1) {
-				continue;
-			}
-			var newChance = binomialCoefficient(numberOfTiles1, 2) / binomialCoefficient(availableTiles.length, 2);
-		}
-		else {
-			var newChance = (binomialCoefficient(numberOfTiles1, 1) * binomialCoefficient(numberOfTiles2, 1)) / binomialCoefficient(availableTiles.length, 2);
-		}
+	var allCombinations = availableTiles.length * (availableTiles.length - 1);
+	shanten /= allCombinations; //Divide by total amount of possible draw combinations
 
-		chance = (numberOfTiles1 / availableTiles.length);
-
-		var tile1Value = valueForTile.find(t => getTileName(t.tile) == getTileName(tileCombination.tile1));
-		var tile2Value = valueForTile.find(t => getTileName(t.tile) == getTileName(tileCombination.tile2));
-
-		if (tile2Value == undefined) {
-			tile2Value = { efficiency: 0, dora: 0, yaku: { open: 0, closed: 0 }, winning: false };
-		}
-
-		if (tile1Value.winning || tile2Value.winning) {
-			continue;
-		}
-
-		hand.push(tileCombination.tile1);
-		hand.push(tileCombination.tile2);
-
-		if (tileCombination.tile1.index == tileCombination.tile2.index && tileCombination.tile1.type == tileCombination.tile2.type) {
-			var oldEfficiency = tile1Value.efficiency;
-		}
-		else {
-			var oldEfficiency = tile1Value.efficiency + tile2Value.efficiency;
-			oldEfficiency = oldEfficiency > 1 ? 1 : oldEfficiency;
-		}
-		var oldDora = tile1Value.dora + tile2Value.dora;
-		var oldYaku = { open: tile1Value.yaku.open + tile2Value.yaku.open, closed: tile1Value.yaku.closed + tile2Value.yaku.closed };
-
-		var combinations3 = getTriplesAndPairs(hand);
-		var triples3 = combinations3.triples;
-		var pairs3 = combinations3.pairs;
-
-		var e3 = parseInt((triples3.length / 3)) + callTriples;
-		e3 = e3 > 3.5 ? 3.5 : e3;
-		e3 += (pairs3.length / 2) > 0 ? 0.5 : 0;
-
-		e3 -= baseEfficiency + oldEfficiency; //Only additional triples
-
-		var d3 = getNumberOfDoras(triples3.concat(pairs3, calls[0])) - (baseDora + oldDora); //Check new triples and pairs for dora
-
-
-		if (d3 > 0) {
-			doraValue += d3 * newChance;
-		}
-		var winning = isWinningHand(parseInt((triples3.length / 3)) + callTriples, pairs3.length / 2);
-		if (e3 > 0 || winning) { //If this tile forms a new triple
-			efficiency += e3 * newChance;
-			var y3 = getYaku(hand, calls[0]);
-			y3.open -= (baseYaku.open + oldYaku.open);
-			y3.closed -= (baseYaku.closed + oldYaku.closed);
-			if (y3.open > 0) {
-				yaku.open += y3.open * newChance;
-			}
-			if (y3.closed > 0) {
-				yaku.closed += y3.closed * newChance;
-			}
-			if (!isHandFuriten && winning) {
-				waits += numberOfTiles2 * ((3 - (getWaitScoreForTile(tileCombination.tile2) / 90)) / 2) * chance; //Factor waits by "uselessness" for opponents
-			}
-		}
-
-		hand.pop();
-		hand.pop();
+	expectedScore.open /= numberOfTotalCombinations; //Divide by the total combinations we checked, to get the average expected value
+	expectedScore.closed /= numberOfTotalCombinations;
+	doraValue /= numberOfTotalCombinations;
+	yaku.open /= numberOfTotalCombinations;
+	yaku.closed /= numberOfTotalCombinations;
+	if (numberOfTotalWaitCombinations > 0) {
+		riichiValue /= numberOfTotalWaitCombinations;
+		fu /= (numberOfTotalWaitCombinations * waits);
 	}
+
+	fu = fu <= 30 ? 30 : fu;
+	fu = fu > 110 ? 30 : fu;
+
+	var improvementFactor = (shanten + (baseShanten - originalShanten)) * -1; //Percent Number that indicates how big the chance is to improve the hand (in regards to efficiency). Negative for increasing shanten with the discard
+	if (originalShanten == 0) { //Already in Tenpai: Look at waits instead
+		improvementFactor = waits;
+	}
+
+	if (getNumberOfPlayers() == 3) {
+		var kita = getNumberOfKitaOfPlayer(0) * getTileDoraValue({ index: 4, type: 3 });;
+		doraValue += kita;
+	}
+
 	var safety = getTileSafety(discardedTile, hand);
-	var priority = calculateTilePriority(efficiency, yaku, doraValue, waits, safety);
-	return { tile: discardedTile, priority: priority, efficiency: efficiency, dora: doraValue, yaku: yaku, waits: waits, safety: safety };
+	var priority = calculateTilePriority(improvementFactor, expectedScore, safety);
+	return {
+		tile: discardedTile, priority: priority, shanten: baseShanten, improvementFactor: improvementFactor,
+		score: expectedScore, dora: doraValue, yaku: yaku, waits: waits, safety: safety, fu: fu, riichiValue: riichiValue
+	};
 }
 
-function calculateTilePriority(efficiency, yakus, doraValue, waits, safety) {
-	var yaku = yakus.open;
+function calculateTilePriority(improvementFactor, expectedScore, safety) {
+	var score = expectedScore.open;
 	if (isClosed) {
-		yaku = yakus.closed;
+		score = expectedScore.closed;
 	}
-
-	efficiency += (waits / (11 - (WAIT_VALUE * 10)));
 
 	var placementFactor = 1;
 
 	if (isLastGame() && getDistanceToFirst() < -10000) { //Huge lead in last game
-		placementFactor = 1.5;
+		placementFactor = 0.75;
 	}
 
-	return ((efficiency * EFFICIENCY_VALUE * placementFactor) + (yaku * YAKU_VALUE) + (doraValue * DORA_VALUE) +
-		(safety * SAFETY_VALUE * placementFactor)) / ((EFFICIENCY_VALUE * placementFactor) + YAKU_VALUE + DORA_VALUE + (SAFETY_VALUE * placementFactor));
+	return improvementFactor * score * safety;
 }
 
 //Get Chiitoitsu Priorities -> Look for Pairs
@@ -562,6 +699,7 @@ function chiitoitsuPriorities() {
 			doraValue += getNumberOfKitaOfPlayer(0) * getTileDoraValue({ index: 4, type: 3 });
 		}
 		var waits = 0;
+		var shanten = 6;
 
 		var efficiency = pairsValue / 2;
 
@@ -591,15 +729,25 @@ function chiitoitsuPriorities() {
 						yaku.closed += y2.closed * chance;
 					}
 					if (pairsValue + (pairs2.length / 2) == 7) {
-						waits += (numberOfTiles * ((3 - (getWaitScoreForTile(tile) / 90)) / 2)) * 2; //Factor waits by "uselessness" for opponents
+						shanten = 0;
+						var thisWait = numberOfTiles * getWaitQuality(tile); //Factor waits by "uselessness" for opponents
+						waits += thisWait;
+						newYaku = getYaku(newHand, calls[0]);
+						doraValue = getNumberOfDoras(newHand); //When Tenpai: The Dora/Yaku for the specific waits needs to be calculated seperately
+						yaku.open = newYaku.open;
+						yaku.closed = newYaku.closed + 2;
+					}
+					if (pairsValue + (pairs2.length / 2) == 6 && shanten > 1) {
+						shanten = 1;
 					}
 				}
 			}
 			oldTile = tile;
 		});
+		var expectedScore = { open: calculateScore(0, yaku.open + doraValue, 25), closed: calculateScore(0, yaku.closed + doraValue, 25) };
 		var safety = getTileSafety(ownHand[i], newHand);
-		var priority = calculateTilePriority(efficiency, yaku, doraValue, waits, safety);
-		tiles.push({ tile: ownHand[i], priority: priority, efficiency: efficiency, dora: doraValue, yaku: yaku, waits: waits, safety: safety });
+		var priority = calculateTilePriority(efficiency, yaku, doraValue, waits, safety, 25);
+		tiles.push({ tile: ownHand[i], priority: priority, efficiency: efficiency, score: expectedScore, dora: doraValue, yaku: yaku, waits: waits, safety: safety, shanten: shanten, fu: 25 });
 	}
 	tiles.sort(function (p1, p2) {
 		return p2.priority - p1.priority;
@@ -630,12 +778,18 @@ function thirteenOrphansPriorities() {
 			efficiency += 0.25;
 		}
 		var doraValue = getNumberOfDoras(hand);
-		var yaku = { open: 5, closed: 5 }; //5 is enough; with more it would never fold the hand
-		var waits = 0; //Waits dont really matter for thirteen orphans, not much choice anyway
+		var yaku = { open: 13, closed: 13 };
+		var shanten = 13 - uniqueTerminalHonors.length;
+		var waits = 0;
+		if (shanten == 0) {
+			var missingTile = getMissingTilesForThirteenOrphans(uniqueTerminalHonors)[0];
+			waits = getNumberOfNonFuritenTilesAvailable(missingTile.index, missingTile.type);
+		}
 		var safety = getTileSafety(ownHand[i], hand);
-		var priority = calculateTilePriority(efficiency, yaku, doraValue, waits, safety);
+		var priority = calculateTilePriority(efficiency, yaku, doraValue, waits, safety, 30);
 
-		tiles.push({ tile: ownHand[i], priority: priority, efficiency: efficiency, dora: doraValue, yaku: yaku, waits: waits, safety: safety });
+		var expectedScore = { open: calculateScore(0, yaku.open + doraValue), closed: calculateScore(0, yaku.closed + doraValue) };
+		tiles.push({ tile: ownHand[i], priority: priority, efficiency: efficiency, score: expectedScore, dora: doraValue, yaku: yaku, waits: waits, safety: safety, shanten: shanten, fu: 30 });
 
 	}
 
@@ -649,7 +803,6 @@ function thirteenOrphansPriorities() {
 function canDoThirteenOrphans() {
 
 	// PARAMETERS
-	var thirteen_orphans_set = "19m19p19s1234567z";
 	var max_missing_orphans_count = 2; // If an orphan has been discarded more than this time (and is not in hand), we don't go for thirteen orphan.
 	// Ie. 'Red Dragon' is not in hand, but been discarded 3-times on field. We stop going for thirteen orphan.
 
@@ -673,18 +826,28 @@ function canDoThirteenOrphans() {
 	}
 
 	// Get list of missing orphans.
-	var thirteenOrphansTiles = getTilesFromString(thirteen_orphans_set);
-	var missingOrphans = thirteenOrphansTiles.filter(tile =>
-		!uniqueTerminalHonors.some(otherTile => tile.index == otherTile.index && tile.type == otherTile.type));
+	var missingOrphans = getMissingTilesForThirteenOrphans(uniqueTerminalHonors);
+
+	if (missingOrphans.length == 1) {
+		max_missing_orphans_count = 3;
+	}
 
 	// Check if there are enough required orphans in the pool.
 	for (let uniqueOrphan of missingOrphans) {
-		if (getNumberOfNonFuritenTilesAvailable(uniqueOrphan.index, uniqueOrphan.type) < max_missing_orphans_count) {
+		if (4 - getNumberOfNonFuritenTilesAvailable(uniqueOrphan.index, uniqueOrphan.type) > max_missing_orphans_count) {
 			return false;
 		}
 	}
 
 	return true;
+}
+
+//Return a list of missing tiles for thirteen orphans
+function getMissingTilesForThirteenOrphans(uniqueTerminalHonors) {
+	var thirteen_orphans_set = "19m19p19s1234567z";
+	var thirteenOrphansTiles = getTilesFromString(thirteen_orphans_set);
+	return missingOrphans = thirteenOrphansTiles.filter(tile =>
+		!uniqueTerminalHonors.some(otherTile => tile.index == otherTile.index && tile.type == otherTile.type));
 }
 
 
@@ -723,7 +886,7 @@ function getDiscardTile(tiles) {
 
 	var highestYaku = -1;
 	for (let t of tiles) {
-		var foldThreshold = getFoldThreshold(t, false);
+		var foldThreshold = getFoldThreshold(t, ownHand);
 		if (t.yaku.open > highestYaku + 0.01 && t.yaku.open / 3 > highestYaku && t.safety > foldThreshold) {
 			tile = t.tile;
 			highestYaku = t.yaku.open;
