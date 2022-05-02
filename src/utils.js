@@ -527,7 +527,7 @@ function shouldFold(tiles) {
 	log("Would fold this hand below " + foldThreshold + " safety.");
 
 	if (foldThreshold > tiles[0].safety) {
-		log("Tile Safety " + tiles[0].safety + " of " + getTileName(tiles[0].tile) + " is too dangerous. Fold this turn!");
+		log("Tile Safety " + tiles[0].safety + " of " + getTileName(tiles[0].tile, false) + " is too dangerous. Fold this turn!");
 		return true;
 	}
 	return false;

@@ -147,7 +147,7 @@ function makeCallWithOption(type, option) {
 		view.DesktopMgr.Inst.WhenDoOperation();
 	} else {
 		try {
-			var tileName = getTileName(option);
+			var tileName = getTileName(option, false);
 			showCrtStrategyMsg(`call ${getCallNameByType(type)} with ${tileName} accepted;`);
 		} catch (error) {
 			showCrtStrategyMsg(`call ${getCallNameByType(type)} with ${option} accepted;`);
@@ -170,7 +170,7 @@ function sendRiichiCall(tile, moqie) {
 	if (MODE === AIMODE.AUTO) {
 		app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.liqi, tile: tile, moqie: moqie, timeuse: Math.random() * 2 + 1 }); //Moqie: Throwing last drawn tile (Riichi -> false)
 	} else {
-		let tileName = getTileName(tile);
+		let tileName = getTileName(tile, false);
 		showCrtStrategyMsg(`riichi ${tileName};`);
 	}
 }
@@ -200,7 +200,7 @@ function callDiscard(tileNumber) {
 		view.DesktopMgr.Inst.players[0].DoDiscardTile();
 	} else {
 		let tile = ownHand[tileNumber];
-		let tileName = getTileName(tile);
+		let tileName = getTileName(tile, false);
 		showCrtStrategyMsg(`discard ${tileName};`);
 	}
 }
