@@ -204,7 +204,7 @@ function getYaku(inputHand, inputCalls) {
 	//Chuuren poutou
 	//9 Gates
 	//Closed
-	let chuurenpoutou = getChuurenPoutou(hand);
+	let chuurenpoutou = getChuurenPoutou(hand, triplets, sequences);
 	yakuOpen += chuurenpoutou.open;
 	yakuClosed += chuurenpoutou.closed
 
@@ -397,9 +397,32 @@ function getSuushiihou(hand) {
 }
 
 //ChuurenPoutou
-function getChuurenPoutou(hand, pairs) {
+function getChuurenPoutou(hand, triplets, sequences) {
 	if (hand.find(tile => tile.type != hand[0].type)) {
 		return { open: 0, closed: 0 };
+	}
+
+	let crtIdx = 1;
+	let red_five = false;
+
+	if (hand[0].index === 0) {
+		red_five = true;
+	}
+
+	for (let idx = red_five ? 1 : 0; idx < hand.length; idx++) {
+		if (hand[idx].index === crtIdx + 1) {
+			crtIdx++;
+		} else if (hand[idx].index === 6 && crtIdx === 4 && red_five) { // red five?
+			crtIdx = 6;
+		}
+	}
+
+	if (crtIdx != 9) {
+		return { open: 0, closed: 0 };
+	}
+
+	if (parseInt(triplets.length / 3) === 1 && parseInt(sequences.length / 3) === 3) {
+		return { open: YAKUMAN_SCORE, closed: YAKUMAN_SCORE };
 	}
 
 	return { open: 0, closed: 0 };
