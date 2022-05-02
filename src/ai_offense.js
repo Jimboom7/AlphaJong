@@ -407,7 +407,7 @@ function getHandValues(hand, discardedTile) {
 		var chance = (numberOfTiles1 / availableTiles.length);
 
 		if (!isClosed && getNumberOfTilesInTileArray(hand, newTile.index, newTile.type) == 3) {
-			chance *= 2; //More value to possible triples when hand is open (can call pons from all players)
+			chance *= 1.5; //More value to possible triples when hand is open (can call pons from all players)
 		}
 
 
