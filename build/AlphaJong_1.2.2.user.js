@@ -229,6 +229,8 @@ function showDebugString() {
 function aiModeChange() {
 	window.localStorage.setItem("alphajongAIMode", aimodeCombobox.value);
 	MODE = parseInt(aimodeCombobox.value);
+
+	setAutoCallWin(MODE === AIMODE.AUTO);
 }
 
 function roomChange() {
@@ -444,12 +446,7 @@ function makeCallWithOption(type, option) {
 		app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { type: type, index: option, timeuse: Math.random() * 2 + 1 });
 		view.DesktopMgr.Inst.WhenDoOperation();
 	} else {
-		try {
-			var tileName = getTileName(option);
-			showCrtStrategyMsg(`call ${getCallNameByType(type)} with ${tileName} accepted;`);
-		} catch (error) {
-			showCrtStrategyMsg(`call ${getCallNameByType(type)} with ${option} accepted;`);
-		}
+		showCrtStrategyMsg(`call ${getCallNameByType(type)} with ${option} accepted;`);
 	}
 }
 
@@ -468,7 +465,7 @@ function sendRiichiCall(tile, moqie) {
 	if (MODE === AIMODE.AUTO) {
 		app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.liqi, tile: tile, moqie: moqie, timeuse: Math.random() * 2 + 1 }); //Moqie: Throwing last drawn tile (Riichi -> false)
 	} else {
-		let tileName = getTileName(tile);
+		let tileName = getTileEmoji(tile);
 		showCrtStrategyMsg(`riichi ${tileName};`);
 	}
 }
@@ -498,7 +495,7 @@ function callDiscard(tileNumber) {
 		view.DesktopMgr.Inst.players[0].DoDiscardTile();
 	} else {
 		let tile = ownHand[tileNumber];
-		let tileName = getTileName(tile);
+		let tileName = getTileName(tile, false);
 		showCrtStrategyMsg(`discard ${tileName};`);
 	}
 }
@@ -1155,7 +1152,7 @@ function shouldFold(tiles) {
 	log("Would fold this hand below " + foldThreshold + " safety.");
 
 	if (foldThreshold > tiles[0].safety) {
-		log("Tile Safety " + tiles[0].safety + " of " + getTileName(tiles[0].tile) + " is too dangerous. Fold this turn!");
+		log("Tile Safety " + tiles[0].safety + " of " + getTileName(tiles[0].tile, false) + " is too dangerous. Fold this turn!");
 		return true;
 	}
 	return false;
@@ -1392,13 +1389,13 @@ function getStringForTiles(tiles) {
 
 //Print tile name
 function printTile(tile) {
-	log(getTileName(tile));
+	log(getTileName(tile, false));
 }
 
 //Print given tile priorities
 function printTilePriority(tiles) {
 	for (var i = 0; i < tiles.length && i < LOG_AMOUNT; i++) {
-		log(getTileName(tiles[i].tile) + ": Priority: <" + Number(tiles[i].priority).toFixed(3) + "> Efficiency: <" + Number(tiles[i].efficiency).toFixed(3) + "> Yaku Open: <" + Number(tiles[i].yaku.open).toFixed(3) + "> Yaku Closed: <" + Number(tiles[i].yaku.closed).toFixed(3) + "> Dora: <" + Number(tiles[i].dora).toFixed(3) + "> Waits: <" + Number(tiles[i].waits).toFixed(3) + "> Safety: " + Number(tiles[i].safety).toFixed(2));
+		log(getTileName(tiles[i].tile, false) + ": Priority: <" + Number(tiles[i].priority).toFixed(3) + "> Efficiency: <" + Number(tiles[i].efficiency).toFixed(3) + "> Yaku Open: <" + Number(tiles[i].yaku.open).toFixed(3) + "> Yaku Closed: <" + Number(tiles[i].yaku.closed).toFixed(3) + "> Dora: <" + Number(tiles[i].dora).toFixed(3) + "> Waits: <" + Number(tiles[i].waits).toFixed(3) + "> Safety: " + Number(tiles[i].safety).toFixed(2));
 	}
 }
 
@@ -1471,7 +1468,7 @@ function getTileFromString(inputString) {
 }
 
 //Returns the name for a tile
-function getTileName(tile) {
+function getTileName(tile, useRaw = true) {
 	let name = "";
 	if (tile.dora == true) {
 		name =  "0" + getNameForType(tile.type);
@@ -1479,7 +1476,7 @@ function getTileName(tile) {
 		name = tile.index + getNameForType(tile.type);
 	}
 
-	if (USE_EMOJI) {
+	if (!useRaw && USE_EMOJI) {
 		return getTileEmoji(name);
 	} else {
 		return name;
@@ -1560,6 +1557,7 @@ function getYaku(inputHand, inputCalls) {
 	//Open
 	if (strategy != STRATEGIES.CHIITOITSU) {
 		let yakuhai = getYakuhai(triplesAndPairs.triples);
+		//log(`-- yakuhai open ${yakuhai.open} ${yakuhai.closed}`)
 		yakuOpen += yakuhai.open;
 		yakuClosed += yakuhai.closed;
 	}
@@ -1573,6 +1571,7 @@ function getYaku(inputHand, inputCalls) {
 	//Tanyao
 	//Open
 	let tanyao = getTanyao(hand, inputCalls);
+	//log(`-- tanyao open ${tanyao.open} ${tanyao.closed}`)
 	yakuOpen += tanyao.open;
 	yakuClosed += tanyao.closed;
 
@@ -1585,6 +1584,7 @@ function getYaku(inputHand, inputCalls) {
 	//Iipeikou (Identical Sequences in same type)
 	//Closed
 	let iipeikou = getIipeikou(sequences);
+	//log(`-- iipeikou open ${iipeikou.open} ${iipeikou.closed}`)
 	yakuOpen += iipeikou.open;
 	yakuClosed += iipeikou.closed;
 
@@ -1599,6 +1599,7 @@ function getYaku(inputHand, inputCalls) {
 	//3 concealed triplets
 	//Open*
 	let sanankou = getSanankou(triplets);
+	//log(`-- sanankou open ${sanankou.open} ${sanankou.closed}`)
 	yakuOpen += sanankou.open;
 	yakuClosed += sanankou.closed;
 
@@ -1611,6 +1612,7 @@ function getYaku(inputHand, inputCalls) {
 	//All Triplets
 	//Open
 	let toitoi = getToitoi(triplets);
+	//log(`-- toitoi open ${toitoi.open} ${toitoi.closed}`)
 	yakuOpen += toitoi.open;
 	yakuClosed += toitoi.closed;
 
@@ -1618,6 +1620,7 @@ function getYaku(inputHand, inputCalls) {
 	//3 same index triplets in all 3 types
 	//Open
 	let sanshokuDouko = getSanshokuDouko(triplets);
+	//log(`-- sanshokuDouko open ${sanshokuDouko.open} ${sanshokuDouko.closed}`)
 	yakuOpen += sanshokuDouko.open;
 	yakuClosed += sanshokuDouko.closed;
 
@@ -1625,6 +1628,7 @@ function getYaku(inputHand, inputCalls) {
 	//3 same index straights in all types
 	//Open/-1 Han after call
 	let sanshoku = getSanshokuDoujun(sequences);
+	//log(`-- sanshoku open ${sanshoku.open} ${sanshoku.closed}`)
 	yakuOpen += sanshoku.open;
 	yakuClosed += sanshoku.closed;
 
@@ -1632,6 +1636,7 @@ function getYaku(inputHand, inputCalls) {
 	//Little 3 Dragons (2 Triplets + Pair)
 	//Open
 	let shousangen = getShousangen(hand);
+	//log(`-- shousangen open ${shousangen.open} ${shousangen.closed}`)
 	yakuOpen += shousangen.open;
 	yakuClosed += shousangen.closed;
 
@@ -1639,6 +1644,7 @@ function getYaku(inputHand, inputCalls) {
 	//Half outside Hand (including terminals)
 	//Open/-1 Han after call
 	let chanta = getChanta(triplets, sequences, triplesAndPairs.pairs);
+	//log(`-- chanta open ${chanta.open} ${chanta.closed}`)
 	yakuOpen += chanta.open;
 	yakuClosed += chanta.closed;
 
@@ -1646,6 +1652,7 @@ function getYaku(inputHand, inputCalls) {
 	//All Terminals and Honors (means: Also 4 triplets)
 	//Open
 	let honrou = getHonrou(hand);
+	//log(`-- honrou open ${honrou.open} ${honrou.closed}`)
 	yakuOpen += honrou.open;
 	yakuClosed += honrou.closed;
 
@@ -1653,6 +1660,7 @@ function getYaku(inputHand, inputCalls) {
 	//Pure Straight
 	//Open/-1 Han after call
 	let ittsuu = getIttsuu(sequences);
+	//log(`-- ittsuu open ${ittsuu.open} ${ittsuu.closed}`)
 	yakuOpen += ittsuu.open;
 	yakuClosed += ittsuu.closed;
 
@@ -1666,6 +1674,7 @@ function getYaku(inputHand, inputCalls) {
 	//All Terminals
 	//Open/-1 Han after call
 	let junchan = getJunchan(triplets, sequences, triplesAndPairs.pairs);
+	//log(`-- junchan open ${junchan.open} ${junchan.closed}`)
 	yakuOpen += junchan.open;
 	yakuClosed += junchan.closed;
 
@@ -1673,6 +1682,7 @@ function getYaku(inputHand, inputCalls) {
 	//Half Flush
 	//Open/-1 Han after call
 	let honitsu = getHonitsu(hand);
+	//log(`-- honitsu open ${honitsu.open} ${honitsu.closed}`)
 	yakuOpen += honitsu.open;
 	yakuClosed += honitsu.closed;
 
@@ -1682,6 +1692,7 @@ function getYaku(inputHand, inputCalls) {
 	//Full Flush
 	//Open/-1 Han after call
 	let chinitsu = getChinitsu(hand);
+	//log(`-- chinitsu open ${chinitsu.open} ${chinitsu.closed}`)
 	yakuOpen += chinitsu.open;
 	yakuClosed += chinitsu.closed;
 
@@ -1691,13 +1702,15 @@ function getYaku(inputHand, inputCalls) {
 	//Big Three Dragons
 	//Open
 	let daisangen = getDaisangen(hand);
+	//log(`-- daisangen open ${daisangen.open} ${daisangen.closed}`)
 	yakuOpen += daisangen.open;
 	yakuClosed += daisangen.closed;
 
 	//Suuankou
 	//4 Concealed Triplets
 	//Closed
-	let suuankou = getSuuankou(hand);
+	let suuankou = getSuuankou(triplets);
+	//log(`-- suuankou open ${suuankou.open} ${suuankou.closed}`)
 	yakuOpen += suuankou.open;
 	yakuOpen += suuankou.closed;
 
@@ -1705,6 +1718,7 @@ function getYaku(inputHand, inputCalls) {
 	//All Honours
 	//Open
 	let tsuuiisou = getTsuuiisou(hand, triplets);
+	//log(`-- tsuuiisou open ${tsuuiisou.open} ${tsuuiisou.closed}`)
 	yakuOpen += tsuuiisou.open;
 	yakuClosed += tsuuiisou.closed;
 
@@ -1712,6 +1726,7 @@ function getYaku(inputHand, inputCalls) {
 	//All Green
 	//Open
 	let ryuuiisou = getRyuuiisou(hand);
+	//log(`-- ryuuiisou open ${ryuuiisou.open} ${ryuuiisou.closed}`)
 	yakuOpen += ryuuiisou.open;
 	yakuClosed += ryuuiisou.closed;
 
@@ -1719,6 +1734,7 @@ function getYaku(inputHand, inputCalls) {
 	//All Terminals
 	//Open
 	let chinroutou = getChinroutou(hand);
+	//log(`-- chinroutou open ${chinroutou.open} ${chinroutou.closed}`)
 	yakuOpen += chinroutou.open;
 	yakuClosed += chinroutou.closed;
 
@@ -1726,6 +1742,7 @@ function getYaku(inputHand, inputCalls) {
 	//Four Little Winds
 	//Open
 	let suushiihou = getSuushiihou(hand);
+	//log(`-- suushiihou open ${suushiihou.open} ${suushiihou.closed}`)
 	yakuOpen += suushiihou.open;
 	yakuClosed += suushiihou.closed;
 
@@ -1738,6 +1755,7 @@ function getYaku(inputHand, inputCalls) {
 	//9 Gates
 	//Closed
 	let chuurenpoutou = getChuurenPoutou(hand, triplets, sequences);
+	//log(`-- chuurenpoutou open ${chuurenpoutou.open} ${chuurenpoutou.closed}`)
 	yakuOpen += chuurenpoutou.open;
 	yakuClosed += chuurenpoutou.closed
 
@@ -1986,10 +2004,10 @@ function getJunchan(triplets, sequences, pairs) {
 }
 
 //Ittsuu
-function getIttsuu(triples) {
+function getIttsuu(sequences) {
 	for (let j = 0; j <= 2; j++) {
 		for (let i = 1; i <= 9; i++) {
-			if (!triples.some(tile => tile.type == j && tile.index == i)) {
+			if (!sequences.some(tile => tile.type == j && tile.index == i)) {
 				break;
 			}
 			if (i == 9) {
@@ -3365,7 +3383,9 @@ function setData() {
 		}
 	}
 	if (tilesLeft < getTilesLeft()) { //Check if new round/reload
-		setAutoCallWin(true);
+		if (MODE === AIMODE.AUTO) {
+			setAutoCallWin(true);
+		}
 		strategy = STRATEGIES.GENERAL;
 		strategyAllowsCalls = true;
 		initialDiscardedTilesSafety();
