@@ -27,6 +27,7 @@ function getYaku(inputHand, inputCalls) {
 	//Open
 	if (strategy != STRATEGIES.CHIITOITSU) {
 		let yakuhai = getYakuhai(triplesAndPairs.triples);
+		//log(`-- yakuhai open ${yakuhai.open} ${yakuhai.closed}`)
 		yakuOpen += yakuhai.open;
 		yakuClosed += yakuhai.closed;
 	}
@@ -40,6 +41,7 @@ function getYaku(inputHand, inputCalls) {
 	//Tanyao
 	//Open
 	let tanyao = getTanyao(hand, inputCalls);
+	//log(`-- tanyao open ${tanyao.open} ${tanyao.closed}`)
 	yakuOpen += tanyao.open;
 	yakuClosed += tanyao.closed;
 
@@ -52,6 +54,7 @@ function getYaku(inputHand, inputCalls) {
 	//Iipeikou (Identical Sequences in same type)
 	//Closed
 	let iipeikou = getIipeikou(sequences);
+	//log(`-- iipeikou open ${iipeikou.open} ${iipeikou.closed}`)
 	yakuOpen += iipeikou.open;
 	yakuClosed += iipeikou.closed;
 
@@ -66,6 +69,7 @@ function getYaku(inputHand, inputCalls) {
 	//3 concealed triplets
 	//Open*
 	let sanankou = getSanankou(triplets);
+	//log(`-- sanankou open ${sanankou.open} ${sanankou.closed}`)
 	yakuOpen += sanankou.open;
 	yakuClosed += sanankou.closed;
 
@@ -78,6 +82,7 @@ function getYaku(inputHand, inputCalls) {
 	//All Triplets
 	//Open
 	let toitoi = getToitoi(triplets);
+	//log(`-- toitoi open ${toitoi.open} ${toitoi.closed}`)
 	yakuOpen += toitoi.open;
 	yakuClosed += toitoi.closed;
 
@@ -85,6 +90,7 @@ function getYaku(inputHand, inputCalls) {
 	//3 same index triplets in all 3 types
 	//Open
 	let sanshokuDouko = getSanshokuDouko(triplets);
+	//log(`-- sanshokuDouko open ${sanshokuDouko.open} ${sanshokuDouko.closed}`)
 	yakuOpen += sanshokuDouko.open;
 	yakuClosed += sanshokuDouko.closed;
 
@@ -92,6 +98,7 @@ function getYaku(inputHand, inputCalls) {
 	//3 same index straights in all types
 	//Open/-1 Han after call
 	let sanshoku = getSanshokuDoujun(sequences);
+	//log(`-- sanshoku open ${sanshoku.open} ${sanshoku.closed}`)
 	yakuOpen += sanshoku.open;
 	yakuClosed += sanshoku.closed;
 
@@ -99,6 +106,7 @@ function getYaku(inputHand, inputCalls) {
 	//Little 3 Dragons (2 Triplets + Pair)
 	//Open
 	let shousangen = getShousangen(hand);
+	//log(`-- shousangen open ${shousangen.open} ${shousangen.closed}`)
 	yakuOpen += shousangen.open;
 	yakuClosed += shousangen.closed;
 
@@ -106,6 +114,7 @@ function getYaku(inputHand, inputCalls) {
 	//Half outside Hand (including terminals)
 	//Open/-1 Han after call
 	let chanta = getChanta(triplets, sequences, triplesAndPairs.pairs);
+	//log(`-- chanta open ${chanta.open} ${chanta.closed}`)
 	yakuOpen += chanta.open;
 	yakuClosed += chanta.closed;
 
@@ -113,6 +122,7 @@ function getYaku(inputHand, inputCalls) {
 	//All Terminals and Honors (means: Also 4 triplets)
 	//Open
 	let honrou = getHonrou(hand);
+	//log(`-- honrou open ${honrou.open} ${honrou.closed}`)
 	yakuOpen += honrou.open;
 	yakuClosed += honrou.closed;
 
@@ -120,6 +130,7 @@ function getYaku(inputHand, inputCalls) {
 	//Pure Straight
 	//Open/-1 Han after call
 	let ittsuu = getIttsuu(sequences);
+	//log(`-- ittsuu open ${ittsuu.open} ${ittsuu.closed}`)
 	yakuOpen += ittsuu.open;
 	yakuClosed += ittsuu.closed;
 
@@ -133,6 +144,7 @@ function getYaku(inputHand, inputCalls) {
 	//All Terminals
 	//Open/-1 Han after call
 	let junchan = getJunchan(triplets, sequences, triplesAndPairs.pairs);
+	//log(`-- junchan open ${junchan.open} ${junchan.closed}`)
 	yakuOpen += junchan.open;
 	yakuClosed += junchan.closed;
 
@@ -140,6 +152,7 @@ function getYaku(inputHand, inputCalls) {
 	//Half Flush
 	//Open/-1 Han after call
 	let honitsu = getHonitsu(hand);
+	//log(`-- honitsu open ${honitsu.open} ${honitsu.closed}`)
 	yakuOpen += honitsu.open;
 	yakuClosed += honitsu.closed;
 
@@ -149,6 +162,7 @@ function getYaku(inputHand, inputCalls) {
 	//Full Flush
 	//Open/-1 Han after call
 	let chinitsu = getChinitsu(hand);
+	//log(`-- chinitsu open ${chinitsu.open} ${chinitsu.closed}`)
 	yakuOpen += chinitsu.open;
 	yakuClosed += chinitsu.closed;
 
@@ -158,13 +172,15 @@ function getYaku(inputHand, inputCalls) {
 	//Big Three Dragons
 	//Open
 	let daisangen = getDaisangen(hand);
+	//log(`-- daisangen open ${daisangen.open} ${daisangen.closed}`)
 	yakuOpen += daisangen.open;
 	yakuClosed += daisangen.closed;
 
 	//Suuankou
 	//4 Concealed Triplets
 	//Closed
-	let suuankou = getSuuankou(hand);
+	let suuankou = getSuuankou(triplets);
+	//log(`-- suuankou open ${suuankou.open} ${suuankou.closed}`)
 	yakuOpen += suuankou.open;
 	yakuOpen += suuankou.closed;
 
@@ -172,6 +188,7 @@ function getYaku(inputHand, inputCalls) {
 	//All Honours
 	//Open
 	let tsuuiisou = getTsuuiisou(hand, triplets);
+	//log(`-- tsuuiisou open ${tsuuiisou.open} ${tsuuiisou.closed}`)
 	yakuOpen += tsuuiisou.open;
 	yakuClosed += tsuuiisou.closed;
 
@@ -179,6 +196,7 @@ function getYaku(inputHand, inputCalls) {
 	//All Green
 	//Open
 	let ryuuiisou = getRyuuiisou(hand);
+	//log(`-- ryuuiisou open ${ryuuiisou.open} ${ryuuiisou.closed}`)
 	yakuOpen += ryuuiisou.open;
 	yakuClosed += ryuuiisou.closed;
 
@@ -186,6 +204,7 @@ function getYaku(inputHand, inputCalls) {
 	//All Terminals
 	//Open
 	let chinroutou = getChinroutou(hand);
+	//log(`-- chinroutou open ${chinroutou.open} ${chinroutou.closed}`)
 	yakuOpen += chinroutou.open;
 	yakuClosed += chinroutou.closed;
 
@@ -193,6 +212,7 @@ function getYaku(inputHand, inputCalls) {
 	//Four Little Winds
 	//Open
 	let suushiihou = getSuushiihou(hand);
+	//log(`-- suushiihou open ${suushiihou.open} ${suushiihou.closed}`)
 	yakuOpen += suushiihou.open;
 	yakuClosed += suushiihou.closed;
 
@@ -205,6 +225,7 @@ function getYaku(inputHand, inputCalls) {
 	//9 Gates
 	//Closed
 	let chuurenpoutou = getChuurenPoutou(hand, triplets, sequences);
+	//log(`-- chuurenpoutou open ${chuurenpoutou.open} ${chuurenpoutou.closed}`)
 	yakuOpen += chuurenpoutou.open;
 	yakuClosed += chuurenpoutou.closed
 
@@ -453,10 +474,10 @@ function getJunchan(triplets, sequences, pairs) {
 }
 
 //Ittsuu
-function getIttsuu(triples) {
+function getIttsuu(sequences) {
 	for (let j = 0; j <= 2; j++) {
 		for (let i = 1; i <= 9; i++) {
-			if (!triples.some(tile => tile.type == j && tile.index == i)) {
+			if (!sequences.some(tile => tile.type == j && tile.index == i)) {
 				break;
 			}
 			if (i == 9) {
