@@ -205,7 +205,7 @@ function isInGame() {
 }
 
 function doesPlayerExist(player) {
-	return view.DesktopMgr.Inst.players[player].hand != undefined;
+	return typeof view.DesktopMgr.Inst.players[player].hand != 'undefined';
 }
 
 function getPlayerScore(player) {
@@ -244,7 +244,7 @@ function isInRank(room) {
 		return (roomData.room == 100) || (roomData.level_limit <= rank && roomData.level_limit_ceil >= rank); // room 100 is casual mode
 	}
 	catch {
-		return roomData.room == 100;
+		return roomData.room == 100 || roomData.level_limit > 0; // Display the Casual Rooms and all ranked rooms (no special rooms)
 	}
 }
 

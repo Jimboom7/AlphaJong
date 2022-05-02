@@ -55,18 +55,7 @@ var lastTilesLeft = 0; //Counter to check if bot is working
 var isConsideringCall = false;
 var riichiTiles = [null, null, null, null]; // Track players discarded tiles on riichi
 var functionsExtended = false;
-
-//TEST
-var testRunning = false;
-var currentTest = 0;
-var passes = 0;
-var startTime = 0;
-var winValues = [];
-var TEST_DANGER_LEVEL = 50;
-var testCallTile = {};
-var testPlayerRiichi = [0, 0, 0, 0];
-var testPlayerHand = [];
-var testStartTime = 0;
+var playerDiscardSafetyList = [[], [], [], []];
 
 //LOCAL STORAGE
 var AUTORUN = window.localStorage.getItem("alphajongAutorun") == "true";

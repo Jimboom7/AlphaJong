@@ -96,7 +96,7 @@ function getPlayerLinkState(player) {
 	return 1;
 }
 
-function getNumberOfPlayerHand(player) {
+function getNumberOfTilesInHand(player) {
 	return testPlayerHand[player];
 }
 
