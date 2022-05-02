@@ -655,3 +655,69 @@ function binomialCoefficient(a, b) {
 	var denominator = facts[a - b] * facts[b];
 	return numerator / denominator;
 } 
+
+function getCallNameByType(type) {
+	switch (type) {
+		case 1: return "discard";
+		case 2: return "chi";
+		case 3: return "pon";
+		case 4: return "kan(ankan)";
+		case 5: return "kan(daiminkan)";
+		case 6: return "kan(shouminkan)";
+		case 7: return "riichi";
+		case 8: return "tsumo";
+		case 9: return "ron";
+		case 10: return "kyuushu kyuuhai";
+		case 11: return "kita";
+		default: return type;
+	}
+}
+
+//Get Emoji str by tile name
+function getTileEmoji(name) {
+	switch (name) {
+		case "0m": return "red🀋";
+		case "1m": return "🀇";
+		case "2m": return "🀈";
+		case "3m": return "🀉";
+		case "4m": return "🀊";
+		case "5m": return "🀋";
+		case "6m": return "🀌";
+		case "7m": return "🀍";
+		case "8m": return "🀎";
+		case "9m": return "🀏";
+
+		case "0s": return "red🀔";
+		case "1s": return "🀐";
+		case "2s": return "🀑";
+		case "3s": return "🀒";
+		case "4s": return "🀓";
+		case "5s": return "🀔";
+		case "6s": return "🀕";
+		case "7s": return "🀖";
+		case "8s": return "🀗";
+		case "9s": return "🀘";
+
+		case "0p": return "red🀝";
+		case "1p": return "🀙";
+		case "2p": return "🀚";
+		case "3p": return "🀛";
+		case "4p": return "🀜";
+		case "5p": return "🀝";
+		case "6p": return "🀞";
+		case "7p": return "🀟";
+		case "8p": return "🀠";
+		case "9p": return "🀡";
+
+		case "1z": return "🀀";
+		case "2z": return "🀁";
+		case "3z": return "🀂";
+		case "4z": return "🀃";
+		case "5z": return "🀆";
+		case "6z": return "🀅";
+		case "7z": return "🀄";
+
+		default:
+			return name;
+	}
+}

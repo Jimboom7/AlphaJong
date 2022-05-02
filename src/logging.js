@@ -121,10 +121,18 @@ function getTileFromString(inputString) {
 
 //Returns the name for a tile
 function getTileName(tile) {
+	let name = "";
 	if (tile.dora == true) {
-		return "0" + getNameForType(tile.type);
+		name =  "0" + getNameForType(tile.type);
+	} else {
+		name = tile.index + getNameForType(tile.type);
 	}
-	return tile.index + getNameForType(tile.type);
+
+	if (USE_EMOJI) {
+		return getTileEmoji(name);
+	} else {
+		return name;
+	}
 }
 
 //Returns the corresponding char for a type

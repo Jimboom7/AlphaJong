@@ -9,7 +9,7 @@ if (!isDebug()) {
 	window.onkeyup = function (e) {
 		var key = e.keyCode ? e.keyCode : e.which;
 
-		if (key == 107) { // Numpad + Key
+		if (key == 107 || key == 65) { // Numpad + Key
 			toggleGui();
 		}
 	}
@@ -19,19 +19,23 @@ if (!isDebug()) {
 		run = true;
 		setInterval(preventAFK, 30000);
 	}
+
+	log(`crt mode ${AIMODE_NAME[MODE]}`);
+
 	waitForMainLobbyLoad();
 }
 
 function toggleRun() {
+	clearCrtStrategyMsg();
 	if (run) {
 		log("AlphaJong deactivated!");
 		run = false;
-		startButton.innerHTML = "Start Bot"
+		startButton.innerHTML = "Start Bot";
 	}
 	else if (!run) {
 		log("AlphaJong activated!");
 		run = true;
-		startButton.innerHTML = "Stop Bot"
+		startButton.innerHTML = "Stop Bot";
 		main();
 	}
 }
@@ -45,7 +49,7 @@ function waitForMainLobbyLoad() {
 
 	if (!hasFinishedMainLobbyLoading()) { //Otherwise wait for Main Lobby to load and then search for game
 		log("Waiting for Main Lobby to load...");
-		currentActionOutput.value = "Wait for Loading.";
+		showCrtActionMsg("Wait for Loading.");
 		setTimeout(waitForMainLobbyLoad, 2000);
 		return;
 	}
@@ -59,12 +63,12 @@ function waitForMainLobbyLoad() {
 //Main Loop
 function main() {
 	if (!run) {
-		currentActionOutput.value = "Bot is not running.";
+		showCrtActionMsg("Bot is not running.");
 		return;
 	}
 	if (!isInGame()) {
 		checkForEnd();
-		currentActionOutput.value = "Waiting for Game to start.";
+		showCrtActionMsg("Waiting for Game to start.");
 		log("Game is not running, sleep 2 seconds.");
 		errorCounter++;
 		if (errorCounter > 90 && AUTORUN) { //3 minutes no game found -> reload page
@@ -92,18 +96,60 @@ function main() {
 			errorCounter = 0;
 		}
 		log("Waiting for own turn, sleep 1 second.");
-		currentActionOutput.value = "Waiting for own turn.";
+		clearCrtStrategyMsg();
+		showCrtActionMsg("Waiting for own turn.");
 		setTimeout(main, 1000);
+
+		if (MODE === AIMODE.HELP) {
+			oldOps = [];
+		}
+
 		return;
 	}
-
-	currentActionOutput.value = "Calculating best move...";
 
 	setTimeout(mainOwnTurn, 500 + (Math.random() * 500));
 }
 
+var oldOps = []
+function recordPlayerOps() {
+	oldOps = []
+	
+	let ops = getOperationList();
+	for (let op of ops) { 
+		oldOps.push(op.type)
+	}
+}
+
+function checkPlayerOpChanged() {
+	let ops = getOperationList();
+	if (ops.length !== oldOps.length) {
+		return true;
+	}
+
+	for (let i = 0; i < ops.length; i++) {
+		if (ops[i].type !== oldOps[i]) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 function mainOwnTurn() {
+	showCrtActionMsg("Calculating best move...");
+
+	//HELP MODE, if player not operate, just skip
+	if (MODE === AIMODE.HELP) {
+		if (!checkPlayerOpChanged()) {
+			setTimeout(main, 1000);
+			return;
+		} else {
+			recordPlayerOps();
+		}
+	}
+
 	setData(); //Set current state of the board to local variables
+
 	var operations = getOperationList();
 
 	log("##### OWN TURN #####");
@@ -164,7 +210,9 @@ function mainOwnTurn() {
 	}
 
 	log(" ");
-	currentActionOutput.value = "Own turn completed.";
+	if (MODE === AIMODE.AUTO) {
+		showCrtActionMsg("Own turn completed.");
+	}
 	setTimeout(main, 1000);
 }
 
@@ -226,7 +274,7 @@ function setData() {
 function startGame() {
 	if (!isInGame() && run && AUTORUN) {
 		log("Searching for Game in Room " + ROOM);
-		currentActionOutput.value = "Searching for Game...";
+		showCrtActionMsg("Searching for Game...");
 		searchForGame();
 	}
 }

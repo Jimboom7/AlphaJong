@@ -133,40 +133,76 @@ function getTileForCall() {
 }
 
 function makeCall(type) {
-	app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { type: type, index: 0, timeuse: 2 });
-	view.DesktopMgr.Inst.WhenDoOperation();
+	if (MODE === AIMODE.AUTO) {
+		app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { type: type, index: 0, timeuse: Math.random() * 2 + 1 });
+		view.DesktopMgr.Inst.WhenDoOperation();
+	} else {
+		showCrtStrategyMsg(`call ${getCallNameByType(type)} accepted;`);
+	}
 }
 
 function makeCallWithOption(type, option) {
-	app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { type: type, index: option, timeuse: 2 });
-	view.DesktopMgr.Inst.WhenDoOperation();
+	if (MODE === AIMODE.AUTO) {
+		app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { type: type, index: option, timeuse: Math.random() * 2 + 1 });
+		view.DesktopMgr.Inst.WhenDoOperation();
+	} else {
+		try {
+			var tileName = getTileName(option);
+			showCrtStrategyMsg(`call ${getCallNameByType(type)} with ${tileName} accepted;`);
+		} catch (error) {
+			showCrtStrategyMsg(`call ${getCallNameByType(type)} with ${option} accepted;`);
+		}
+	}
 }
 
 function declineCall(operation) {
-	if (operation == getOperationList()[getOperationList().length - 1].type) { //Is last operation -> Send decline Command
-		app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { cancel_operation: true, timeuse: 2 });
-		view.DesktopMgr.Inst.WhenDoOperation();
+	if (MODE === AIMODE.AUTO) {
+		if (operation == getOperationList()[getOperationList().length - 1].type) { //Is last operation -> Send decline Command
+			app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { cancel_operation: true, timeuse: Math.random() * 2 + 1 });
+			view.DesktopMgr.Inst.WhenDoOperation();
+		}
+	} else {
+		showCrtStrategyMsg(`call ${getCallNameByType(operation)} declined;`);
 	}
 }
 
 function sendRiichiCall(tile, moqie) {
-	app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.liqi, tile: tile, moqie: moqie, timeuse: 2 }); //Moqie: Throwing last drawn tile (Riichi -> false)
+	if (MODE === AIMODE.AUTO) {
+		app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.liqi, tile: tile, moqie: moqie, timeuse: Math.random() * 2 + 1 }); //Moqie: Throwing last drawn tile (Riichi -> false)
+	} else {
+		let tileName = getTileName(tile);
+		showCrtStrategyMsg(`riichi ${tileName};`);
+	}
 }
 
 function sendKitaCall() {
-	var moqie = view.DesktopMgr.Inst.mainrole.last_tile.val.toString() == "4z";
-	app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.babei, moqie: moqie, timeuse: 2 });
-	view.DesktopMgr.Inst.WhenDoOperation();
+	if (MODE === AIMODE.AUTO) {
+		var moqie = view.DesktopMgr.Inst.mainrole.last_tile.val.toString() == "4z";
+		app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.babei, moqie: moqie, timeuse: Math.random() * 2 + 1 });
+		view.DesktopMgr.Inst.WhenDoOperation();
+	} else {
+		showCrtStrategyMsg(`kita accepted;`);
+	}
 }
 
 function sendAbortiveDrawCall() {
-	app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.jiuzhongjiupai, index: 0, timeuse: 2 });
-	view.DesktopMgr.Inst.WhenDoOperation();
+	if (MODE === AIMODE.AUTO) {
+		app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.jiuzhongjiupai, index: 0, timeuse: Math.random() * 2 + 1 });
+		view.DesktopMgr.Inst.WhenDoOperation();
+	} else {
+		showCrtStrategyMsg(`Kyuushu Kyuuhai accepted;`);
+	}
 }
 
 function callDiscard(tileNumber) {
-	view.DesktopMgr.Inst.players[0]._choose_pai = view.DesktopMgr.Inst.players[0].hand[tileNumber];
-	view.DesktopMgr.Inst.players[0].DoDiscardTile();
+	if (MODE === AIMODE.AUTO) {
+		view.DesktopMgr.Inst.players[0]._choose_pai = view.DesktopMgr.Inst.players[0].hand[tileNumber];
+		view.DesktopMgr.Inst.players[0].DoDiscardTile();
+	} else {
+		let tile = ownHand[tileNumber];
+		let tileName = getTileName(tile);
+		showCrtStrategyMsg(`discard ${tileName};`);
+	}
 }
 
 function getPlayerLinkState(player) {
