@@ -265,8 +265,8 @@ function callRiichi(tiles) {
 function discardFold(tiles) {
 	if (strategy != STRATEGIES.FOLD) { //Not in full Fold mode yet: Discard a relatively safe tile with high priority
 		for (let tile of tiles) {
-			var foldThreshold = getFoldThreshold(tile, true);
-			if (tile.priority + 0.1 > tiles[0].priority) { //If next tile is not much worse in value than the top priority discard
+			var foldThreshold = getFoldThreshold(tile, ownHand);
+			if (tile.priority + 0.1 > tiles[0].priority) { //If next tile is not much worse in priority than the top priority discard
 				if (tile.safety > foldThreshold) { //Tile that is safe enough exists
 					log("Tile Priorities: ");
 					printTilePriority(tiles);
@@ -276,8 +276,8 @@ function discardFold(tiles) {
 			}
 		}
 		// No safe tile with high priority found: Full Fold.
-		log("Hand is very dangerous, fold until the end of this round.");
-		strategy = STRATEGIES.FOLD;
+		log("Hand is very dangerous, full fold.");
+		//strategy = STRATEGIES.FOLD;
 		strategyAllowsCalls = false;
 	}
 

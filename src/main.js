@@ -169,7 +169,7 @@ function mainOwnTurn() {
 }
 
 //Set Data from real Game
-function setData() {
+function setData(mainUpdate = true) {
 
 	dora = getDora();
 
@@ -189,7 +189,9 @@ function setData() {
 		}
 		discards.push(temp_discards);
 	}
-	updateDiscardedTilesSafety();
+	if (mainUpdate) {
+		updateDiscardedTilesSafety();
+	}
 
 	calls = [];
 	for (var j = 0; j < getNumberOfPlayers(); j++) { //Get Calls for all Players
@@ -209,6 +211,7 @@ function setData() {
 		strategyAllowsCalls = true;
 		initialDiscardedTilesSafety();
 		riichiTiles = [null, null, null, null];
+		playerDiscardSafetyList = [[], [], [], []];
 		extendMJSoulFunctions();
 	}
 

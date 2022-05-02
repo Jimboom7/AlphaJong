@@ -3,20 +3,24 @@
 // Defensive part of the AI
 //################################
 
-//Returns danger of tile for all players as a number from 0-100
+//Returns danger of tile for all players (from a specific players perspective, see second param) as a number from 0-100+
 //Takes into account Genbutsu (Furiten for opponents), Suji, Walls and general knowledge about remaining tiles.
-function getTileDanger(tile, hand) {
-	var dangerPerPlayer = [0, 100, 100, 100];
+//From the perspective of playerPerspective parameter
+function getTileDanger(tile, hand, playerPerspective = 0) {
+	var dangerPerPlayer = [0, 0, 0, 0];
 	if (getNumberOfPlayers() == 3) {
-		dangerPerPlayer = [0, 100, 100];
+		dangerPerPlayer = [0, 0, 0];
 	}
-	for (var i = 1; i < getNumberOfPlayers(); i++) { //Foreach Player
+	for (var i = 0; i < getNumberOfPlayers(); i++) { //Foreach Player
+		if (i == playerPerspective) {
+			continue;
+		}
 		if (getLastTileInDiscard(i, tile) != null) { // Check if tile in discard (Genbutsu)
 			dangerPerPlayer[i] = 0;
 			continue;
 		}
 
-		dangerPerPlayer[i] = getWaitScoreForTileAndPlayer(i, tile, true); //Suji, Walls and general knowledge about remaining tiles.
+		dangerPerPlayer[i] = getWaitScoreForTileAndPlayer(i, tile, true, playerPerspective == 0); //Suji, Walls and general knowledge about remaining tiles.
 
 		if (dangerPerPlayer[i] <= 0) {
 			continue;
@@ -30,22 +34,50 @@ function getTileDanger(tile, hand) {
 			dangerPerPlayer[i] *= 1.05;
 		}
 
-		//Is the player going for a flush of that type? -> 30% more dangerous
-		if (isGoingForFlush(i, tile.type)) {
-			dangerPerPlayer[i] *= 1.3;
+		//Is the player doing a flush of that type? -> More dangerous
+		var honitsuChance = isDoingHonitsu(i, tile.type);
+		var otherHonitsu = Math.max(isDoingHonitsu(i, 0) || isDoingHonitsu(i, 1) || isDoingHonitsu(i, 2));
+		if (honitsuChance > 0) {
+			dangerPerPlayer[i] *= 1 + (honitsuChance / 3);
 		}
-		else if (isGoingForFlush(i, 0) || isGoingForFlush(i, 1) || isGoingForFlush(i, 2)) { //Is the player going for any other flush?
+		else if (otherHonitsu > 0) { //Is the player going for any other flush?
 			if (tile.type == 3) {
-				dangerPerPlayer[i] *= 1.2; //Honor tiles are also dangerous
+				dangerPerPlayer[i] *= 1 + (otherHonitsu / 3); //Honor tiles are also dangerous
 			}
 			else {
-				dangerPerPlayer[i] /= 1.2; //Other tiles are less dangerous
+				dangerPerPlayer[i] /= 1 + (otherHonitsu / 3); //Other tiles are less dangerous
 			}
 		}
-		//Is Tile close to the tile discarded on the riichi turn? -> 20% more dangerous
-		if (isTileCloseToRiichiTile(i, tile)) {
-			dangerPerPlayer[i] *= 1.2;
+
+		//Is the player doing a tanyao? Inner tiles are more dangerous, outer tiles are less dangerous
+		if (tile.type != 3 && tile.index < 9 && tile.index > 1) {
+			dangerPerPlayer[i] *= 1 + (isDoingTanyao(i) / 10);
 		}
+		else {
+			dangerPerPlayer[i] /= 1 + (isDoingTanyao(i) / 10);
+		}
+
+		//Does the player have no yaku yet? Yakuhai is likely -> Honor tiles are 10% more dangerous
+		if (!hasYaku(i)) {
+			if (tile.type == 3 && (tile.index > 4 || tile.index == getSeatWind(i) || tile.index == getRoundWind()) &&
+				getNumberOfTilesAvailable(tile.type, tile.index) > 2) {
+				dangerPerPlayer[i] *= 1.1;
+			}
+		}
+
+		//Is Tile close to the tile discarded on the riichi turn? -> 10% more dangerous
+		if (isPlayerRiichi(i) && riichiTiles[getCorrectPlayerNumber(i)] != null && riichiTiles[getCorrectPlayerNumber(i)] != 'undefined') {
+			if (isTileCloseToOtherTile(tile, riichiTiles[getCorrectPlayerNumber(i)])) {
+				dangerPerPlayer[i] *= 1.1;
+			}
+		}
+
+		//Is Tile close to an early discard (first row)? -> 10% less dangerous
+		discards[i].slice(0, 6).forEach(function (earlyDiscard) {
+			if (isTileCloseToOtherTile(tile, earlyDiscard)) {
+				dangerPerPlayer[i] *= 0.9;
+			}
+		});
 
 		//Danger is at least 5
 		if (dangerPerPlayer[i] < 5) {
@@ -53,74 +85,97 @@ function getTileDanger(tile, hand) {
 		}
 
 		//Multiply with Danger Level
-		dangerPerPlayer[i] *= getPlayerDangerLevel(i) / 100;
+		if (playerPerspective == 0) {
+			dangerPerPlayer[i] *= getPlayerDangerLevel(i) / 100;
+		}
 	}
-	for (var i = 1; i < getNumberOfPlayers(); i++) { // Check for Sakigiri for each player
-		dangerPerPlayer[i] += shouldKeepSafeTile(i, hand, tile);
+	if (playerPerspective == 0 && typeof hand != 'undefined') {
+		for (var i = 1; i < getNumberOfPlayers(); i++) { // Check for Sakigiri for each player
+			dangerPerPlayer[i] += shouldKeepSafeTile(i, hand, tile);
+		}
 	}
 
-	var dangerNumber = ((dangerPerPlayer[1] + dangerPerPlayer[2] + dangerPerPlayer[3] + Math.max.apply(null, dangerPerPlayer)) / 4); //Most dangerous player counts twice
+	var dangerNumber = (dangerPerPlayer[0] + dangerPerPlayer[1] + dangerPerPlayer[2] + dangerPerPlayer[3]) / 3;
 
 	if (getNumberOfPlayers() == 3) {
-		dangerNumber = ((dangerPerPlayer[1] + dangerPerPlayer[2] + Math.max.apply(null, dangerPerPlayer)) / 4); //Most dangerous player counts twice
+		dangerNumber = (dangerPerPlayer[0] + dangerPerPlayer[1] + dangerPerPlayer[2]) / 3;
 	}
 	return dangerNumber;
 }
 
-//Returns danger level for players. 100: Tenpai (Riichi)
+//Returns danger level for players. Contains the state of the hand (like tenpai), but also the value.
 function getPlayerDangerLevel(player) {
 	if (getPlayerLinkState(player) == 0) { //Disconnected -> Safe
 		return 0;
 	}
 
-	if (getNumberOfPlayerHand(player) < 13) { //Some Calls
-		var dangerLevel = parseInt(190 - (getNumberOfPlayerHand(player) * 8) - (tilesLeft * 1.75));
-	}
-	else {
-		dangerLevel = 15 - tilesLeft; //Full hand without Riichi -> Nearly always safe
+	var dealInValue = getExpectedDealInValue(player);
+
+	return 100 * dealInValue / 8000;  //Divide by Mangan value and multiply by 100 to match this with the old scale (dangerLevel 100 = Tenpai with Mangan)
+}
+
+//Returns the expected deal in calue
+function getExpectedDealInValue(player) {
+	var tenpaiChance = isPlayerTenpai(player);
+
+	var han = getExpectedHandValue(player);
+
+	//DealInValue is probability of player being in tenpai multiplied by the value of the hand
+	return tenpaiChance * calculateScore(player, han);
+}
+
+//Calculate the expected Han of the hand
+function getExpectedHandValue(player) {
+	var handValue = getNumberOfDoras(calls[player]); //Visible Dora (melds)
+
+	handValue += getExpectedDoraInHand(player); //Dora in hidden tiles (hand)
+
+	if (isPlayerRiichi(player)) {
+		handValue += 1;
 	}
 
-
-	if (dangerLevel > 80) {
-		dangerLevel = 80;
-	}
-	else if (isPlayerRiichi(player)) { //Riichi
-		dangerLevel = 100;
-	}
-	else if (dangerLevel < 0) {
-		return 0;
-	}
-
-	//Account for possible values of hands.
-
-	if (getSeatWind(player) == 1) { //Is Dealer
-		dangerLevel += 10;
-	}
-
-	dangerLevel += getNumberOfDoras(calls[player]) * 10;
-
-	//3 player mode: More dangerous when more kita
+	//Kita (3 player mode only)
 	if (getNumberOfPlayers() == 3) {
-		dangerLevel += (getNumberOfKitaOfPlayer(player) * getTileDoraValue({ index: 4, type: 3 })) * 10;
+		handValue += (getNumberOfKitaOfPlayer(player) * getTileDoraValue({ index: 4, type: 3 })) * 1;
 	}
 
-	if (isGoingForFlush(player, 0) || isGoingForFlush(player, 1) || isGoingForFlush(player, 2)) {
-		dangerLevel += 10;
-	}
+	//Yakus (only for open hands)
+	handValue += (Math.max(isDoingHonitsu(player, 0) * 2), (isDoingHonitsu(player, 1) * 2), (isDoingHonitsu(player, 2) * 2)) +
+		(isDoingToiToi(player) * 2) + (isDoingTanyao(player) * 1) + (isDoingYakuhai(player) * 1);
 
-	if (tilesLeft > 50) {
-		dangerLevel *= 0.5 + ((70 - tilesLeft) / 40); //Danger scales over the first few turns.
-	}
+	//Expect some hidden Yaku when more tiles are unknown. 1.3 Yaku for a fully concealed hand
+	handValue += getNumberOfTilesInHand(player) / 10;
 
-	return dangerLevel;
+	return handValue;
+}
+
+//How many dora does the player have on average in his hidden tiles?
+function getExpectedDoraInHand(player) {
+	var uradora = 0;
+	if (isPlayerRiichi(player)) { //amount of dora indicators multiplied by chance to hit uradora
+		getUradoraChance();
+	}
+	return (((getNumberOfTilesInHand(player) + (discards[player].length / 2)) / availableTiles.length) * getNumberOfDoras(availableTiles)) + uradora;
 }
 
 //Returns the current Danger level of the table
-function getCurrentDangerLevel() { //Most Dangerous Player counts extra
-	if (getNumberOfPlayers() == 3) {
-		return ((getPlayerDangerLevel(1) + getPlayerDangerLevel(2) + Math.max(getPlayerDangerLevel(1), getPlayerDangerLevel(2))) / 3);
+function getCurrentDangerLevel(forPlayer = 0) { //Most Dangerous Player counts extra
+	var i = 1;
+	var j = 2;
+	var k = 3;
+	if (forPlayer == 1) {
+		i = 0;
 	}
-	return ((getPlayerDangerLevel(1) + getPlayerDangerLevel(2) + getPlayerDangerLevel(3) + Math.max(getPlayerDangerLevel(1), getPlayerDangerLevel(2), getPlayerDangerLevel(3))) / 4);
+	if (forPlayer == 2) {
+		j = 0;
+	}
+	if (forPlayer == 3) {
+		k = 0;
+	}
+	if (getNumberOfPlayers() == 3) {
+		return ((getPlayerDangerLevel(i) + getPlayerDangerLevel(j) + Math.max(getPlayerDangerLevel(i), getPlayerDangerLevel(j))) / 3);
+	}
+	return ((getPlayerDangerLevel(i) + getPlayerDangerLevel(j) + getPlayerDangerLevel(k) + Math.max(getPlayerDangerLevel(i), getPlayerDangerLevel(j), getPlayerDangerLevel(k))) / 4);
 }
 
 //Returns the number of turns ago when the tile was most recently discarded
@@ -131,13 +186,13 @@ function getMostRecentDiscardDanger(tile, player, includeOthers) {
 		if (player == i && r != null) { //Tile is in own discards
 			return 0;
 		}
-		if (wasTileCalledFromOtherPlayers(player, tile)) { //The tile was discarded and called by someone else
-			return 0;
-		}
 		if (!includeOthers) {
 			continue;
 		}
-		if (r != null && r.numberOfPlayerHandChanges[player] < danger) {
+		if (r != null && typeof (r.numberOfPlayerHandChanges) == 'undefined') {
+			danger = 0;
+		}
+		else if (r != null && r.numberOfPlayerHandChanges[player] < danger) {
 			danger = r.numberOfPlayerHandChanges[player];
 		}
 	}
@@ -151,6 +206,9 @@ function getLastTileInDiscard(player, tile) {
 		if (discards[player][i].index == tile.index && discards[player][i].type == tile.type) {
 			return discards[player][i];
 		}
+	}
+	if (wasTileCalledFromOtherPlayers(player, tile)) {
+		return 10; //unknown when it was discarded
 	}
 	return null;
 }
@@ -179,15 +237,132 @@ function getTileSafety(tile, hand) {
 	return 1 - (Math.pow(getTileDanger(tile, hand) / 10, 2) / 100);
 }
 
-//Returns true if the player is going for a flush of a given type
-function isGoingForFlush(player, type) {
-	if (calls[player].length < 6 || calls[player].some(tile => tile.type != type && tile.type != 3)) { //Not enough or different calls -> false
-		return false;
+//Returns a number from 0 to 1 how likely it is that the player is tenpai
+function isPlayerTenpai(player) {
+	var numberOfCalls = parseInt(calls[player].length / 3);
+	if (isPlayerRiichi(player) || numberOfCalls >= 4) {
+		return 1;
 	}
-	if (discards[player].filter(tile => tile.type == type).length >= (discards[player].length / 6)) { //Many discards of that type -> false
-		return false;
+
+	//Based on: https://pathofhouou.blogspot.com/2021/04/analysis-tenpai-chance-by-tedashis-and.html
+	//TODO: Include the more specific lists for Dama hands
+	var tenpaiChanceList = [[], [], [], []];
+	tenpaiChanceList[0] = [0, 0.1, 0.2, 0.5, 1, 1.8, 2.8, 4.2, 5.8, 7.6, 9.5, 11.5, 13.5, 15.5, 17.5, 19.5, 21.7, 23.9, 25, 27];
+	tenpaiChanceList[1] = [0.2, 0.9, 2.3, 4.7, 8.3, 12.7, 17.9, 23.5, 29.2, 34.7, 39.7, 43.9, 47.4, 50.3, 52.9, 55.2, 57.1, 59, 61, 63];
+	tenpaiChanceList[2] = [0, 5.1, 10.5, 17.2, 24.7, 32.3, 39.5, 46.1, 52, 57.2, 61.5, 65.1, 67.9, 69.9, 71.4, 72.4, 73.3, 74.2, 75, 76];
+	tenpaiChanceList[3] = [0, 0, 41.9, 54.1, 63.7, 70.9, 76, 79.9, 83, 85.1, 86.7, 87.9, 88.7, 89.2, 89.5, 89.4, 89.3, 89.2, 89.2, 89.2];
+
+	var numberOfDiscards = discards[player].length;
+	if (numberOfDiscards > 20) {
+		numberOfDiscards = 20;
 	}
-	return true;
+	for (var i = 0; i < getNumberOfPlayers(); i++) {
+		if (i == player) {
+			continue;
+		}
+		for (let t of calls[i]) { //Look through all melds and check where the tile came from
+			if (t.from == localPosition2Seat(getCorrectPlayerNumber(player))) {
+				numberOfDiscards++;
+			}
+		}
+	}
+
+	var tenpaiChance = tenpaiChanceList[numberOfCalls][numberOfDiscards] / 100;
+
+	tenpaiChance *= 1 + (isPlayerPushing(player) / 5);
+
+	//Player who is doing Honitsu starts discarding tiles of his own type => probably tenpai
+	if ((isDoingHonitsu(player, 0) && discards[player].slice(10).filter(tile => tile.type == 0).length > 0)) {
+		tenpaiChance *= 1 + (isDoingHonitsu(player, 0) / 1.5);
+	}
+	if ((isDoingHonitsu(player, 1) && discards[player].slice(10).filter(tile => tile.type == 1).length > 0)) {
+		tenpaiChance *= 1 + (isDoingHonitsu(player, 1) / 1.5);
+	}
+	if ((isDoingHonitsu(player, 2) && discards[player].slice(10).filter(tile => tile.type == 2).length > 0)) {
+		tenpaiChance *= 1 + (isDoingHonitsu(player, 2) / 1.5);
+	}
+
+	if (tenpaiChance > 1) {
+		tenpaiChance = 1;
+	}
+	else if (tenpaiChance < 0) {
+		tenpaiChance = 0;
+	}
+
+	return tenpaiChance;
+}
+
+//Returns a number from -1 (fold) to 1 (push).
+function isPlayerPushing(player) {
+	var lastDiscardSafety = playerDiscardSafetyList[player].slice(-3).filter(v => v >= 0); //Check safety of last three discards. If dangerous: Not folding.
+
+	if (playerDiscardSafetyList[player].length < 3 || lastDiscardSafety.length == 0) {
+		return 0;
+	}
+
+	var pushValue = -1 + (lastDiscardSafety.reduce((v1, v2) => v1 + v2, 0) / (lastDiscardSafety.length * 20));
+	if (pushValue > 1) {
+		pushValue = 1;
+	}
+	return pushValue;
+}
+
+//Is the player doing any of the most common yaku?
+function hasYaku(player) {
+	return (isDoingHonitsu(player, 0) > 0 || isDoingHonitsu(player, 1) > 0 || isDoingHonitsu(player, 2) > 0 ||
+		isDoingToiToi(player) > 0 || isDoingTanyao(player) > 0 || isDoingYakuhai(player) > 0);
+}
+
+//Return a confidence between 0 and 1 for how predictable the strategy of another player is (many calls -> very predictable)
+function getConfidenceInYakuPrediction(player) {
+	var confidence = Math.pow(parseInt(calls[player].length / 3), 2) / 10;
+	if (confidence > 1) {
+		confidence = 1;
+	}
+	return confidence;
+}
+
+//Returns a value between 0 and 1 for how likely the player could be doing honitsu
+function isDoingHonitsu(player, type) {
+	if (parseInt(calls[player].length) == 0 || calls[player].some(tile => tile.type != type && tile.type != 3)) { //Calls of different type -> false
+		return 0;
+	}
+	if (parseInt(calls[player].length / 3) == 4) {
+		return 1;
+	}
+	var percentageOfDiscards = discards[player].slice(0, 10).filter(tile => tile.type == type).length / discards[player].slice(0, 10).length;
+	if (percentageOfDiscards > 0.2) {
+		return 0;
+	}
+	var confidence = (Math.pow(parseInt(calls[player].length / 3), 2) / 10) - percentageOfDiscards + 0.1;
+	if (confidence > 1) {
+		confidence = 1;
+	}
+	return confidence;
+}
+
+//Returns a value between 0 and 1 for how likely the player could be doing toitoi
+function isDoingToiToi(player) {
+	if (parseInt(calls[player].length) > 0 && getSequences(calls[player]).length == 0) { //Only triplets called
+		return getConfidenceInYakuPrediction(player) - 0.1;
+	}
+	return 0;
+}
+
+//Returns a value between 0 and 1 for how likely the player could be doing tanyao
+function isDoingTanyao(player) {
+	if (parseInt(calls[player].length) > 0 && calls[player].filter(tile => tile.type == 3 || tile.index == 1 || tile.index == 9).length == 0 &&
+		(discards[player].slice(0, 5).filter(tile => tile.type == 3 || tile.index == 1 || tile.index == 9).length / discards[player].slice(0, 5).length) >= 0.6) { //only inner tiles called and lots of terminal/honor discards
+		return getConfidenceInYakuPrediction(player);
+	}
+	return 0;
+}
+
+//Returns how many Yakuhai the player has
+function isDoingYakuhai(player) {
+	var yakuhai = parseInt(calls[player].filter(tile => tile.type == 3 && (tile.index > 4 || tile.index == getSeatWind(player) || tile.index == roundWind)).length / 3);
+	yakuhai += parseInt(calls[player].filter(tile => tile.type == 3 && tile.index == getSeatWind(player) && tile.index == roundWind).length / 3);
+	return yakuhai;
 }
 
 //Returns the Wait Score for a Tile (Possible that anyone is waiting for this tile)
@@ -202,40 +377,50 @@ function getWaitScoreForTile(tile) {
 //Returns a score how likely this tile can form the last triple/pair for a player
 //Suji, Walls and general knowledge about remaining tiles.
 //If "includeOthers" parameter is set to true it will also check if other players recently discarded relevant tiles
-function getWaitScoreForTileAndPlayer(player, tile, includeOthers) {
+function getWaitScoreForTileAndPlayer(player, tile, includeOthers, useKnowledgeOfOwnHand = true) {
 	var tile0 = getNumberOfTilesAvailable(tile.index, tile.type);
 	var tile0Public = tile0 + getNumberOfTilesInTileArray(ownHand, tile.index, tile.type);
-	var factor = getFuritenValue(player, tile, includeOthers);
+	if (!useKnowledgeOfOwnHand) {
+		tile0 = tile0Public;
+	}
+	var furitenFactor = getFuritenValue(player, tile, includeOthers);
+
+	//Less priority on Ryanmen and Bridge Wait when player is doing Toitoi
+	var toitoiFactor = 1 - (isDoingToiToi(player) / 3);
 
 	var score = 0;
 
 	//Same tile
-	score += tile0 * (tile0Public + 1) * 6;
+	score += tile0 * (tile0Public + 1) * 6 * furitenFactor * (2 - toitoiFactor);
 
-	if (getNumberOfPlayerHand(player) == 1 || tile.type == 3) {
-		return score * factor; //Return normalized result
+	if (getNumberOfTilesInHand(player) == 1 || tile.type == 3) {
+		return score;
 	}
 
-	var tileL3 = getNumberOfTilesAvailable(tile.index - 3, tile.type);
-	var tileL3Public = tileL3 + getNumberOfTilesInTileArray(ownHand, tile.index - 3, tile.type);
-	var factorL = getFuritenValue(player, { index: tile.index - 3, type: tile.type }, includeOthers);
+	var tileL3Public = getNumberOfTilesAvailable(tile.index - 3, tile.type) + getNumberOfTilesInTileArray(ownHand, tile.index - 3, tile.type);
+	var tileU3Public = getNumberOfTilesAvailable(tile.index + 3, tile.type) + getNumberOfTilesInTileArray(ownHand, tile.index + 3, tile.type);
 
 	var tileL2 = getNumberOfTilesAvailable(tile.index - 2, tile.type);
 	var tileL1 = getNumberOfTilesAvailable(tile.index - 1, tile.type);
 	var tileU1 = getNumberOfTilesAvailable(tile.index + 1, tile.type);
 	var tileU2 = getNumberOfTilesAvailable(tile.index + 2, tile.type);
-	var tileU3 = getNumberOfTilesAvailable(tile.index + 3, tile.type);
-	var tileU3Public = tileU3 + getNumberOfTilesInTileArray(ownHand, tile.index + 3, tile.type);
-	var factorU = getFuritenValue(player, { index: tile.index + 3, type: tile.type }, includeOthers);
+
+	if (!useKnowledgeOfOwnHand) {
+		tileL2 += getNumberOfTilesInTileArray(ownHand, tile.index - 2, tile.type);
+		tileL1 += getNumberOfTilesInTileArray(ownHand, tile.index - 1, tile.type);
+		tileU1 += getNumberOfTilesInTileArray(ownHand, tile.index + 1, tile.type);
+		tileU2 += getNumberOfTilesInTileArray(ownHand, tile.index + 2, tile.type);
+	}
+
+	var furitenFactorL = getFuritenValue(player, { index: tile.index - 3, type: tile.type }, includeOthers);
+	var furitenFactorU = getFuritenValue(player, { index: tile.index + 3, type: tile.type }, includeOthers);
 
 	//Ryanmen Waits
-	score += (tileL1 * tileL2) * (tile0Public + tileL3Public) * factorL;
-	score += (tileU1 * tileU2) * (tile0Public + tileU3Public) * factorU;
+	score += (tileL1 * tileL2) * (tile0Public + tileL3Public) * furitenFactorL * toitoiFactor;
+	score += (tileU1 * tileU2) * (tile0Public + tileU3Public) * furitenFactorU * toitoiFactor;
 
 	//Bridge Wait
-	score += (tileL1 * tileU1 * tile0Public);
-
-	score *= factor;
+	score += (tileL1 * tileU1 * tile0Public) * furitenFactor * toitoiFactor;
 
 	if (score > 180) {
 		score = 180 + ((score - 180) / 4); //add "overflow" that is worth less
@@ -304,17 +489,18 @@ function initialDiscardedTilesSafety() {
 	}
 }
 
-//Returns a value which indicates how important it is to keep the given tile early (Sakigiri something else)
+//Returns a value which indicates how important it is to keep the given tile against another player (Sakigiri something else)
 function shouldKeepSafeTile(player, hand, discardTile) {
 	if (discards[player].length < 3) { // Not many discards yet (very early) => ignore Sakigiri
 		return 0;
 	}
-	if (getPlayerDangerLevel(player) > 0) { // Obviously don't sakigiri when the player could already be in tenpai
+	if (getPlayerDangerLevel(player) > 3) { // Obviously don't sakigiri when the player could already be in tenpai
 		return 0;
 	}
 	if (getLastTileInDiscard(player, discardTile) == null && getWaitScoreForTileAndPlayer(player, discardTile, false) >= 20) { // Tile is not safe, has no value for sakigiri
 		return 0;
 	}
+
 	var safeTiles = 0;
 	for (let tile of hand) { // How many safe tiles do we currently have?
 		if (getLastTileInDiscard(player, tile) != null || getWaitScoreForTileAndPlayer(player, tile, false) < 20) {
@@ -332,13 +518,10 @@ function shouldKeepSafeTile(player, hand, discardTile) {
 	return sakigiri;
 }
 
-//Check if the tile is close to the riichi tile of a player
-function isTileCloseToRiichiTile(player, tile) {
-	if (!isPlayerRiichi(player) || riichiTiles[getCorrectPlayerNumber(player)] == null || riichiTiles[getCorrectPlayerNumber(player)] == 'undefined') {
-		return false;
-	}
-	if (tile.type != 3 && tile.type == riichiTiles[getCorrectPlayerNumber(player)].type) {
-		return tile.index >= riichiTiles[getCorrectPlayerNumber(player)].index - 3 && tile.index <= riichiTiles[getCorrectPlayerNumber(player)].index + 3;
+//Check if the tile is close to another tile
+function isTileCloseToOtherTile(tile, otherTile) {
+	if (tile.type != 3 && tile.type == otherTile.type) {
+		return tile.index >= otherTile.index - 3 && tile.index <= otherTile.index + 3;
 	}
 }
 
