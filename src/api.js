@@ -146,12 +146,7 @@ function makeCallWithOption(type, option) {
 		app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { type: type, index: option, timeuse: Math.random() * 2 + 1 });
 		view.DesktopMgr.Inst.WhenDoOperation();
 	} else {
-		try {
-			var tileName = getTileName(option, false);
-			showCrtStrategyMsg(`call ${getCallNameByType(type)} with ${tileName} accepted;`);
-		} catch (error) {
-			showCrtStrategyMsg(`call ${getCallNameByType(type)} with ${option} accepted;`);
-		}
+		showCrtStrategyMsg(`call ${getCallNameByType(type)} with ${option} accepted;`);
 	}
 }
 
