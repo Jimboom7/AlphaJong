@@ -113,6 +113,9 @@ function getRoundWind() {
 }
 
 function setAutoCallWin(win) {
+	if (!isInGame())
+		return;
+
 	view.DesktopMgr.Inst.setAutoHule(win);
 	//view.DesktopMgr.Inst.setAutoNoFulu(true) //Auto No Chi/Pon/Kan
 	try {
