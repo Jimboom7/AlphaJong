@@ -252,7 +252,9 @@ function setData() {
 		}
 	}
 	if (tilesLeft < getTilesLeft()) { //Check if new round/reload
-		setAutoCallWin(true);
+		if (MODE === AIMODE.AUTO) {
+			setAutoCallWin(true);
+		}
 		strategy = STRATEGIES.GENERAL;
 		strategyAllowsCalls = true;
 		initialDiscardedTilesSafety();

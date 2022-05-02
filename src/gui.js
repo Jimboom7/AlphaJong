@@ -122,6 +122,8 @@ function showDebugString() {
 function aiModeChange() {
 	window.localStorage.setItem("alphajongAIMode", aimodeCombobox.value);
 	MODE = parseInt(aimodeCombobox.value);
+
+	setAutoCallWin(MODE === AIMODE.AUTO);
 }
 
 function roomChange() {
