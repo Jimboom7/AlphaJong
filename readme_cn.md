@@ -116,6 +116,7 @@ UI非常简单，你可以轻易地控制AI。
 |ron|荣|
 |yaku|役|
 |han|翻|
+|fold|副露|
 |yakuman|役满|
 |yakuhai|役牌|
 |riichi|立直|
@@ -152,5 +153,7 @@ UI非常简单，你可以轻易地控制AI。
 |junsei chuuren poutou|纯正九莲宝灯|
 |daisuushii|大四喜|
 |furiten|振听|
+
+参考链接：https://riichi.wiki/List_of_terminology_translations
 
 翻译By: [Nifilmjon](https://github.com/Nifilmjon), [yangruihan](https://github.com/yangruihan)
