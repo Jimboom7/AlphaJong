@@ -44,7 +44,7 @@ function callTriple(combinations, operation) {
 	var newTriple = removeTilesFromTileArray(newHandTriples.triples, currentHandTriples.triples.concat(getTileForCall()));
 	newTriple = sortTiles(newTriple);
 
-	if (newHandTriples.triples.length <= currentHandTriples.triples.length || typeof newTriple[0] == undefined || typeof newTriple[1] == undefined) { //No new triple
+	if (newHandTriples.triples.length <= currentHandTriples.triples.length || typeof newTriple[0] == 'undefined' || typeof newTriple[1] == 'undefined') { //No new triple
 		log("Call would form no new triple! Declined!");
 		declineCall(operation);
 		return false;
@@ -74,27 +74,20 @@ function callTriple(combinations, operation) {
 		}
 	}
 
+	if (!strategyAllowsCalls) { //No Calls allowed
+		log("Strategy allows no calls! Declined!");
+		declineCall(operation);
+		return false;
+	}
+
 	if (comb == -1) {
 		declineCall(operation);
 		log("Could not find combination. Call declined!");
 		return false;
 	}
 
-	var averageSafety = 0;
-	var numOfTiles = 0;
-
-	for (let tile of newHand) {
-		averageSafety += getTileSafety(tile, newHand);
-		numOfTiles++;
-	}
-	averageSafety /= numOfTiles;
-
-	if (getFoldThreshold(newHandValue, false) > averageSafety || getFoldThreshold(newHandValue, false) > newHandValue.safety) {
-		strategyAllowsCalls = false;
-	}
-
-	if (!strategyAllowsCalls) { //No Calls allowed
-		log("Strategy allows no calls! Declined!");
+	if (getFoldThreshold(newHandValue, newHand) > newHandValue.safety) {
+		log("Would fold next discard! Declined!");
 		declineCall(operation);
 		return false;
 	}
@@ -141,8 +134,10 @@ function callTriple(combinations, operation) {
 	else if (!isClosed && (newHandValue.yaku.open + newHandValue.dora) >= (handValue.yaku.open + handValue.dora) * 0.9) { //Hand is already open and not much value is lost
 		log("Call accepted because hand is already open!");
 	}
-	else if (newHandValue.efficiency >= 3.5 && (newHandValue.yaku.open + newHandValue.dora) >= (handValue.yaku.open + handValue.dora) * 0.9) { //Hand is already open and not much value is lost
-		log("Call accepted because it makes the hand ready!");
+	else if (newHandValue.efficiency >= 3.5 && (newHandValue.yaku.open + newHandValue.dora) >= (handValue.yaku.open + handValue.dora) * 0.9 && newHandValue.waits > 2 && // Make hand ready and eliminate a bad wait
+		(newTriple[0].index == newTriple[1].index || Math.abs(newTriple[0].index - newTriple[1].index) == 2 || // Pon or Kanchan
+			newTriple[0].index >= 8 && newTriple[1].index >= 8 || newTriple[0].index <= 2 && newTriple[1].index <= 2)) { //Penchan
+		log("Call accepted because it eliminates a bad wait and makes the hand ready!");
 	}
 	else { //Decline
 		declineCall(operation);
