@@ -170,7 +170,7 @@ function sendRiichiCall(tile, moqie) {
 	if (MODE === AIMODE.AUTO) {
 		app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.liqi, tile: tile, moqie: moqie, timeuse: Math.random() * 2 + 1 }); //Moqie: Throwing last drawn tile (Riichi -> false)
 	} else {
-		let tileName = getTileName(tile, false);
+		let tileName = getTileEmoji(tile);
 		showCrtStrategyMsg(`riichi ${tileName};`);
 	}
 }
