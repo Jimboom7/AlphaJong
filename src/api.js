@@ -133,34 +133,34 @@ function getTileForCall() {
 }
 
 function makeCall(type) {
-	app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { type: type, index: 0, timeuse: 2 });
+	app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { type: type, index: 0, timeuse: Math.random() * 2 + 1 });
 	view.DesktopMgr.Inst.WhenDoOperation();
 }
 
 function makeCallWithOption(type, option) {
-	app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { type: type, index: option, timeuse: 2 });
+	app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { type: type, index: option, timeuse: Math.random() * 2 + 1 });
 	view.DesktopMgr.Inst.WhenDoOperation();
 }
 
 function declineCall(operation) {
 	if (operation == getOperationList()[getOperationList().length - 1].type) { //Is last operation -> Send decline Command
-		app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { cancel_operation: true, timeuse: 2 });
+		app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { cancel_operation: true, timeuse: Math.random() * 2 + 1 });
 		view.DesktopMgr.Inst.WhenDoOperation();
 	}
 }
 
 function sendRiichiCall(tile, moqie) {
-	app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.liqi, tile: tile, moqie: moqie, timeuse: 2 }); //Moqie: Throwing last drawn tile (Riichi -> false)
+	app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.liqi, tile: tile, moqie: moqie, timeuse: Math.random() * 2 + 1 }); //Moqie: Throwing last drawn tile (Riichi -> false)
 }
 
 function sendKitaCall() {
 	var moqie = view.DesktopMgr.Inst.mainrole.last_tile.val.toString() == "4z";
-	app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.babei, moqie: moqie, timeuse: 2 });
+	app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.babei, moqie: moqie, timeuse: Math.random() * 2 + 1 });
 	view.DesktopMgr.Inst.WhenDoOperation();
 }
 
 function sendAbortiveDrawCall() {
-	app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.jiuzhongjiupai, index: 0, timeuse: 2 });
+	app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.jiuzhongjiupai, index: 0, timeuse: Math.random() * 2 + 1 });
 	view.DesktopMgr.Inst.WhenDoOperation();
 }
 
