@@ -18,8 +18,8 @@ src_files = [
     'main.js',
 ]
 
-version = "1.2.2"
-author = "ryan"
+version = "1.2.1"
+author = "Jimboom7"
 
 header = f"""// ==UserScript==
 // @name         AlphaJong
