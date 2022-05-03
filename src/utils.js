@@ -307,7 +307,7 @@ function getTilesInTileArray(tileArray, index, type) {
 //Update the available tile pool
 function updateAvailableTiles() {
 	visibleTiles = dora.concat(ownHand, discards[0], discards[1], discards[2], discards[3], calls[0], calls[1], calls[2], calls[3]);
-	visibleTiles = visibleTiles.filter(tile => tile != undefined);
+	visibleTiles = visibleTiles.filter(tile => typeof tile != 'undefined');
 	availableTiles = [];
 	for (var i = 0; i <= 3; i++) {
 		for (var j = 1; j <= 9; j++) {
@@ -383,7 +383,7 @@ function checkWin(hand) {
 
 //Returns true if DEBUG flag is set
 function isDebug() {
-	return typeof DEBUG != "undefined";
+	return typeof DEBUG != 'undefined';
 }
 
 //Adds calls of player 0 to the hand
@@ -856,10 +856,3 @@ function isWinningHand(numberOfTriples, numberOfPairs) {
 	}
 	return numberOfTriples == 4 && numberOfPairs == 1;
 }
-
-//Returns the binomialCoefficient for two numbers. Needed for chance to draw tile calculation. Fails if a faculty of > 134 is needed (should not be the case since there are 134 tiles)
-function binomialCoefficient(a, b) {
-	var numerator = facts[a];
-	var denominator = facts[a - b] * facts[b];
-	return numerator / denominator;
-} 

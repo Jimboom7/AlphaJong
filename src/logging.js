@@ -54,7 +54,7 @@ function printTilePriority(tiles) {
 	for (var i = 0; i < tiles.length && i < LOG_AMOUNT; i++) {
 		log(getTileName(tiles[i].tile) +
 			": Priority: <" + Number(tiles[i].priority).toFixed(3) +
-			"> Efficiency: <" + Number(tiles[i].improvementFactor).toFixed(3) +
+			"> Efficiency: <" + Number(tiles[i].efficiency).toFixed(3) +
 			"> Yaku Open: <" + Number(tiles[i].yaku.open).toFixed(3) +
 			"> Yaku Closed: <" + Number(tiles[i].yaku.closed).toFixed(3) +
 			"> Dora: <" + Number(tiles[i].dora).toFixed(3) +

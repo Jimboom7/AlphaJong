@@ -13,7 +13,7 @@ Compatible with both 3 and 4 player mode.
 * Open [Mahjong Soul](https://mahjongsoul.game.yo-star.com/) (make sure you are logged in already).
 * Go into a game and click "Start Bot" in the GUI at the top.
 * You can check "Autostart" to let the bot automatically start new games.
-* Logging is output to the browser console (Ctrl + Shift + J [Chrome] or Ctrl + Shift + K [Firefox])
+* Detailed logging is output to the browser console ([F12] in most browsers])
 
 ### GUI
 ![GUI](https://i.imgur.com/6PnXb3T.png)

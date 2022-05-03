@@ -200,6 +200,7 @@ function runEfficiencyTestcase() {
 			logTestcase("Open Hand");
 			ownHand = getTilesFromString("2256p234s2p");
 			calls[0] = getTilesFromString("222444m");
+			isClosed = false;
 			expected = ["2p"];
 			break;
 
@@ -207,6 +208,7 @@ function runEfficiencyTestcase() {
 			logTestcase("Open Hand 2");
 			ownHand = getTilesFromString("66734s");
 			calls[0] = getTilesFromString("111333555m");
+			isClosed = false;
 			expected = ["3s", "4s"];
 			break;
 
@@ -373,7 +375,7 @@ function runYakuTestcase() {
 		case 12:
 			logTestcase("Sanshoku Douko");
 			ownHand = getTilesFromString("11156m11199p1167s");
-			expected = ["6s", "7s", "5m", "6m"];
+			expected = ["6s", "7s", "5m", "6m", "9p"];
 			break;
 
 		case 13:

@@ -66,7 +66,7 @@ function getTileDanger(tile, hand, playerPerspective = 0) {
 		}
 
 		//Is Tile close to the tile discarded on the riichi turn? -> 10% more dangerous
-		if (isPlayerRiichi(i) && riichiTiles[getCorrectPlayerNumber(i)] != null && riichiTiles[getCorrectPlayerNumber(i)] != 'undefined') {
+		if (isPlayerRiichi(i) && riichiTiles[getCorrectPlayerNumber(i)] != null && typeof riichiTiles[getCorrectPlayerNumber(i)] != 'undefined') {
 			if (isTileCloseToOtherTile(tile, riichiTiles[getCorrectPlayerNumber(i)])) {
 				dangerPerPlayer[i] *= 1.1;
 			}
@@ -456,7 +456,7 @@ function updateDiscardedTilesSafety() {
 	for (var k = 1; k < getNumberOfPlayers(); k++) { //For all other players
 		for (var i = 0; i < getNumberOfPlayers(); i++) { //For all discard ponds
 			for (var j = 0; j < discards[i].length; j++) { //For every tile in it
-				if (typeof (discards[i][j].numberOfPlayerHandChanges) == "undefined") {
+				if (typeof (discards[i][j].numberOfPlayerHandChanges) == 'undefined') {
 					discards[i][j].numberOfPlayerHandChanges = [0, 0, 0, 0];
 				}
 				if (hasPlayerHandChanged(k)) {
@@ -476,7 +476,7 @@ function initialDiscardedTilesSafety() {
 	for (var k = 1; k < getNumberOfPlayers(); k++) { //For all other players
 		for (var i = 0; i < getNumberOfPlayers(); i++) { //For all discard ponds
 			for (var j = 0; j < discards[i].length; j++) { //For every tile in it
-				if (typeof (discards[i][j].numberOfPlayerHandChanges) == "undefined") {
+				if (typeof (discards[i][j].numberOfPlayerHandChanges) == 'undefined') {
 					discards[i][j].numberOfPlayerHandChanges = [0, 0, 0, 0];
 				}
 				var bonus = 0;
