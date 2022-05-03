@@ -18,7 +18,7 @@ var SAKIGIRI_VALUE = 0.3; // 0 -> Never Sakigiri. Default: 0.3
 
 //STRATEGY CONSTANTS
 var CHIITOITSU = 5; //Number of Pairs in Hand to go for chiitoitsu. Default: 5
-var THIRTEEN_ORPHANS = 10; //Number of Honor/Terminals in hand to go for 13 orphans (Not yet implemented). Default: 10
+var THIRTEEN_ORPHANS = 10; //Number of Honor/Terminals in hand to go for 13 orphans. Default: 10
 var RIICHI_TILES_LEFT = 6; //Minimum amount of tiles that need to be left for calling Riichi. Default: 6
 var WAITS_FOR_RIICHI = 5; //Amount of waits that is considered good enough for calling Riichi. Default: 5
 

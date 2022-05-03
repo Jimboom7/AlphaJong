@@ -753,6 +753,11 @@ function shouldRiichi(waits, yaku, handDora) {
 		return false;
 	}
 
+	if (tilesLeft <= RIICHI_TILES_LEFT) {
+		log("Decline Riichi because close to end of game.");
+		return false;
+	}
+
 	//No waits
 	if (waits < 1) {
 		log("Decline Riichi because of no waits.");
