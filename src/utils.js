@@ -549,7 +549,7 @@ function calculateScore(player, han, fu = 30) {
 	return score;
 }
 
-//Calculate the Fu Value for given parameters. NOt 100% accurate, but good enough
+//Calculate the Fu Value for given parameters. Not 100% accurate, but good enough
 function calculateFu(triples, openTiles, pair, waitTiles, winningTile, ron = true) {
 	var fu = 20;
 
@@ -586,12 +586,6 @@ function calculateFu(triples, openTiles, pair, waitTiles, winningTile, ron = tru
 			fu += 2;
 		}
 	});
-	for (let tile of calls[0]) { //Is hand closed? Also consider closed Kans
-		if (tile.from != localPosition2Seat(0)) {
-			isClosed = false;
-			break;
-		}
-	}
 
 	//Kans: Add to existing fu of pon
 	kans.forEach(function (tile) {

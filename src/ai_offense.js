@@ -52,9 +52,11 @@ function callTriple(combinations, operation) {
 
 	for (var i = 0; i < combinations.length; i++) {
 		if (combinations[i] == getTileName(newTriple[0]) + "|" + getTileName(newTriple[1]) || combinations[i] == getTileName(newTriple[1]) + "|" + getTileName(newTriple[0])) {
+			var wasClosed = isClosed;
 			calls[0].push(newTriple[0]); //Simulate "Call" for hand value calculation
 			calls[0].push(newTriple[1]);
 			calls[0].push(getTileForCall());
+			//isClosed = false;
 			newHand = removeTilesFromTileArray(ownHand, [newTriple[0], newTriple[1]]); //Remove called tiles from hand
 			var nextDiscard = getDiscardTile(getTilePriorities(newHand)); //Calculate next discard
 			if (nextDiscard.index == getTileForCall().index && nextDiscard.type == getTileForCall().type) {
@@ -68,7 +70,7 @@ function callTriple(combinations, operation) {
 			calls[0].pop();
 			calls[0].pop();
 			calls[0].pop();
-
+			isClosed = wasClosed;
 			log("Combination found: " + combinations[i]);
 			comb = i;
 		}
