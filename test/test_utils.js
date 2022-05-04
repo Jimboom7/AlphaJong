@@ -45,6 +45,7 @@ function readDebugString(debugString) {
 	roundWind = debugArray[12];
 	tilesLeft = debugArray[13];
 	testPlayerHand = [13 - calls[0].length, 13 - calls[1].length, 13 - calls[2].length, 13 - calls[3].length];
+	isClosed = calls[0].length == 0;
 }
 
 
@@ -70,12 +71,5 @@ function read3PlayerDebugString(debugString) {
 	roundWind = debugArray[10];
 	tilesLeft = debugArray[11];
 	testPlayerHand = [13 - calls[0].length, 13 - calls[1].length, 13 - calls[2].length];
-}
-
-//Returns true if triples, pairs and doubles are valid for tenpai
-function isTenpai(triplesAndPairs, doubles, efficiency) {
-	if (strategy == STRATEGIES.CHIITOITSU) {
-		return parseInt(triplesAndPairs.pairs.length / 2) >= 6;
-	}
-	return efficiency >= 3.5 && ((parseInt(triplesAndPairs.triples.length / 3) == 3 && parseInt(triplesAndPairs.pairs.length / 2) >= 1 && ((parseInt(doubles.length / 2) >= 1) || parseInt(triplesAndPairs.pairs.length / 2) >= 2)) || parseInt(triplesAndPairs.triples.length / 3) == 4);
+	isClosed = calls[0].length == 0;
 }

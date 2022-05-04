@@ -20,6 +20,9 @@ function getYaku(inputHand, inputCalls, triplesAndPairs = null) {
 	if (triplesAndPairs == null) { //Can be set as a parameter to save calculation time if already precomputed
 		triplesAndPairs = getTriplesAndPairs(hand);
 	}
+	else {
+		triplesAndPairs.triples = triplesAndPairs.triples.concat(inputCalls);
+	}
 	var triplets = getTripletsAsArray(hand);
 	var sequences = getBestSequenceCombination(inputHand).concat(getBestSequenceCombination(inputCalls));
 

@@ -269,6 +269,9 @@ function sortTiles(inputTiles) {
 
 //Return number of specific tiles available
 function getNumberOfTilesAvailable(index, type) {
+	if (index < 0 || index > 9 || type < 0 || type > 4 || (type == 3 && index > 7)) {
+		return 0;
+	}
 	if (getNumberOfPlayers() == 3 && (index > 1 && index < 9 && type == 1)) {
 		return 0;
 	}
@@ -364,21 +367,6 @@ function getHigherTileIndex(tile) {
 		return 9; // 3 player mode: 1 man indicator means 9 man is dora
 	}
 	return tile.index == 9 ? 1 : tile.index + 1;
-}
-
-//Returns 0 if not winning hand. Returns value of yaku/dora otherwise.
-//Only used for benchmark
-function checkWin(hand) {
-	var win = getTriplesAndPairs(hand);
-	if (parseInt((win.triples.length / 3)) >= 4 && parseInt((win.pairs.length / 2)) >= 1) {
-		if (isClosed) {
-			return getNumberOfDoras(hand) + getYaku(hand).closed;
-		}
-		else {
-			return getNumberOfDoras(hand) + getYaku(hand).open;
-		}
-	}
-	return 0;
 }
 
 //Returns true if DEBUG flag is set
@@ -494,6 +482,7 @@ function isTerminalOrHonor(tile) {
 	return false;
 }
 
+// Returns a number how "good" the wait is. An average wait is 1, a bad wait (like a middle tile) is lower, a good wait (like an honor tile) is higher.
 function getWaitQuality(tile) {
 	return (3 - (getWaitScoreForTileAndPlayer(0, tile, false) / 90)) / 2;
 }
@@ -630,7 +619,6 @@ function calculateFu(triples, openTiles, pair, waitTiles, winningTile, ron = tru
 		fu += 10;
 	}
 
-	//log("fu:" + fu);
 	return Math.ceil(fu / 10) * 10;
 }
 
@@ -639,35 +627,7 @@ function isValueTile(tile) {
 	return tile.type == 3 && (tile.index > 4 || tile.index == seatWind || tile.index == roundWind);
 }
 
-//Return a safety value which is the threshold for folding (safety lower than this value -> fold)
-function getFoldThresholdForHighShanten(tilePrio, dealInValues) {
-	if (dealInValues > 5000) {
-		return 1;
-	}
-	var han = tilePrio.yaku.open + tilePrio.dora;
-	if (isClosed) {
-		han = tilePrio.yaku.closed + tilePrio.dora;
-	}
-	var priority = tilePrio.priority + ((han - 2) / 10);
-
-	var factor = (2 * FOLD_CONSTANT) / (2 + (dealInValues / 1000));
-	if (isLastGame()) { //Fold earlier when first/later when last in last game
-		if (getDistanceToLast() > 0) {
-			factor *= 1.5; //Last Place -> Later Fold
-		}
-		else if (getDistanceToFirst() < 0) {
-			var dist = (getDistanceToFirst() / 30000) > -0.5 ? getDistanceToFirst() / 30000 : -0.5;
-			factor *= 1 + dist; //First Place -> Easier Fold
-		}
-	}
-	factor *= seatWind == 1 ? 1.1 : 1; //Fold later as dealer
-	var threshold = Number((1 - (((priority * priority * factor) + (factor / 3)) / 100))).toFixed(2);
-	if (threshold < -1) {
-		threshold = -1;
-	}
-	return threshold;
-}
-
+//Return a danger value which is the threshold for folding (danger higher than this value -> fold)
 function getFoldThreshold(tilePrio, hand) {
 	var dealInValues;
 	if (getNumberOfPlayers() == 4) {
@@ -677,24 +637,36 @@ function getFoldThreshold(tilePrio, hand) {
 		dealInValues = getExpectedDealInValue(1) + getExpectedDealInValue(2);
 	}
 
-	var han = tilePrio.yaku.open + tilePrio.dora;
+	var handScore = tilePrio.score.open;
 	if (isClosed) {
-		han = tilePrio.yaku.closed + tilePrio.dora;
-		han += 1 + 0.2 + getUradoraChance(); // Riichi + Ippatsu (20%) + Uradora
+		handScore = tilePrio.riichiValue;
 	}
-	var handScore = calculateScore(0, han, tilePrio.fu);
 
 	var waits = tilePrio.waits;
 
 	// Formulas are based on this table: https://docs.google.com/spreadsheets/d/172LFySNLUtboZUiDguf8I3QpmFT-TApUfjOs5iRy3os/edit#gid=212618921
+	// TODO: Maybe switch to this: https://riichi-mahjong.com/2020/01/28/mahjong-strategy-push-or-fold-4-maximizing-game-ev/
 	if (tilePrio.shanten == 0) {
-		var foldValue = ((0.25 + (waits / 8)) * (0.25 + (handScore / dealInValues))) * 80;
+		var foldValue = waits * handScore / 40;
 	}
 	else if (tilePrio.shanten == 1) {
-		var foldValue = ((0.25 + (waits / 4)) * (1 + (handScore / dealInValues))) * 40;
+		var foldValue = waits * handScore / 30;
 	}
-	else { // Use old calculation for 2+ shanten. A bit wonky, but does it's job I guess.
-		return getFoldThresholdForHighShanten(tilePrio, dealInValues);
+	else {
+		if (dealInValues > 5000) {
+			return 0;
+		}
+		var foldValue = (((6 - (tilePrio.shanten - tilePrio.efficiency)) * 2000) + handScore) / 200;
+	}
+
+	if (isLastGame()) { //Fold earlier when first/later when last in last game
+		if (getDistanceToLast() > 0) {
+			foldValue *= 1.3; //Last Place -> Later Fold
+		}
+		else if (getDistanceToFirst() < 0) {
+			var dist = (getDistanceToFirst() / 30000) > -0.5 ? getDistanceToFirst() / 30000 : -0.5;
+			foldValue *= 1 + dist; //First Place -> Easier Fold
+		}
 	}
 
 	foldValue *= 1 + (((35 - tilesLeft) / (35 * 5)) * (waits / 4)); // up to 20% more/less fold when early/lategame.
@@ -712,19 +684,14 @@ function getFoldThreshold(tilePrio, hand) {
 	}
 	foldValue *= 1 + (0.4 - (safeTiles / 5)); // 20% less likely to fold when only 1 safetile, or 40% when 0 safetiles
 
-	foldValue = Number(1 - (Math.pow(foldValue / 10, 2) / 100)).toFixed(2);
+	foldValue = foldValue < 0 ? 0 : foldValue;
 
-	foldValue = foldValue < -1 ? -1 : foldValue;
-	foldValue = foldValue > 1 ? 1 : foldValue;
-
-	return foldValue;
+	return Number(foldValue).toFixed(2);
 }
 
 //Return true if danger is too high in relation to the value of the hand
 function shouldFold(tiles) {
-	if ((tilesLeft < 4 && tiles[0].efficiency < 3.5) ||
-		(tilesLeft < 8 && tiles[0].efficiency < 3) ||
-		(tilesLeft < 12 && tiles[0].efficiency < 2)) {
+	if (tiles[0].shanten > 0 && tiles[0].shanten >= tilesLeft * 4) {
 		log("Hand is too far from tenpai before end of game. Fold!");
 		strategy = STRATEGIES.FOLD;
 		strategyAllowsCalls = false;
@@ -732,10 +699,10 @@ function shouldFold(tiles) {
 	}
 
 	var foldThreshold = getFoldThreshold(tiles[0], ownHand);
-	log("Would fold this hand below " + foldThreshold + " safety.");
+	log("Would fold this hand above " + foldThreshold + " danger.");
 
-	if (foldThreshold > tiles[0].safety) {
-		log("Tile Safety " + Number(tiles[0].safety).toFixed(2) + " of " + getTileName(tiles[0].tile) + " is too dangerous.");
+	if (tiles[0].danger > foldThreshold) {
+		log("Tile Danger " + Number(tiles[0].danger).toFixed(2) + " of " + getTileName(tiles[0].tile) + " is too dangerous.");
 		return true;
 	}
 	return false;
@@ -753,6 +720,7 @@ function shouldRiichi(waits, yaku, handDora) {
 		return false;
 	}
 
+	//Close to end of game
 	if (tilesLeft <= RIICHI_TILES_LEFT) {
 		log("Decline Riichi because close to end of game.");
 		return false;
@@ -783,7 +751,7 @@ function shouldRiichi(waits, yaku, handDora) {
 	}
 
 	// High Danger and hand not worth much or bad wait
-	if (getCurrentDangerLevel() > 50 && (yaku.closed + handDora < 2 || badWait)) {
+	if (getCurrentDangerLevel() > 5000 && (yaku.closed + handDora < 2 || badWait)) {
 		log("Decline Riichi because of worthless hand and high danger.");
 		return false;
 	}
@@ -836,7 +804,6 @@ function getDistanceToLast() {
 	}
 	return Math.min(getPlayerScore(1), getPlayerScore(2), getPlayerScore(3)) - getPlayerScore(0);
 }
-
 
 //Positive: Other player is in front of you
 function getDistanceToPlayer(player) {

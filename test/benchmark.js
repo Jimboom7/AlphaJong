@@ -56,10 +56,7 @@ function runOffense() {
 		updateDiscardedTilesSafety();
 
 		var value = getTilePriorities(ownHand);
-		var triplesAndPairs = getTriplesAndPairs(ownHand);
-		handWithoutTriples = removeTilesFromTileArray(ownHand, triplesAndPairs.triples);
-		var doubles = getDoubles(handWithoutTriples);
-		if (isTenpai(triplesAndPairs, doubles, value[0].efficiency)) {
+		if (value[0].shanten == 0) {
 			log("<h2>Tenpai</h2>");
 			passes++;
 			log("Turns: " + (currentTest % 50));

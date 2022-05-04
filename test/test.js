@@ -235,7 +235,7 @@ function runDefenseTestcase() {
 		case 1:
 			logTestcase("Sakigiri");
 			ownHand = getTilesFromString("112445999m5559p9s");
-			discards = [[], getTilesFromString("3333p9s"), getTilesFromString("2222s9s"), getTilesFromString("444p9s")];
+			discards = [getTilesFromString("999p"), getTilesFromString("3333p9s"), getTilesFromString("2222s9s"), getTilesFromString("444p9s")];
 			expected = ["9p"];
 			break;
 
@@ -478,8 +478,8 @@ function runWaitsTestcase() {
 
 		case 2:
 			logTestcase("Test Pair Furiten");
-			readDebugString("6z|3m33p406777s77z|576m||231m|999s|93p261z1s|8s2z91s2p|1s9p51z2p|35z1m94p|0,0,0,0|1|1|48");
-			expected = ["3p"];
+			readDebugString("6z|1m33p406777s77z|576m||231m|999s|93p261z1s|8s2z91s2p|1s9p51z2p|35z1m94p|0,0,0,0|1|1|48");
+			expected = ["3p", "4s"];
 			break;
 
 		case 3:
@@ -517,6 +517,9 @@ function runCallTestcase() {
 			testCallTile = { index: 8, type: 0, dora: false, doraValue: 0 };
 			callTriple(["6p|7p"], 0);
 			expected = ["3s"];
+			if (callResult) { //Should decline
+				expected = ["0z"];
+			}
 			break;
 
 		case 2:
@@ -526,7 +529,25 @@ function runCallTestcase() {
 			testCallTile = { index: 4, type: 0, dora: false, doraValue: 0 };
 			callTriple(["2p|3p", "3p|5p"], 0);
 			expected = ["3s"];
+			if (callResult) { //Should decline
+				expected = ["0z"];
+			}
 			break;
+
+		case 3:
+			logTestcase("Test Yakuhai Pon (Should accept, check log)");
+			readDebugString("1s|34489m2479p30s66z|||||22z9s44z|9m4z7s8m1z|1s1z65s6z|9s2z9m4p|0,0,0,0|1|1|51");
+			updateAvailableTiles();
+			testCallTile = { index: 6, type: 3, dora: false, doraValue: 0 };
+			var callResult = callTriple(["6z|6z"], 0);
+			expected = ["9m"];
+			if (!callResult) { //Should accept
+				expected = ["0z"];
+			}
+			break;
+
+
+
 
 		default:
 			nextTestcase();

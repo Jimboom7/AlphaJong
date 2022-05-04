@@ -277,7 +277,7 @@ function extendMJSoulFunctions() {
 	functionsExtended = true;
 }
 
-// Track which tile the players discarded on their riichi turn
+// Track which tiles the players discarded (for push/fold judgement and tracking the riichi tile)
 function trackDiscardTiles() {
 	for (var i = 1; i < getNumberOfPlayers(); i++) {
 		var player = getCorrectPlayerNumber(i);
