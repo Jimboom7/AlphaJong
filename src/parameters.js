@@ -69,6 +69,13 @@ var riichiTiles = [null, null, null, null]; // Track players discarded tiles on 
 var functionsExtended = false;
 var showingStrategy = false; //Current in own turn?
 
+// Display
+var tileEmojiList = [
+	["red🀝" ,"🀙" ,"🀚" ,"🀛" ,"🀜" ,"🀝" ,"🀞" ,"🀟" ,"🀠" ,"🀡"],
+	["red🀋" ,"🀇" ,"🀈" ,"🀉" ,"🀊" ,"🀋" ,"🀌" ,"🀍" ,"🀎" ,"🀏"],
+	["red🀔" ,"🀐" ,"🀑" ,"🀒" ,"🀓" ,"🀔" ,"🀕" ,"🀖" ,"🀗" ,"🀘"],
+	["", "🀀" ,"🀁" ,"🀂" ,"🀃" ,"🀆" ,"🀅" ,"🀄"]];
+
 //TEST
 var testRunning = false;
 var currentTest = 0;

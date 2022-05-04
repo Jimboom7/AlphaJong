@@ -107,6 +107,8 @@ function main() {
 		return;
 	}
 
+	showCrtActionMsg("Calculating best move...");
+
 	setTimeout(mainOwnTurn, 500 + (Math.random() * 500));
 }
 
@@ -136,8 +138,6 @@ function checkPlayerOpChanged() {
 }
 
 function mainOwnTurn() {
-	showCrtActionMsg("Calculating best move...");
-
 	//HELP MODE, if player not operate, just skip
 	if (MODE === AIMODE.HELP) {
 		if (!checkPlayerOpChanged()) {
