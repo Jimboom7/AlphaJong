@@ -292,7 +292,9 @@ function getSanshokuDouko(triplets) {
 //Sanshoku Doujun
 function getSanshokuDoujun(sequences) {
 	for (var i = 1; i <= 7; i++) {
-		if (sequences.filter(tile => tile.index == i || tile.index == i + 1 || tile.index == i + 2).length >= 9) {
+		var seq = sequences.filter(tile => tile.index == i || tile.index == i + 1 || tile.index == i + 2);
+		if (seq.length >= 9 && seq.filter(tile => tile.type == 0) >= 3 &&
+			seq.filter(tile => tile.type == 1) >= 3 && seq.filter(tile => tile.type == 0) >= 3) {
 			return { open: 1, closed: 2 };
 		}
 	}
@@ -362,7 +364,12 @@ function getIttsuu(triples) {
 
 //Honitsu
 function getHonitsu(hand) {
-	if (hand.filter(tile => tile.type == 3 || tile.type == 0).length >= 13 || hand.filter(tile => tile.type == 3 || tile.type == 1).length >= 13 || hand.filter(tile => tile.type == 3 || tile.type == 2).length >= 13) { //&& tenpai ?
+	var pinzu = hand.filter(tile => tile.type == 3 || tile.type == 0).length;
+	var manzu = hand.filter(tile => tile.type == 3 || tile.type == 1).length;
+	var souzu = hand.filter(tile => tile.type == 3 || tile.type == 2).length;
+	if (pinzu >= 14 || pinzu >= hand.length ||
+		manzu >= 14 || manzu >= hand.length ||
+		souzu >= 14 || souzu >= hand.length) {
 		return { open: 2, closed: 3 };
 	}
 	return { open: 0, closed: 0 };
@@ -370,7 +377,12 @@ function getHonitsu(hand) {
 
 //Chinitsu
 function getChinitsu(hand) {
-	if (hand.filter(tile => tile.type == 0).length >= 13 || hand.filter(tile => tile.type == 1).length >= 13 || hand.filter(tile => tile.type == 2).length >= 13) { //&& tenpai ?
+	var pinzu = hand.filter(tile => tile.type == 0).length;
+	var manzu = hand.filter(tile => tile.type == 1).length;
+	var souzu = hand.filter(tile => tile.type == 2).length;
+	if (pinzu >= 14 || pinzu >= hand.length ||
+		manzu >= 14 || manzu >= hand.length ||
+		souzu >= 14 || souzu >= hand.length) {
 		return { open: 3, closed: 3 }; //Score gets added to honitsu -> 5/6 han
 	}
 	return { open: 0, closed: 0 };

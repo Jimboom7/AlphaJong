@@ -48,7 +48,7 @@ function printTile(tile) {
 function printTilePriority(tiles) {
 	log("Overall: Value Open: <" + Number(tiles[0].score.open).toFixed(0) +
 		"> Closed Value: <" + Number(tiles[0].score.closed).toFixed(0) +
-		"> Riichi Value: <" + Number(tiles[0].riichiValue).toFixed(0) +
+		"> Riichi Value: <" + Number(tiles[0].score.riichi).toFixed(0) +
 		"> Shanten: <" + Number(tiles[0].shanten).toFixed(0) + ">");
 	for (var i = 0; i < tiles.length && i < LOG_AMOUNT; i++) {
 		log(getTileName(tiles[i].tile) +

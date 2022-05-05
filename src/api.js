@@ -25,7 +25,7 @@ function hasFinishedMainLobbyLoading() {
 	if (typeof GameMgr == 'undefined') {
 		return false;
 	}
-	return GameMgr.Inst.login_loading_end;
+	return GameMgr.Inst.login_loading_end || isInGame();
 }
 
 function searchForGame() {
