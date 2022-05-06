@@ -107,7 +107,7 @@ function getDealInChanceForTileAndPlayer(player, tile, playerPerspective = 0) {
 	if (playerPerspective == 0) {
 		if (typeof totalPossibleWaits.turn == 'undefined' || totalPossibleWaits.turn != tilesLeft) {
 			totalPossibleWaits = { turn: tilesLeft, totalWaits: [0, 0, 0, 0] }; // Save it in a global variable to not calculate this expensive step multiple times per turn
-			for (let pl = 1; pl <= 3; pl++) {
+			for (let pl = 1; pl < getNumberOfPlayers(); pl++) {
 				totalPossibleWaits.totalWaits[pl] = getTotalPossibleWaits(pl);
 			}
 		}

@@ -11,8 +11,7 @@ function determineStrategy() {
 		var handTriples = parseInt(getTriples(getHandWithCalls(ownHand)).length / 3);
 		var pairs = getPairsAsArray(ownHand).length / 2;
 
-		if ((pairs == 6 || (pairs >= CHIITOITSU && handTriples < 2) ||
-			(pairs >= CHIITOITSU - 1 && handTriples == 0)) && isClosed) {
+		if ((pairs == 6 || (pairs >= CHIITOITSU && handTriples < 2)) && isClosed) {
 			strategy = STRATEGIES.CHIITOITSU;
 			strategyAllowsCalls = false;
 		}

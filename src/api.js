@@ -205,7 +205,7 @@ function isInGame() {
 }
 
 function doesPlayerExist(player) {
-	return typeof view.DesktopMgr.Inst.players[player].hand != 'undefined';
+	return typeof view.DesktopMgr.Inst.players[player].hand != 'undefined' && view.DesktopMgr.Inst.players[player].hand != null;
 }
 
 function getPlayerScore(player) {
