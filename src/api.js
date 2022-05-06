@@ -258,7 +258,7 @@ function getRooms() {
 	}
 }
 
-// Client language
+// Client language: ["chs", "chs_t", "en", "jp"]
 function getLanguage() {
 	return GameMgr.client_language;
 }

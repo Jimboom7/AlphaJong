@@ -7,7 +7,6 @@
 function determineStrategy() {
 
 	if (strategy != STRATEGIES.FOLD) {
-
 		var handTriples = parseInt(getTriples(getHandWithCalls(ownHand)).length / 3);
 		var pairs = getPairsAsArray(ownHand).length / 2;
 
@@ -20,8 +19,11 @@ function determineStrategy() {
 			strategyAllowsCalls = false;
 		}
 		else {
+			if (strategy == STRATEGIES.THIRTEEN_ORPHANS ||
+				strategy == STRATEGIES.CHIITOITSU) {
+				strategyAllowsCalls = true; //Don't reset this value when bot is playing defensively without a full fold
+			}
 			strategy = STRATEGIES.GENERAL;
-			strategyAllowsCalls = true;
 		}
 	}
 	log("Strategy: " + strategy);
@@ -133,7 +135,7 @@ function callTriple(combinations, operation) {
 	else if (newHandValue.score.open >= 4000 && newHandValue.score.open > handValue.score.closed * 0.7) { //High value hand? -> Go for a fast win
 		log("Call accepted because of high value hand!");
 	}
-	else if (newHandValue.score.open >= handValue.score.closed * 1.5) { //Call gives additional value to hand
+	else if (newHandValue.score.open >= handValue.score.closed * 1.75) { //Call gives additional value to hand
 		log("Call accepted because it boosts the value of the hand!");
 	}
 	else if (newHandValue.shanten == 0 && newHandValue.score.open > handValue.score.closed * 0.9 && newHandValue.waits > 2 && // Make hand ready and eliminate a bad wait
@@ -180,10 +182,12 @@ function callKan(operation, tileForCall) {
 
 	var newTiles = getHandValues(getHandWithCalls(removeTilesFromTileArray(ownHand, [tileForCall]))); //Check if efficiency goes down without additional tile
 
-	if (isPlayerRiichi(0) || (strategyAllowsCalls && //TODO: Rework this
-		tiles.efficiency >= 4 - (tilesLeft / 30) - (1 - (CALL_KAN_CONSTANT / 50)) &&
-		getCurrentDangerLevel() < 1000 - (CALL_KAN_CONSTANT * 10) &&
-		(tiles.efficiency * 0.95) < newTiles.efficiency)) {
+	if (isPlayerRiichi(0) ||
+		(strategyAllowsCalls &&
+			tiles.shanten <= (tilesLeft / 30) + (CALL_KAN_CONSTANT / 50) &&
+			getCurrentDangerLevel() < 1000 + (CALL_KAN_CONSTANT * 10) &&
+			(tiles.shanten <= newTiles.shanten) &&
+			(tiles.efficiency * 0.9 <= newTiles.efficiency))) {
 		makeCall(operation);
 		log("Kan accepted!");
 	}

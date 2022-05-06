@@ -386,6 +386,10 @@ function getWaitScoreForTileAndPlayer(player, tile, includeOthers, useKnowledgeO
 	}
 	var furitenFactor = getFuritenValue(player, tile, includeOthers);
 
+	if (furitenFactor == 0) {
+		return 0;
+	}
+
 	//Less priority on Ryanmen and Bridge Wait when player is doing Toitoi
 	var toitoiFactor = 1 - (isDoingToiToi(player) / 3);
 

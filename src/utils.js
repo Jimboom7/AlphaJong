@@ -703,6 +703,7 @@ function shouldFold(tiles) {
 
 	if (tiles[0].danger > foldThreshold) {
 		log("Tile Danger " + Number(tiles[0].danger).toFixed(2) + " of " + getTileName(tiles[0].tile) + " is too dangerous.");
+		strategyAllowsCalls = false; //Don't set the strategy to full fold, but prevent calls
 		return true;
 	}
 	return false;

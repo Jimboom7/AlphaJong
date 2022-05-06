@@ -8,7 +8,7 @@ var FOLD_CONSTANT = 10; //Lower -> Earlier Fold. Default: 10
 
 //CALLS
 var CALL_CONSTANT = 3; //Amount of han (Open Yaku + Dora) that is needed for calls (to accelerate high value hands). Default: 3
-var CALL_KAN_CONSTANT = 60; //Higher Value: Higher Threshold for calling Kans. Default: 60
+var CALL_KAN_CONSTANT = 50; //Higher Value: Call Kan more often. Default: 50
 
 //HAND EVALUATION CONSTANTS. Higher number => more important.
 var EFFICIENCY_VALUE = 0.5; // From 0-1. Lower: Slower hands. Higher: Daster hands. Default: 0.5
