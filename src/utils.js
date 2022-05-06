@@ -527,7 +527,7 @@ function shouldFold(tiles) {
 	log("Would fold this hand below " + foldThreshold + " safety.");
 
 	if (foldThreshold > tiles[0].safety) {
-		log("Tile Safety " + tiles[0].safety + " of " + getTileName(tiles[0].tile) + " is too dangerous. Fold this turn!");
+		log("Tile Safety " + tiles[0].safety + " of " + getTileName(tiles[0].tile, false) + " is too dangerous. Fold this turn!");
 		return true;
 	}
 	return false;
@@ -655,3 +655,33 @@ function binomialCoefficient(a, b) {
 	var denominator = facts[a - b] * facts[b];
 	return numerator / denominator;
 } 
+
+function getCallNameByType(type) {
+	switch (type) {
+		case 1: return "discard";
+		case 2: return "chi";
+		case 3: return "pon";
+		case 4: return "kan(ankan)";
+		case 5: return "kan(daiminkan)";
+		case 6: return "kan(shouminkan)";
+		case 7: return "riichi";
+		case 8: return "tsumo";
+		case 9: return "ron";
+		case 10: return "kyuushu kyuuhai";
+		case 11: return "kita";
+		default: return type;
+	}
+}
+
+function getTileEmoji(tileType, tileIdx, dora) {
+	if (dora) {
+		tileIdx = 0;
+	}
+	return tileEmojiList[tileType][tileIdx];
+}
+
+//Get Emoji str by tile name
+function getTileEmojiByName(name) {
+	let tile = getTileFromString(name);
+	return getTileEmoji(tile.type, tile.index, tile.dora);
+}
