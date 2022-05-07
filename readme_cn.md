@@ -19,9 +19,12 @@
 * 对局输出的日志将会显示在浏览器控制台 (Ctrl + Shift + J [Chrome] or Ctrl + Shift + K [Firefox])。
 
 ### UI
-![UI](https://i.imgur.com/6PnXb3T.png)
+![GUI](./doc/img/gui.png)
 UI非常简单，你可以轻易地控制AI。
 * Start bot: 启动或者关闭AI自动打牌。
+* Auto: 当前 AI 模式，有两种
+  * AUTO：自动帮玩家操作
+  * HELP：只提示当前行为，不自动操作
 * Autostart: 启用自动运行模式。AI将自动重新加载网站，并在前一个游戏结束后搜索一个新的游戏。需要打的段位可以在旁边的组合框中选择。(目前仅支持到金之间的所有模式)
 * Output Field: 简单展示AI目前正在准备做什么。
 * Hide GUI: 隐藏UI。你可以通过在键盘上按“+”来重新显示它。
