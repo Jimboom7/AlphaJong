@@ -120,19 +120,19 @@ function callTriple(combinations, operation) {
 		return false;
 	}
 
-	if (isClosed && newHandValue.score.open < 1500 && newHandValue.shanten >= 3 && seatWind != 1) { // Hand is worthless and slow and not dealer. Should prevent cheap yakuhai or tanyao calls
+	if (isClosed && newHandValue.score.open < 1000 + (CALL_PON_CHI * 500) && newHandValue.shanten >= 4 - CALL_PON_CHI && seatWind != 1) { // Hand is worthless and slow and not dealer. Should prevent cheap yakuhai or tanyao calls
 		log("Hand is cheap and slow! Declined!");
 		declineCall(operation);
 		return false;
 	}
 
-	if (handValue.shanten >= 4 && seatWind == 1) { //Very slow hand & dealer? -> Go for a fast win
+	if (handValue.shanten >= 5 - (CALL_PON_CHI * 500) && seatWind == 1) { //Very slow hand & dealer? -> Go for a fast win
 		log("Call accepted because of bad hand and dealer position!");
 	}
 	else if (!isClosed && newHandValue.score.open > handValue.score.open * 0.9) { //Hand is already open and not much value is lost
 		log("Call accepted because hand is already open!");
 	}
-	else if (newHandValue.score.open >= 4000 && newHandValue.score.open > handValue.score.closed * 0.7) { //High value hand? -> Go for a fast win
+	else if (newHandValue.score.open >= 4500 - (CALL_PON_CHI * 500) && newHandValue.score.open > handValue.score.closed * 0.7) { //High value hand? -> Go for a fast win
 		log("Call accepted because of high value hand!");
 	}
 	else if (newHandValue.score.open >= handValue.score.closed * 1.75) { //Call gives additional value to hand
@@ -184,10 +184,10 @@ function callKan(operation, tileForCall) {
 
 	if (isPlayerRiichi(0) ||
 		(strategyAllowsCalls &&
-			tiles.shanten <= (tilesLeft / 30) + (CALL_KAN_CONSTANT / 50) &&
-			getCurrentDangerLevel() < 1000 + (CALL_KAN_CONSTANT * 10) &&
-			(tiles.shanten <= newTiles.shanten) &&
-			(tiles.efficiency * 0.9 <= newTiles.efficiency))) {
+			tiles.shanten <= (tilesLeft / 35) + CALL_KAN &&
+			getCurrentDangerLevel() < 1000 + (CALL_KAN * 500) &&
+			tiles.shanten <= newTiles.shanten &&
+			tiles.efficiency * 0.9 <= newTiles.efficiency)) {
 		makeCall(operation);
 		log("Kan accepted!");
 	}
@@ -523,14 +523,12 @@ function getHandValues(hand, discardedTile) {
 
 		if (tileCombination.winning) { //For winning tiles: Add waits, fu and the Riichi value (value only for drawing winning tiles)
 			if (!tile1Furiten) {
-				if (isClosed || thisYaku.open >= 1) {
-					var thisWait = numberOfTiles1 * getWaitQuality(tile1);
-					waits += thisWait;
-					thisFu = calculateFu(triples2, calls[0], pairs2, removeTilesFromTileArray(hand, triples.concat(pairs).concat(tile1)), tile1);
-					fu += thisFu * thisWait * factor;
-					if (thisFu == 30 && isClosed) {
-						thisYaku.closed += 1;
-					}
+				var thisWait = numberOfTiles1 * getWaitQuality(tile1);
+				waits += thisWait;
+				thisFu = calculateFu(triples2, calls[0], pairs2, removeTilesFromTileArray(hand, triples.concat(pairs).concat(tile1)), tile1);
+				fu += thisFu * thisWait * factor;
+				if (thisFu == 30 && isClosed) {
+					thisYaku.closed += 1;
 				}
 			}
 			expectedScore.riichi += calculateScore(0, thisYaku.closed + thisDora + 1 + 0.2 + getUradoraChance(), thisFu) * thisWait * factor;
@@ -692,20 +690,27 @@ function getHandValues(hand, discardedTile) {
 	};
 }
 
+//Calculates a relative priority based on how "good" the given values are.
+//The resulting priority value is useless as an absolute value, only use it relatively to compare with other values of the same hand.
 function calculateTilePriority(efficiency, expectedScore, danger) {
 	var score = expectedScore.open;
 	if (isClosed) {
 		score = expectedScore.closed;
 	}
 
-	var placementFactor = 1; //TODO: Add this to the formula
+	var placementFactor = 1;
 
-	if (isLastGame() && getDistanceToFirst() < -10000) { //Huge lead in last game
-		placementFactor = 0.75;
+	if (isLastGame() && getDistanceToFirst() < 0) { //First Place in last game:
+		placementFactor = 1.5;
 	}
 
-	//TODO: Add parameters
-	return efficiency * (score - danger);
+	//Basically the formula should be efficiency multiplied by score (=expected value of the hand)
+	//But it's generally better to just win even with a small score to prevent others from winning (and no-ten penalty) 
+	//That's why efficiency is weighted a bit higher with Math.pow.
+	var weightedEfficiency = Math.pow(Math.abs(efficiency), 0.3 + EFFICIENCY * placementFactor);
+	weightedEfficiency = efficiency < 0 ? -weightedEfficiency : weightedEfficiency;
+
+	return weightedEfficiency * (score - (danger * SAFETY));
 }
 
 //Get Chiitoitsu Priorities -> Look for Pairs
@@ -770,7 +775,7 @@ function chiitoitsuPriorities() {
 			riichi: calculateScore(0, yaku.closed + doraValue + 1 + 0.2 + getUradoraChance(), 25)
 		};
 
-		var efficiency = (shanten + (baseShanten - originalShanten)) * -1
+		var efficiency = (shanten + (baseShanten - originalShanten)) * -1;
 		var danger = getTileDanger(ownHand[i], newHand);
 		var priority = calculateTilePriority(efficiency, expectedScore, danger);
 		tiles.push({

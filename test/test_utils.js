@@ -11,6 +11,7 @@ function resetGlobals() {
 	roundWind = 1;
 	tilesLeft = 70;
 	strategy = STRATEGIES.GENERAL;
+	strategyAllowsCalls = true;
 	EFFICIENCY_VALUE = 0.5;
 	SCORE_VALUE = 0.5;
 	SAFETY_VALUE = 0.5;

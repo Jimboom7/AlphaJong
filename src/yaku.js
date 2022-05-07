@@ -24,7 +24,10 @@ function getYaku(inputHand, inputCalls, triplesAndPairs = null) {
 		triplesAndPairs.triples = triplesAndPairs.triples.concat(inputCalls);
 	}
 	var triplets = getTripletsAsArray(hand);
-	var sequences = getBestSequenceCombination(inputHand).concat(getBestSequenceCombination(inputCalls));
+	var sequences = getBestSequenceCombination(removeTilesFromTileArray(inputHand, triplets.concat(triplesAndPairs.pairs))).concat(getBestSequenceCombination(inputCalls));
+
+	//Pinfu is applied in ai_offense when fu is 30, same with Riichi.
+	//There's no certain way to check for it here, so ignore it
 
 	//Yakuhai
 	//Wind/Dragon Triples
@@ -35,20 +38,11 @@ function getYaku(inputHand, inputCalls, triplesAndPairs = null) {
 		yakuClosed += yakuhai.closed;
 	}
 
-	//Riichi (Bot has better results without additional value for Riichi)
-	//Closed
-	//var riichi = getRiichi(tenpai);
-	//yakuOpen += riichi.open;
-	//yakuClosed += riichi.closed;
-
 	//Tanyao
 	//Open
 	var tanyao = getTanyao(hand, triplesAndPairs, inputCalls);
 	yakuOpen += tanyao.open;
 	yakuClosed += tanyao.closed;
-
-	//Pinfu is applied in ai_offense when fu=30
-	//There's no certain way to check for it here, so ignore it
 
 	//Iipeikou (Identical Sequences in same type)
 	//Closed
@@ -226,14 +220,6 @@ function getYakuhai(triples) {
 	return { open: yakuhai, closed: yakuhai };
 }
 
-//Riichi
-function getRiichi(tenpai) {
-	if (tenpai) {
-		return { open: 0, closed: 1 };
-	}
-	return { open: 0, closed: 0 };
-}
-
 //Tanyao
 function getTanyao(hand, triplesAndPairs, inputCalls) {
 	if (hand.filter(tile => tile.type != 3 && tile.index > 1 && tile.index < 9).length >= 13 &&
@@ -341,7 +327,8 @@ function getHonrou(triplets) {
 
 //Junchan
 function getJunchan(triplets, sequences, pairs) {
-	if ((triplets.concat(pairs)).filter(tile => tile.type != 3 && (tile.index == 1 || tile.index == 9)).length + (sequences.filter(tile => tile.index == 1 || tile.index == 9).length * 3) >= 13) {
+	if ((triplets.concat(pairs)).filter(tile => tile.type != 3 && (tile.index == 1 || tile.index == 9)).length +
+		(sequences.filter(tile => tile.index == 1 || tile.index == 9).length * 3) >= 13) {
 		return { open: 1, closed: 1 }; // - Added to Chanta
 	}
 	return { open: 0, closed: 0 };

@@ -3,24 +3,19 @@
 // Contains Parameters to change the playstile of the bot. Usually no need to change anything.
 //################################
 
-//DEFENSE CONSTANTS
-var FOLD_CONSTANT = 10; //Lower -> Earlier Fold. Default: 10
+//HAND EVALUATION CONSTANTS
+var EFFICIENCY = 1.0; // Lower: Slower and more expensive hands. Higher: Faster and cheaper hands. Default: 1.0, Minimum: 0
+var SAFETY = 1.0; // Lower: The bot will not pay much attention to safety. Higher: The bot will try to play safer. Default: 1.0, Minimum: 0
+var SAKIGIRI = 1.0; //Lower: Don't place much importance on Sakigiri. Higher: Try to Sakigiri more often. Default: 1.0, Minimum: 0
 
-//CALLS
-var CALL_CONSTANT = 3; //Amount of han (Open Yaku + Dora) that is needed for calls (to accelerate high value hands). Default: 3
-var CALL_KAN_CONSTANT = 50; //Higher Value: Call Kan more often. Default: 50
-
-//HAND EVALUATION CONSTANTS. Higher number => more important.
-var EFFICIENCY_VALUE = 0.5; // From 0-1. Lower: Slower hands. Higher: Daster hands. Default: 0.5
-var SCORE_VALUE = 0.5 // From 0-1. Lower: Cheaper hands. Higher: More expensive hands. Default: 0.5
-var SAFETY_VALUE = 0.5; // From 0-1. Lower: The bot will not pay much attention to safety. Higher: The bot will try to play safer. Default: 0.5
-var SAKIGIRI_VALUE = 0.5; // 0 -> Never Sakigiri. Default: 0.3
+//CALL CONSTANTS
+var CALL_PON_CHI = 1.0; //Lower: Call Pon/Chi less often. Higher: Call Pon/Chi more often. Default: 1.0, Minimum: 0
+var CALL_KAN = 1.0; //Lower: Call Kan less often. Higher: Call Kan more often. Default: 1.0, Minimum: 0
 
 //STRATEGY CONSTANTS
+var RIICHI = 1.0; //Lower: Call Riichi less often. Higher: Call Riichi more often. Default: 1.0, Minimum: 0
 var CHIITOITSU = 5; //Number of Pairs in Hand to go for chiitoitsu. Default: 5
 var THIRTEEN_ORPHANS = 10; //Number of Honor/Terminals in hand to go for 13 orphans. Default: 10
-var RIICHI_TILES_LEFT = 6; //Minimum amount of tiles that need to be left for calling Riichi. Default: 6
-var WAITS_FOR_RIICHI = 5; //Amount of waits that is considered good enough for calling Riichi. Default: 5
 
 //MISC
 var LOG_AMOUNT = 3; //Amount of Messages to log for Tile Priorities

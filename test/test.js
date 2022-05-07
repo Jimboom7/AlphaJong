@@ -259,7 +259,7 @@ function runPushFoldTestcase() {
 			ownHand = getTilesFromString("13579m224567p123z");
 			discards = [[], getTilesFromString("1133699m2p"), getTilesFromString("567567567m2p"), getTilesFromString("2567567p")];
 			calls = [[], getTilesFromString("555z"), getTilesFromString("666z"), getTilesFromString("777z")];
-			expected = ["2p"];
+			expected = ["2p", "7p"];
 			break;
 
 		default:
@@ -305,7 +305,7 @@ function runYakuTestcase() {
 			//dora = getTilesFromString("7p");
 			ownHand = getTilesFromString("111234m5688p23s11z");
 			discards = [[], [], [], []];
-			expected = ["5p"];
+			expected = ["5p", "8p"];
 			break;
 
 		case 2:
