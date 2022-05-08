@@ -3,15 +3,24 @@ name: Publish Userscript
 on: 
   [push]
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
+      - name: Setup Build Env
+        - uses: actions/checkout@v3
+        - uses: actions/setup-python@v3
+          with:
+            python-version: '3.x' # Version range or exact version of a Python version to use, using SemVer's version range syntax
+            architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
+
+      - name: Run publish script
+        - run: python build.py
+
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v3
         with:
-          python-version: '3.x' # Version range or exact version of a Python version to use, using SemVer's version range syntax
-          architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
-      - run: python build.py
+          name: dist-userscript
+          path: |
+            build
 
