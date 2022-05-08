@@ -129,7 +129,7 @@ function getTileName(tile, useRaw = true) {
 	}
 
 	if (!useRaw && USE_EMOJI) {
-		return getTileEmoji(tile.type, tile.index, tile.dora);
+		return `${getTileEmoji(tile.type, tile.index, tile.dora)}: ${name}`;
 	} else {
 		return name;
 	}

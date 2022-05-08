@@ -140,7 +140,7 @@ function makeCall(type) {
 		app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { type: type, index: 0, timeuse: Math.random() * 2 + 1 });
 		view.DesktopMgr.Inst.WhenDoOperation();
 	} else {
-		showCrtStrategyMsg(`call ${getCallNameByType(type)} accepted;`);
+		showCrtStrategyMsg(`Accept: Call ${getCallNameByType(type)};`);
 	}
 }
 
@@ -149,7 +149,7 @@ function makeCallWithOption(type, option) {
 		app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { type: type, index: option, timeuse: Math.random() * 2 + 1 });
 		view.DesktopMgr.Inst.WhenDoOperation();
 	} else {
-		showCrtStrategyMsg(`call ${getCallNameByType(type)} with ${option} accepted;`);
+		showCrtStrategyMsg(`Accept ${option}: Call ${getCallNameByType(type)};`);
 	}
 }
 
@@ -160,7 +160,7 @@ function declineCall(operation) {
 			view.DesktopMgr.Inst.WhenDoOperation();
 		}
 	} else {
-		showCrtStrategyMsg(`call ${getCallNameByType(operation)} declined;`);
+		showCrtStrategyMsg(`Decline: Call ${getCallNameByType(operation)};`);
 	}
 }
 
@@ -169,7 +169,7 @@ function sendRiichiCall(tile, moqie) {
 		app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.liqi, tile: tile, moqie: moqie, timeuse: Math.random() * 2 + 1 }); //Moqie: Throwing last drawn tile (Riichi -> false)
 	} else {
 		let tileName = getTileEmojiByName(tile);
-		showCrtStrategyMsg(`riichi ${tileName};`);
+		showCrtStrategyMsg(`Riichi: ${tileName};`);
 	}
 }
 
@@ -179,7 +179,7 @@ function sendKitaCall() {
 		app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.babei, moqie: moqie, timeuse: Math.random() * 2 + 1 });
 		view.DesktopMgr.Inst.WhenDoOperation();
 	} else {
-		showCrtStrategyMsg(`kita accepted;`);
+		showCrtStrategyMsg(`Accept: Kita;`);
 	}
 }
 
@@ -188,7 +188,7 @@ function sendAbortiveDrawCall() {
 		app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.jiuzhongjiupai, index: 0, timeuse: Math.random() * 2 + 1 });
 		view.DesktopMgr.Inst.WhenDoOperation();
 	} else {
-		showCrtStrategyMsg(`Kyuushu Kyuuhai accepted;`);
+		showCrtStrategyMsg(`Accept: Kyuushu Kyuuhai;`);
 	}
 }
 
@@ -199,7 +199,7 @@ function callDiscard(tileNumber) {
 	} else {
 		let tile = ownHand[tileNumber];
 		let tileName = getTileName(tile, false);
-		showCrtStrategyMsg(`discard ${tileName};`);
+		showCrtStrategyMsg(`Discard: ${tileName};`);
 	}
 }
 
