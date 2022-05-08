@@ -21,4 +21,4 @@ jobs:
         with:
           name: dist-userscript
           path: |
-            build
+            build/*.user.js
