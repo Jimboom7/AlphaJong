@@ -30,7 +30,7 @@ var DEBUG_BUTTON = false; //Display a Debug Button in the GUI
 var LOW_SPEC_MODE = false; //Decrease calculation time
 
 var USE_EMOJI = true; //use EMOJI to show tile
-
+var CHANGE_RECOMMEND_TILE_COLOR = true; // change current recommend tile color
 
 //### GLOBAL VARIABLES DO NOT CHANGE ###
 var run = false; //Is the bot running

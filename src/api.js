@@ -197,9 +197,15 @@ function callDiscard(tileNumber) {
 		view.DesktopMgr.Inst.players[0]._choose_pai = view.DesktopMgr.Inst.players[0].hand[tileNumber];
 		view.DesktopMgr.Inst.players[0].DoDiscardTile();
 	} else {
-		let tile = ownHand[tileNumber];
-		let tileName = getTileName(tile, false);
+		let tileID = ownHand[tileNumber];
+		let tileName = getTileName(tileID, false);
 		showCrtStrategyMsg(`Discard: ${tileName};`);
+		if (CHANGE_RECOMMEND_TILE_COLOR) {
+			view.DesktopMgr.Inst.mainrole.hand.forEach(
+				tile => tile.val.toString() == tileID ? 
+					tile._SetColor(new Laya.Vector4(0.5, 0.8, 0.9, 1)) 
+					: tile._SetColor(new Laya.Vector4(1, 1, 1, 1)));
+		}
 	}
 }
 
