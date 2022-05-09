@@ -210,7 +210,7 @@ function getMostRecentDiscardDanger(tile, player, includeOthers) {
 		if (player == i && r != null) { //Tile is in own discards
 			return 0;
 		}
-		if (!includeOthers) {
+		if (!includeOthers || player == 0) {
 			continue;
 		}
 		if (r != null && typeof (r.numberOfPlayerHandChanges) == 'undefined') {
@@ -231,10 +231,7 @@ function getLastTileInDiscard(player, tile) {
 			return discards[player][i];
 		}
 	}
-	if (wasTileCalledFromOtherPlayers(player, tile)) {
-		return 10; //unknown when it was discarded
-	}
-	return null;
+	return wasTileCalledFromOtherPlayers(player, tile);
 }
 
 //Checks if a tile has been called by someone
@@ -245,11 +242,12 @@ function wasTileCalledFromOtherPlayers(player, tile) {
 		}
 		for (let t of calls[i]) { //Look through all melds and check where the tile came from
 			if (t.from == localPosition2Seat(getCorrectPlayerNumber(player)) && tile.index == t.index && tile.type == t.type) {
-				return true;
+				t.numberOfPlayerHandChanges = [10, 10, 10, 10];
+				return t;
 			}
 		}
 	}
-	return false;
+	return null;
 }
 
 //Returns a number from 0 to 1 how likely it is that the player is tenpai
@@ -401,7 +399,7 @@ function getWaitScoreForTileAndPlayer(player, tile, includeOthers, useKnowledgeO
 	var score = 0;
 
 	//Same tile
-	score += tile0 * (tile0Public + 1) * 6 * furitenFactor * (2 - toitoiFactor);
+	score += tile0 * tile0Public * furitenFactor * 3 * (2 - toitoiFactor);
 
 	if (getNumberOfTilesInHand(player) == 1 || tile.type == 3) {
 		return score;
@@ -431,10 +429,6 @@ function getWaitScoreForTileAndPlayer(player, tile, includeOthers, useKnowledgeO
 
 	//Bridge Wait
 	score += (tileL1 * tileU1 * tile0Public) * furitenFactor * toitoiFactor;
-
-	if (score > 200) {
-		score = 200 + (Math.sqrt(score)); //add "overflow" that is worth less
-	}
 
 	return score;
 }

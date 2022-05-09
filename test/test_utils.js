@@ -12,9 +12,9 @@ function resetGlobals() {
 	tilesLeft = 70;
 	strategy = STRATEGIES.GENERAL;
 	strategyAllowsCalls = true;
-	EFFICIENCY_VALUE = 0.5;
-	SCORE_VALUE = 0.5;
-	SAFETY_VALUE = 0.5;
+	EFFICIENCY = 1.0;
+	SAFETY = 1.0;
+	SAKIGIRI = 1.0;
 	isClosed = true;
 	testPlayerRiichi = [0, 0, 0, 0];
 	testPlayerHand = [13, 13, 13, 13];

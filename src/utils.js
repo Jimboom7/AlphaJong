@@ -484,14 +484,14 @@ function isTerminalOrHonor(tile) {
 
 // Returns a number how "good" the wait is. An average wait is 1, a bad wait (like a middle tile) is lower, a good wait (like an honor tile) is higher.
 function getWaitQuality(tile) {
-	return (3 - (getWaitScoreForTileAndPlayer(0, tile, false) / 90)) / 2;
+	return 1.3 - (getDealInChanceForTileAndPlayer(0, tile, 1) * 5);
 }
 
 //Calculate the shanten number. Based on this: https://www.youtube.com/watch?v=69Xhu-OzwHM
 //Fast and accurate, but original hand needs to have 14 or more tiles.
 function calculateShanten(triples, pairs, doubles) {
 	if ((triples * 3) + (pairs * 2) + (doubles * 2) > 14) {
-		doubles = (13 - ((triples * 3) + (pairs * 2))) / 2;
+		doubles = parseInt((13 - ((triples * 3) + (pairs * 2))) / 2);
 	}
 	var shanten = 8 - (2 * triples) - (pairs + doubles);
 	if (triples + pairs + doubles >= 5 && pairs == 0) {
@@ -650,12 +650,10 @@ function getFoldThreshold(tilePrio, hand) {
 		var foldValue = waits * handScore / 40;
 	}
 	else if (tilePrio.shanten == 1 && strategy == STRATEGIES.GENERAL) {
-		var foldValue = waits * handScore / 30;
+		waits = waits < 0.3 ? waits = 0.3 : waits;
+		var foldValue = waits * handScore / 60;
 	}
 	else {
-		if (dealInValues > 5000) {
-			return 0;
-		}
 		var foldValue = (((6 - (tilePrio.shanten - tilePrio.efficiency)) * 2000) + handScore) / 200;
 	}
 
@@ -669,9 +667,9 @@ function getFoldThreshold(tilePrio, hand) {
 		}
 	}
 
-	foldValue *= 1 + (((35 - tilesLeft) / (35 * 5)) * (waits / 4)); // up to 20% more/less fold when early/lategame.
+	foldValue *= 1 - ((35 - tilesLeft) / (35 * 4)); // up to 25% more/less fold when early/lategame.
 
-	foldValue *= seatWind == 1 ? 1.1 : 1; //Push more as dealer (it's already in the handScore, but because of Tsumo Malus pushing is even better)
+	foldValue *= seatWind == 1 ? 1.2 : 1; //Push more as dealer (it's already in the handScore, but because of Tsumo Malus pushing is even better)
 
 	var safeTiles = 0;
 	for (let tile of hand) { // How many safe tiles do we currently have?
@@ -682,7 +680,13 @@ function getFoldThreshold(tilePrio, hand) {
 			break;
 		}
 	}
-	foldValue *= 1 + (0.4 - (safeTiles / 5)); // 20% less likely to fold when only 1 safetile, or 40% when 0 safetiles
+	foldValue *= 1 + (0.5 - (safeTiles / 4)); // 25% less likely to fold when only 1 safetile, or 50% when 0 safetiles
+
+	foldValue *= 2 - (hand.length / 14); // Less likely to fold when fewer tiles in hand (harder to defend)
+
+	if (dealInValues < 2500) { // Make it even less likely to fold for very low dealInValues
+		foldValue *= 1 + ((2500 - dealInValues) / 1000);
+	}
 
 	foldValue /= SAFETY;
 
@@ -735,8 +739,8 @@ function shouldRiichi(tilePrio) {
 		return false;
 	}
 
-	// Last Place (in last game)? -> Yolo
-	if (isLastGame() && getDistanceToLast() > 0) {
+	// Last Place (in last game) and Riichi is enough to get third
+	if (isLastGame() && getDistanceToLast() > 0 && getDistanceToLast() < tilePrio.score.riichi) {
 		log("Accept Riichi because of last place in last game.");
 		return true;
 	}
@@ -759,14 +763,14 @@ function shouldRiichi(tilePrio) {
 		return false;
 	}
 
-	// Hand already has high value and enough yaku
-	if (tilePrio.yaku.closed >= 1 && tilePrio.score.riichi > 5000 + (RIICHI * 1000) + (tilePrio.waits * 500)) {
+	// Hand already has enough yaku and high value (Around 6000+ depending on the wait)
+	if (tilePrio.yaku.closed >= 1 && tilePrio.score.closed > 4000 + (RIICHI * 1000) + (tilePrio.waits * 500)) {
 		log("Decline Riichi because of high value hand with enough yaku.");
 		return false;
 	}
 
 	// Hand already has high value and no yaku
-	if (tilePrio.yaku.closed < 1 && tilePrio.score.riichi > 5000 - (RIICHI * 1000)) {
+	if (tilePrio.yaku.closed < 0.9 && tilePrio.score.riichi > 5000 - (RIICHI * 1000)) {
 		log("Accept Riichi because of high value hand without yaku.");
 		return true;
 	}

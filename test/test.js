@@ -209,7 +209,7 @@ function runEfficiencyTestcase() {
 			ownHand = getTilesFromString("66734s");
 			calls[0] = getTilesFromString("111333555m");
 			isClosed = false;
-			expected = ["3s", "4s"];
+			expected = ["3s", "4s", "7s"];
 			break;
 
 		case 14:
@@ -354,7 +354,7 @@ function runYakuTestcase() {
 		case 9:
 			logTestcase("Test Sanankou");
 			ownHand = getTilesFromString("22233368m2488p88s");
-			expected = ["8m", "2p"];
+			expected = ["6m", "8m", "2p", "4p"];
 			break;
 
 		case 10:
@@ -368,8 +368,8 @@ function runYakuTestcase() {
 
 		case 11:
 			logTestcase("Test Chinitsu");
-			ownHand = getTilesFromString("111222568899m33z");
-			expected = ["3z"];
+			ownHand = getTilesFromString("111222333469m34z");
+			expected = ["3z", "4z"];
 			break;
 
 		case 12:
@@ -399,8 +399,9 @@ function runYakuTestcase() {
 
 		case 16:
 			logTestcase("Shousangen");
-			ownHand = getTilesFromString("456s23p78s5556667z");
-			expected = ["2p"];
+			dora = getTilesFromString("1m");
+			ownHand = getTilesFromString("23p45678s5556667z");
+			expected = ["2p", "3p"];
 			break;
 
 		case 17:
@@ -535,12 +536,12 @@ function runCallTestcase() {
 			break;
 
 		case 3:
-			logTestcase("Test Yakuhai Pon (Should accept, check log)");
-			readDebugString("1s|34489m2479p30s66z|||||22z9s44z|9m4z7s8m1z|1s1z65s6z|9s2z9m4p|0,0,0,0|1|1|51");
+			logTestcase("Test Yakuhai Pon");
+			readDebugString("6m|44789m2469p30s66z|||||22z9s44z|9m4z7s8m1z|1s1z65s6z|9s2z9m4p|0,0,0,0|1|1|51");
 			updateAvailableTiles();
 			testCallTile = { index: 6, type: 3, dora: false, doraValue: 0 };
 			var callResult = callTriple(["6z|6z"], 0);
-			expected = ["9m"];
+			expected = ["9p"];
 			if (!callResult) { //Should accept
 				expected = ["0z"];
 			}
@@ -598,10 +599,29 @@ function runIssueTestcase() {
 function runExampleTestcase() {
 	switch (currentTestStep) {
 		case 1:
-			logTestcase("Complex Hand");
+			logTestcase("Example 1");
 			ownHand = getTilesFromString("113m223457p12379s");
 			expected = ["3m", "7p"];
 			break;
+
+		case 2:
+			logTestcase("Example 2");
+			ownHand = getTilesFromString("2339m34559p11459s");
+			expected = ["9m", "9p", "9s"];
+			break;
+
+		case 3:
+			logTestcase("Example 3");
+			ownHand = getTilesFromString("3m35569p12s12477z7s");
+			expected = ["1z", "2z", "4z"];
+			break;
+
+		case 4:
+			logTestcase("Example 4");
+			ownHand = getTilesFromString("356778m2348p145s2z");
+			expected = ["2z"];
+			break;
+
 		default:
 			nextTestcase();
 			return;
