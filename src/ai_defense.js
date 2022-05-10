@@ -154,27 +154,35 @@ function getExpectedDealInValue(player) {
 
 //Calculate the expected Han of the hand
 function getExpectedHandValue(player) {
-	var handValue = getNumberOfDoras(calls[player]); //Visible Dora (melds)
+	var doraValue = getNumberOfDoras(calls[player]); //Visible Dora (melds)
 
-	handValue += getExpectedDoraInHand(player); //Dora in hidden tiles (hand)
-
-	if (isPlayerRiichi(player)) {
-		handValue += 1;
-	}
+	doraValue += getExpectedDoraInHand(player); //Dora in hidden tiles (hand)
 
 	//Kita (3 player mode only)
 	if (getNumberOfPlayers() == 3) {
-		handValue += (getNumberOfKitaOfPlayer(player) * getTileDoraValue({ index: 4, type: 3 })) * 1;
+		doraValue += (getNumberOfKitaOfPlayer(player) * getTileDoraValue({ index: 4, type: 3 })) * 1;
+	}
+
+	var hanValue = 0;
+	if (isPlayerRiichi(player)) {
+		hanValue += 1;
 	}
 
 	//Yakus (only for open hands)
-	handValue += (Math.max(isDoingHonitsu(player, 0) * 2), (isDoingHonitsu(player, 1) * 2), (isDoingHonitsu(player, 2) * 2)) +
+	hanValue += (Math.max(isDoingHonitsu(player, 0) * 2), (isDoingHonitsu(player, 1) * 2), (isDoingHonitsu(player, 2) * 2)) +
 		(isDoingToiToi(player) * 2) + (isDoingTanyao(player) * 1) + (isDoingYakuhai(player) * 1);
 
-	//Expect some hidden Yaku when more tiles are unknown. 1.3 Yaku for a fully concealed hand
-	handValue += getNumberOfTilesInHand(player) / 10;
+	//Expect some hidden Yaku when more tiles are unknown. 1.3 Yaku for a fully concealed hand, less for open hands
+	if (calls[player].length == 0) {
+		hanValue += 1.3;
+	}
+	else {
+		hanValue += getNumberOfTilesInHand(player) / 15;
+	}
 
-	return calculateScore(player, handValue);
+	hanValue = hanValue < 1 ? 1 : hanValue;
+
+	return calculateScore(player, hanValue + doraValue);
 }
 
 //How many dora does the player have on average in his hidden tiles?
