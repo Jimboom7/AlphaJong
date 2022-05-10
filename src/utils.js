@@ -642,14 +642,6 @@ function isValueTile(tile) {
 
 //Return a danger value which is the threshold for folding (danger higher than this value -> fold)
 function getFoldThreshold(tilePrio, hand) {
-	var dealInValues;
-	if (getNumberOfPlayers() == 4) {
-		dealInValues = getExpectedDealInValue(1) + getExpectedDealInValue(2) + getExpectedDealInValue(3);
-	}
-	else {
-		dealInValues = getExpectedDealInValue(1) + getExpectedDealInValue(2);
-	}
-
 	var handScore = tilePrio.score.open;
 	if (isClosed) {
 		handScore = tilePrio.score.riichi;

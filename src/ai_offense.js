@@ -281,7 +281,6 @@ function discardFold(tiles) {
 		}
 		// No safe tile with good shanten found: Full Fold.
 		log("Hand is very dangerous, full fold.");
-		//strategy = STRATEGIES.FOLD;
 		strategyAllowsCalls = false;
 	}
 
@@ -343,9 +342,7 @@ async function getTilePriorities(inputHand) {
 	tiles.sort(function (p1, p2) {
 		return p2.priority - p1.priority;
 	});
-	return new Promise((resolve, reject) => {
-		resolve(tiles);
-	});
+	return Promise.resolve(tiles);
 }
 
 /*
@@ -370,13 +367,11 @@ function getHandValues(hand, discardedTile) {
 	var pairs = triplesAndPairs.pairs;
 	var doubles = getDoubles(removeTilesFromTileArray(hand, triples.concat(pairs)));
 
-	var baseDora = getNumberOfDoras(triples.concat(pairs, calls[0]));
-	var baseYaku = getYaku(hand, calls[0], triplesAndPairs);
 	var baseShanten = calculateShanten(parseInt(triples.length / 3) + callTriples, parseInt(pairs.length / 2), parseInt(doubles.length / 2));
 
 	if (typeof discardedTile != 'undefined') { //When deciding whether to call for a tile there is no discarded tile in the evaluation
 		hand.push(discardedTile); //Calculate original values
-		originalCombinations = getTriplesAndPairs(hand);
+		var originalCombinations = getTriplesAndPairs(hand);
 		var originalTriples = originalCombinations.triples;
 		var originalPairs = originalCombinations.pairs;
 		var originalDoubles = getDoubles(removeTilesFromTileArray(hand, originalTriples.concat(originalPairs)));
@@ -427,7 +422,7 @@ function getHandValues(hand, discardedTile) {
 				}
 			}
 			newTiles2Objects.push({ tile2: t, winning: false, furiten: false, triplesAndPairs: null, duplicate: false, skip: skip });
-		};
+		}
 
 		tileCombinations.push({ tile1: newTile, tiles2: newTiles2Objects, winning: false, furiten: false, triplesAndPairs: null });
 		hand.pop();
@@ -683,7 +678,7 @@ function getHandValues(hand, discardedTile) {
 	}
 
 	if (getNumberOfPlayers() == 3) {
-		var kita = getNumberOfKitaOfPlayer(0) * getTileDoraValue({ index: 4, type: 3 });;
+		var kita = getNumberOfKitaOfPlayer(0) * getTileDoraValue({ index: 4, type: 3 });
 		doraValue += kita;
 	}
 
@@ -908,49 +903,47 @@ function canDoThirteenOrphans() {
 function getMissingTilesForThirteenOrphans(uniqueTerminalHonors) {
 	var thirteen_orphans_set = "19m19p19s1234567z";
 	var thirteenOrphansTiles = getTilesFromString(thirteen_orphans_set);
-	return missingOrphans = thirteenOrphansTiles.filter(tile =>
-		!uniqueTerminalHonors.some(otherTile => tile.index == otherTile.index && tile.type == otherTile.type));
+	return thirteenOrphansTiles.filter(tile => !uniqueTerminalHonors.some(otherTile => tile.index == otherTile.index && tile.type == otherTile.type));
 }
 
 
 //Discards the "best" tile
 async function discard() {
 
-	return await getTilePriorities(ownHand).then(function (tiles) {
-		tiles = sortOutUnsafeTiles(tiles);
+	var tiles = await getTilePriorities(ownHand);
+	tiles = sortOutUnsafeTiles(tiles);
 
-		if (KEEP_SAFETILE) {
-			tiles = keepSafetile(tiles);
-		}
+	if (KEEP_SAFETILE) {
+		tiles = keepSafetile(tiles);
+	}
 
-		if (strategy == STRATEGIES.FOLD || tiles.filter(t => t.safe).length == 0) {
-			return discardFold(tiles);
-		}
+	if (strategy == STRATEGIES.FOLD || tiles.filter(t => t.safe).length == 0) {
+		return discardFold(tiles);
+	}
 
-		log("Tile Priorities: ");
-		printTilePriority(tiles);
+	log("Tile Priorities: ");
+	printTilePriority(tiles);
 
-		var tile = getDiscardTile(tiles);
+	var tile = getDiscardTile(tiles);
 
-		if (canRiichi()) {
-			callRiichi(tiles);
-		}
-		else {
-			discardTile(tile);
-		}
+	if (canRiichi()) {
+		callRiichi(tiles);
+	}
+	else {
+		discardTile(tile);
+	}
 
-		return tile;
-	});
+	return tile;
 }
 
 //Check all tiles for enough safety
 function sortOutUnsafeTiles(tiles) {
 	for (let tile of tiles) {
 		if (tile == tiles[0]) {
-			verbose = true;
+			var verbose = true;
 		}
 		else {
-			verbose = false;
+			var verbose = false;
 		}
 		if (shouldFold(tile, verbose)) {
 			tile.safe = 0;

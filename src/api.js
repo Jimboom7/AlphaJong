@@ -143,9 +143,14 @@ function makeCallWithOption(type, option) {
 }
 
 function declineCall(operation) {
-	if (operation == getOperationList()[getOperationList().length - 1].type) { //Is last operation -> Send decline Command
-		app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { cancel_operation: true, timeuse: 2 });
-		view.DesktopMgr.Inst.WhenDoOperation();
+	try {
+		if (operation == getOperationList()[getOperationList().length - 1].type) { //Is last operation -> Send decline Command
+			app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { cancel_operation: true, timeuse: 2 });
+			view.DesktopMgr.Inst.WhenDoOperation();
+		}
+	}
+	catch {
+		log("Failed to decline the Call. Maybe someone else was faster?");
 	}
 }
 

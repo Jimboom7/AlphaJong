@@ -370,9 +370,7 @@ function runYakuTestcase() {
 	switch (currentTestStep) {
 		case 1:
 			logTestcase("Yakuhai");
-			//dora = getTilesFromString("7p");
 			ownHand = getTilesFromString("111234m5688p23s11z");
-			discards = [[], [], [], []];
 			expected = ["5p", "8p"];
 			break;
 
