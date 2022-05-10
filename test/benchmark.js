@@ -26,7 +26,7 @@ function runOffenseBenchmark() {
 	seed = currentTest * 100;
 
 	if (currentTest < (NUMBER_OF_RUNS * 50)) {
-		setTimeout(runOffense, 5000); //Loop needs to be delayed, otherwise browser crashes
+		setTimeout(runOffense, 1000); //Loop needs to be delayed, otherwise browser crashes
 	}
 	else {
 		log("#################");
@@ -46,7 +46,7 @@ function runOffenseBenchmark() {
 }
 
 //Simulates turns and check if tenpai. No Calls, only closed hands.
-function runOffense() {
+async function runOffense() {
 	log(" ");
 
 	setTestData();
@@ -55,7 +55,7 @@ function runOffense() {
 		simulateTurn();
 		updateDiscardedTilesSafety();
 
-		var value = getTilePriorities(ownHand);
+		var value = await getTilePriorities(ownHand);
 		if (value[0].shanten == 0) {
 			log("<h2>Tenpai</h2>");
 			passes++;

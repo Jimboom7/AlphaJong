@@ -279,8 +279,8 @@ function getSanshokuDouko(triplets) {
 function getSanshokuDoujun(sequences) {
 	for (var i = 1; i <= 7; i++) {
 		var seq = sequences.filter(tile => tile.index == i || tile.index == i + 1 || tile.index == i + 2);
-		if (seq.length >= 9 && seq.filter(tile => tile.type == 0) >= 3 &&
-			seq.filter(tile => tile.type == 1) >= 3 && seq.filter(tile => tile.type == 0) >= 3) {
+		if (seq.length >= 9 && seq.filter(tile => tile.type == 0).length >= 3 &&
+			seq.filter(tile => tile.type == 1).length >= 3 && seq.filter(tile => tile.type == 2).length >= 3) {
 			return { open: 1, closed: 2 };
 		}
 	}

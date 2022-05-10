@@ -99,10 +99,10 @@ function main() {
 
 	currentActionOutput.value = "Calculating best move...";
 
-	setTimeout(mainOwnTurn, 500 + (Math.random() * 500));
+	setTimeout(mainOwnTurn, 200 + (Math.random() * 200));
 }
 
-function mainOwnTurn() {
+async function mainOwnTurn() {
 	setData(); //Set current state of the board to local variables
 	var operations = getOperationList();
 
@@ -157,13 +157,13 @@ function mainOwnTurn() {
 		switch (operation.type) {
 			case getOperations().dapai:
 				isConsideringCall = false;
-				discard();
+				await discard();
 				break;
 			case getOperations().eat:
-				callTriple(operation.combination, getOperations().eat);
+				await callTriple(operation.combination, getOperations().eat);
 				break;
 			case getOperations().peng:
-				callTriple(operation.combination, getOperations().peng);
+				await callTriple(operation.combination, getOperations().peng);
 				break;
 			case getOperations().ming_gang: //From others
 				callDaiminkan();

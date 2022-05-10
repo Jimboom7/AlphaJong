@@ -16,11 +16,12 @@ var CALL_KAN = 1.0; //Lower: Call Kan less often. Higher: Call Kan more often. D
 var RIICHI = 1.0; //Lower: Call Riichi less often. Higher: Call Riichi more often. Default: 1.0, Minimum: 0
 var CHIITOITSU = 5; //Number of Pairs in Hand to go for chiitoitsu. Default: 5
 var THIRTEEN_ORPHANS = 10; //Number of Honor/Terminals in hand to go for 13 orphans. Default: 10
+var KEEP_SAFETILE = false; //If set to true the bot will keep 1 safetile
 
 //MISC
 var LOG_AMOUNT = 3; //Amount of Messages to log for Tile Priorities
 var DEBUG_BUTTON = false; //Display a Debug Button in the GUI
-var LOW_SPEC_MODE = false; //Decrease calculation time
+var LOW_SPEC_MODE = 0; //Range 0 to 3. Decrease calculation time at the cost of efficiency. 0 = Highest Calculation Time. 3 = Lowest Calculation Time
 
 
 

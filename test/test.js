@@ -4,7 +4,7 @@
 //################################
 
 //TEST PARAMETERS
-var TEST_CASES = ["Efficiency", "Defense", "PushFold", "Dora", "Yaku", "Strategy", "Waits", "Call", "Issue", "Example"];
+var TEST_CASES = ["Efficiency", "Defense", "Dora", "Yaku", "Strategy", "Waits", "Call", "Issue", "Example"];
 var currentTestcase = 0;
 var currentTestStep = 0;
 var passes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -22,8 +22,8 @@ if (isDebug()) {
 }
 
 //Test Main
-function runTestcases() {
-	runTestcase(TEST_CASES[currentTestcase]);
+async function runTestcases() {
+	await runTestcase(TEST_CASES[currentTestcase]);
 	if (currentTestcase >= TEST_CASES.length) {
 		showEndResult();
 		return;
@@ -49,7 +49,7 @@ function showEndResult() {
 }
 
 //List of testcases
-function runTestcase(testcase) {
+async function runTestcase(testcase) {
 	resetGlobals();
 	currentTestStep++;
 
@@ -59,9 +59,6 @@ function runTestcase(testcase) {
 			break;
 		case "Defense":
 			runDefenseTestcase();
-			break;
-		case "PushFold":
-			runPushFoldTestcase();
 			break;
 		case "Dora":
 			runDoraTestcase();
@@ -96,24 +93,25 @@ function runTestcase(testcase) {
 	updateAvailableTiles();
 	determineStrategy();
 
-	checkDiscard();
+	await checkDiscard();
 }
 
 //Discard a tile and check if it meets the expectation
-function checkDiscard() {
-	var tile = discard();
-	log("Expected Discards:");
-	overall[currentTestcase]++;
-	for (let ex of expected) {
-		log(ex);
-		if (ex == tile.index + getNameForType(tile.type)) {
-			log("<span style='color: green;'>" + TEST_CASES[currentTestcase] + " Testcase " + currentTestStep + " passed!</span>");
-			passes[currentTestcase]++;
-			log(" ");
-			return;
+async function checkDiscard() {
+	await discard().then(function (tile) {
+		log("Expected Discards:");
+		overall[currentTestcase]++;
+		for (let ex of expected) {
+			log(ex);
+			if (ex == tile.index + getNameForType(tile.type)) {
+				log("<span style='color: green;'>" + TEST_CASES[currentTestcase] + " Testcase " + currentTestStep + " passed!</span>");
+				passes[currentTestcase]++;
+				log(" ");
+				return;
+			}
 		}
-	}
-	log("<b style='color: red;'>" + TEST_CASES[currentTestcase] + " testcase " + currentTestStep + " failed!</b>");
+		log("<b style='color: red;'>" + TEST_CASES[currentTestcase] + " testcase " + currentTestStep + " failed!</b>");
+	});
 }
 
 function logTestcase(title) {
@@ -137,20 +135,18 @@ function runEfficiencyTestcase() {
 		case 2:
 			logTestcase("Standard Hand 2");
 			ownHand = getTilesFromString("1239p22456m44469s");
-			discards = [[{ index: 9, type: 2, dora: false }], [], [], []];
 			expected = ["9p", "9s"];
 			break;
 
 		case 3:
 			logTestcase("Keep Pair");
 			ownHand = getTilesFromString("12367p22456m4578s");
-			expected = ["4s", "5s"];
+			expected = ["4s", "5s", "7s", "8s"];
 			break;
 
 		case 4:
 			logTestcase("Keep Kanchan");
 			ownHand = getTilesFromString("12379p11456m2346s");
-			//discards = [[], [{ index: 6, type: 2, dora: false }], [], []];
 			expected = ["6s"];
 			break;
 
@@ -224,6 +220,12 @@ function runEfficiencyTestcase() {
 			expected = ["2p"];
 			break;
 
+		case 16:
+			logTestcase("Ukeire vs. fastest Tenpai"); //8s has highest ukeire, but 1s is fastest way to tenpai
+			ownHand = getTilesFromString("12588m27789p1889s");
+			expected = ["1s"];
+			break;
+
 		default:
 			nextTestcase();
 			return;
@@ -233,33 +235,85 @@ function runEfficiencyTestcase() {
 function runDefenseTestcase() {
 	switch (currentTestStep) {
 		case 1:
-			logTestcase("Sakigiri");
-			ownHand = getTilesFromString("112445999m5559p9s");
-			discards = [getTilesFromString("999p"), getTilesFromString("3333p9s"), getTilesFromString("2222s9s"), getTilesFromString("444p9s")];
-			expected = ["9p"];
-			break;
-
-		default:
-			nextTestcase();
-			return;
-	}
-}
-
-function runPushFoldTestcase() {
-	switch (currentTestStep) {
-		case 1:
-			logTestcase("Fold 1");
-			ownHand = getTilesFromString("1122m5579p234s111z");
-			testPlayerRiichi = [0, 1, 1, 1];
+			logTestcase("Should Fold Tenpai");
+			ownHand = getTilesFromString("11345m57p2347s111z");
+			discards = [[], getTilesFromString("13369m2p"), getTilesFromString("567567999m2p4z"), getTilesFromString("2348899p4z")];
+			testPlayerRiichi = [0, 0, 0, 1];
 			expected = ["1z"];
 			break;
 
 		case 2:
-			logTestcase("Fold 2");
-			ownHand = getTilesFromString("13579m224567p123z");
-			discards = [[], getTilesFromString("1133699m2p"), getTilesFromString("567567567m2p"), getTilesFromString("2567567p")];
-			calls = [[], getTilesFromString("555z"), getTilesFromString("666z"), getTilesFromString("777z")];
-			expected = ["2p", "7p"];
+			logTestcase("Should Fold 1 Shanten");
+			ownHand = getTilesFromString("2367m2257p234s111z");
+			discards = [[], getTilesFromString("13369m2p"), getTilesFromString("567567999s2p4z"), getTilesFromString("346688p14z")];
+			testPlayerRiichi = [0, 0, 0, 1];
+			expected = ["1z"];
+			break;
+
+		case 3:
+			logTestcase("Should Fold 2 Shanten");
+			dora = getTilesFromString("4z");
+			ownHand = getTilesFromString("2367m2267p246s111z");
+			discards = [[], getTilesFromString("5669m2p"), getTilesFromString("2p4z"), getTilesFromString("34p14z")];
+			testPlayerRiichi = [0, 0, 0, 1];
+			expected = ["1z"];
+			break;
+
+		case 4:
+			logTestcase("Should Fold 3 Shanten");
+			dora = getTilesFromString("4z");
+			ownHand = getTilesFromString("369m2267p2469s111z");
+			discards = [[], getTilesFromString("5669m2p"), getTilesFromString("1999p4z"), getTilesFromString("14z")];
+			calls = [[], [], getTilesFromString("666z"), getTilesFromString("111444m777z")];
+			expected = ["1z"];
+			break;
+
+		case 5:
+			logTestcase("Should Push 1 Shanten");
+			ownHand = getTilesFromString("123m236p677s11777z");
+			discards = [[], getTilesFromString("1133699m2p"), getTilesFromString("567567567m2p"), getTilesFromString("2567567m")];
+			testPlayerRiichi = [0, 0, 0, 1];
+			expected = ["6p"];
+			break;
+
+		case 6:
+			logTestcase("Should Push 2 Shanten");
+			ownHand = getTilesFromString("2378m22456p258s77z");
+			discards = [[], getTilesFromString("1133699m2p"), getTilesFromString("567567567m2p"), getTilesFromString("25678p7z")];
+			calls = [[], [], [], getTilesFromString("555z")];
+			expected = ["2s", "5s", "8s"];
+			break;
+
+		case 7:
+			logTestcase("Should Push 3 Shanten");
+			ownHand = getTilesFromString("2589m22456p258s55z");
+			discards = [[], getTilesFromString("11m2p"), getTilesFromString("367m2p5z"), getTilesFromString("25677p")];
+			calls = [[], [], getTilesFromString("666z"), []];
+			expected = ["2m", "5m", "2s", "5s", "8s"];
+			break;
+
+		case 8:
+			logTestcase("Should Throw Semi-Safe tile");
+			dora = getTilesFromString("4z");
+			ownHand = getTilesFromString("2367m2267p246s111z");
+			discards = [[], getTilesFromString("13369m2p"), getTilesFromString("567567999m2p4z"), getTilesFromString("3466788p14z")];
+			testPlayerRiichi = [0, 0, 0, 1];
+			expected = ["6p", "7p", "7m"];
+			break;
+
+		case 9:
+			logTestcase("Sakigiri");
+			ownHand = getTilesFromString("112445999m5559p9s");
+			discards = [getTilesFromString("999p"), getTilesFromString("3333p9s"), getTilesFromString("222s9s"), getTilesFromString("111p9s")];
+			expected = ["9p"];
+			break;
+
+		case 10:
+			logTestcase("Keep Safetile");
+			ownHand = getTilesFromString("11245699m23s559p4z");
+			KEEP_SAFETILE = true;
+			discards = [[], getTilesFromString("333"), getTilesFromString("222s"), getTilesFromString("111p9s")];
+			expected = ["9p"];
 			break;
 
 		default:
@@ -290,6 +344,20 @@ function runDoraTestcase() {
 			dora = getTilesFromString("8p");
 			ownHand = getTilesFromString("4569p123467m3458s");
 			expected = ["1m", "8s"];
+			break;
+
+		case 4:
+			logTestcase("Choose wait for expected Dora");
+			dora = getTilesFromString("7p");
+			ownHand = getTilesFromString("579p123567m11144s");
+			expected = ["5p"];
+			break;
+
+		case 5:
+			logTestcase("Throw Dora for better Wait");
+			dora = getTilesFromString("4p");
+			ownHand = getTilesFromString("578p123567m11144s");
+			expected = ["5p"];
 			break;
 
 		default:
@@ -503,6 +571,14 @@ function runWaitsTestcase() {
 			expected = ["4z"];
 			break;
 
+		case 6:
+			logTestcase("Switch Dead Wait");
+			dora = getTilesFromString("4p");
+			ownHand = getTilesFromString("111333555m225ps44z");
+			discards = [[], getTilesFromString("22p44z"), [], []];
+			expected = ["2p", "4z"];
+			break;
+
 		default:
 			nextTestcase();
 			return;
@@ -620,6 +696,18 @@ function runExampleTestcase() {
 			logTestcase("Example 4");
 			ownHand = getTilesFromString("356778m2348p145s2z");
 			expected = ["2z"];
+			break;
+
+		case 5:
+			logTestcase("Example 5");
+			ownHand = getTilesFromString("12456m12567p5s244z");
+			expected = ["2z"];
+			break;
+
+		case 6:
+			logTestcase("Example 6");
+			ownHand = getTilesFromString("1237m4569p1267s33z");
+			expected = ["9p"];
 			break;
 
 		default:

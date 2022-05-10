@@ -15,10 +15,12 @@ function resetGlobals() {
 	EFFICIENCY = 1.0;
 	SAFETY = 1.0;
 	SAKIGIRI = 1.0;
+	KEEP_SAFETILE = false;
 	isClosed = true;
 	testPlayerRiichi = [0, 0, 0, 0];
 	testPlayerHand = [13, 13, 13, 13];
 	riichiTiles = [null, null, null, null];
+	totalPossibleWaits = {};
 	LOG_AMOUNT = 14;
 }
 
