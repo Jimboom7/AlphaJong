@@ -170,8 +170,13 @@ function sendAbortiveDrawCall() {
 }
 
 function callDiscard(tileNumber) {
-	view.DesktopMgr.Inst.players[0]._choose_pai = view.DesktopMgr.Inst.players[0].hand[tileNumber];
-	view.DesktopMgr.Inst.players[0].DoDiscardTile();
+	try {
+		view.DesktopMgr.Inst.players[0]._choose_pai = view.DesktopMgr.Inst.players[0].hand[tileNumber];
+		view.DesktopMgr.Inst.players[0].DoDiscardTile();
+	}
+	catch {
+		log("Failed to decline the discard.");
+	}
 }
 
 function getPlayerLinkState(player) {
@@ -260,6 +265,17 @@ function getRooms() {
 	}
 	catch {
 		return null;
+	}
+}
+
+// Returns the room of the current game as a number: Bronze = 1, Silver = 2 etc.
+function getCurrentRoom() {
+	try {
+		var currentRoom = view.DesktopMgr.Inst.game_config.meta.mode_id;
+		return getRooms().map_[currentRoom].room;
+	}
+	catch {
+		return 0;
 	}
 }
 

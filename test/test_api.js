@@ -136,6 +136,19 @@ function isEastRound() {
 	return true;
 }
 
+
+function isInRank(room) {
+
+}
+
+function getRooms() {
+
+}
+
+function getCurrentRoom() {
+	return 4;
+}
+
 function extendMJSoulFunctions() {
 
 }

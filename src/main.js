@@ -83,7 +83,7 @@ function main() {
 	if (operations == null || operations.length == 0) {
 		errorCounter++;
 		if (getTilesLeft() == lastTilesLeft) { //1 minute no tile drawn
-			if (errorCounter > 60) {
+			if (errorCounter > 120) {
 				goToLobby();
 			}
 		}
@@ -91,9 +91,8 @@ function main() {
 			lastTilesLeft = getTilesLeft();
 			errorCounter = 0;
 		}
-		log("Waiting for own turn, sleep 1 second.");
 		currentActionOutput.value = "Waiting for own turn.";
-		setTimeout(main, 1000);
+		setTimeout(main, 500);
 		return;
 	}
 
@@ -103,6 +102,10 @@ function main() {
 }
 
 async function mainOwnTurn() {
+	if (threadIsRunning) {
+		return;
+	}
+	threadIsRunning = true;
 	setData(); //Set current state of the board to local variables
 	var operations = getOperationList();
 
@@ -140,6 +143,7 @@ async function mainOwnTurn() {
 				break;
 			case getOperations().babei:
 				if (callKita()) {
+					threadIsRunning = false;
 					setTimeout(main, 1000);
 					return;
 				}

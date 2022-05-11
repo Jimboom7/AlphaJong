@@ -9,7 +9,7 @@ function resetGlobals() {
 	calls = [[], [], [], []];
 	seatWind = 2;
 	roundWind = 1;
-	tilesLeft = 70;
+	tilesLeft = 50;
 	strategy = STRATEGIES.GENERAL;
 	strategyAllowsCalls = true;
 	EFFICIENCY = 1.0;
@@ -21,6 +21,7 @@ function resetGlobals() {
 	testPlayerHand = [13, 13, 13, 13];
 	riichiTiles = [null, null, null, null];
 	totalPossibleWaits = {};
+	PERFORMANCE_MODE = 4;
 	LOG_AMOUNT = 14;
 }
 

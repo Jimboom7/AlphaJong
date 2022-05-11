@@ -237,7 +237,7 @@ function runDefenseTestcase() {
 		case 1:
 			logTestcase("Should Fold Tenpai");
 			ownHand = getTilesFromString("11345m57p2347s111z");
-			discards = [[], getTilesFromString("13369m2p"), getTilesFromString("567567999m2p4z"), getTilesFromString("2348899p4z")];
+			discards = [[], getTilesFromString("1223369m2p"), getTilesFromString("567567999m2p4z"), getTilesFromString("134999p4z")];
 			testPlayerRiichi = [0, 0, 0, 1];
 			expected = ["1z"];
 			break;
@@ -466,8 +466,8 @@ function runYakuTestcase() {
 		case 16:
 			logTestcase("Shousangen");
 			dora = getTilesFromString("1m");
-			ownHand = getTilesFromString("23p45678s5556667z");
-			expected = ["2p", "3p"];
+			ownHand = getTilesFromString("23556p79s5556667z");
+			expected = ["6p"];
 			break;
 
 		case 17:
@@ -621,7 +621,17 @@ function runCallTestcase() {
 			}
 			break;
 
-
+		case 4:
+			logTestcase("Test Shanten Reduce Call");
+			ownHand = getTilesFromString("1359m11p067s4466z");
+			updateAvailableTiles();
+			testCallTile = { index: 1, type: 0, dora: false, doraValue: 0 };
+			var callResult = callTriple(["1p|1p"], 0);
+			expected = ["1p"];
+			if (!callResult) { //Should accept
+				expected = ["0z"];
+			}
+			break;
 
 
 		default:

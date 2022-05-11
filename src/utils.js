@@ -202,19 +202,33 @@ function getBestCombinationOfTiles(inputTiles, possibleCombinations, chosenCombi
 			tt = pushTileAndCheckDora(cs.pairs.concat(cs.triples), cs.pairs, tiles.tile2);
 			hand = removeTilesFromTileArray(hand, [tt]);
 		}
-		if (cs.triples.length >= chosenCombinations.triples.length) {
-			var doubles = getDoubles(hand);
-			cs.shanten = calculateShanten(parseInt(cs.triples.length / 3), parseInt(cs.pairs.length / 2), parseInt(doubles.length / 2));
+
+		if (PERFORMANCE_MODE - timeSave <= 3) {
+			var anotherChoice = getBestCombinationOfTiles(hand, possibleCombinations.slice(i + 1), cs);
+			if (anotherChoice.triples.length > chosenCombinations.triples.length ||
+				(anotherChoice.triples.length == chosenCombinations.triples.length &&
+					anotherChoice.pairs.length > chosenCombinations.pairs.length) ||
+				(anotherChoice.triples.length == chosenCombinations.triples.length &&
+					anotherChoice.pairs.length == chosenCombinations.pairs.length &&
+					getNumberOfDoras(anotherChoice.triples.concat(anotherChoice.pairs)) > getNumberOfDoras(chosenCombinations.triples.concat(chosenCombinations.pairs)))) {
+				chosenCombinations = anotherChoice;
+			}
 		}
 		else {
-			cs.shanten = 8;
-		}
+			if (cs.triples.length >= chosenCombinations.triples.length) {
+				var doubles = getDoubles(hand); //This is costly, so only do it when performance mode is at maximum
+				cs.shanten = calculateShanten(parseInt(cs.triples.length / 3), parseInt(cs.pairs.length / 2), parseInt(doubles.length / 2));
+			}
+			else {
+				cs.shanten = 8;
+			}
 
-		var anotherChoice = getBestCombinationOfTiles(hand, possibleCombinations.slice(i + 1), cs);
-		if (anotherChoice.shanten < chosenCombinations.shanten || (anotherChoice.shanten == chosenCombinations.shanten &&
-			(anotherChoice.pairs.length > chosenCombinations.pairs.length ||
-				getNumberOfDoras(anotherChoice.triples.concat(anotherChoice.pairs)) > getNumberOfDoras(chosenCombinations.triples.concat(chosenCombinations.pairs))))) {
-			chosenCombinations = anotherChoice;
+			var anotherChoice = getBestCombinationOfTiles(hand, possibleCombinations.slice(i + 1), cs);
+			if (anotherChoice.shanten < chosenCombinations.shanten || (anotherChoice.shanten == chosenCombinations.shanten &&
+				(anotherChoice.pairs.length > chosenCombinations.pairs.length ||
+					getNumberOfDoras(anotherChoice.triples.concat(anotherChoice.pairs)) > getNumberOfDoras(chosenCombinations.triples.concat(chosenCombinations.pairs))))) {
+				chosenCombinations = anotherChoice;
+			}
 		}
 	}
 
@@ -460,13 +474,15 @@ function getUsefulTilesForDouble(tileArray) {
 		if (tile.index + 1 <= 9) {
 			pushTileIfNotExists(tiles, tile.index + 1, tile.type);
 		}
-		if (LOW_SPEC_MODE < 1) {
-			if (tile.index - 2 >= 1) {
-				pushTileIfNotExists(tiles, tile.index - 2, tile.type);
-			}
-			if (tile.index + 2 <= 9) {
-				pushTileIfNotExists(tiles, tile.index + 2, tile.type);
-			}
+
+		if (PERFORMANCE_MODE - timeSave <= 2) {
+			continue;
+		}
+		if (tile.index - 2 >= 1) {
+			pushTileIfNotExists(tiles, tile.index - 2, tile.type);
+		}
+		if (tile.index + 2 <= 9) {
+			pushTileIfNotExists(tiles, tile.index + 2, tile.type);
 		}
 	}
 	return tiles;
@@ -494,7 +510,7 @@ function isTerminalOrHonor(tile) {
 
 // Returns a number how "good" the wait is. An average wait is 1, a bad wait (like a middle tile) is lower, a good wait (like an honor tile) is higher.
 function getWaitQuality(tile) {
-	return 1.3 - (getDealInChanceForTileAndPlayer(0, tile, 1) * 5);
+	return 1.5 - (getDealInChanceForTileAndPlayer(0, tile, 1) * 7);
 }
 
 //Calculate the shanten number. Based on this: https://www.youtube.com/watch?v=69Xhu-OzwHM
@@ -653,10 +669,14 @@ function getFoldThreshold(tilePrio, hand) {
 	// TODO: Maybe switch to this: https://riichi-mahjong.com/2020/01/28/mahjong-strategy-push-or-fold-4-maximizing-game-ev/
 	if (tilePrio.shanten == 0) {
 		var foldValue = waits * handScore / 40;
+		if (tilesLeft < 8) { //Try to avoid no ten penalty
+			foldValue += 200 - (parseInt(tilesLeft / 4) * 100);
+		}
 	}
 	else if (tilePrio.shanten == 1 && strategy == STRATEGIES.GENERAL) {
 		waits = waits < 0.4 ? waits = 0.4 : waits;
-		var foldValue = waits * handScore / 50;
+		waits = waits > 2 ? waits = 2 : waits;
+		var foldValue = waits * handScore / 40;
 	}
 	else {
 		if (getCurrentDangerLevel() > 3000 && strategy == STRATEGIES.GENERAL) {
@@ -712,7 +732,7 @@ function shouldFold(tile, verbose = false) {
 
 	var foldThreshold = getFoldThreshold(tile, ownHand);
 	if (verbose) {
-		log("Would fold this hand above " + foldThreshold + " danger.");
+		log("Would fold this hand above " + foldThreshold + " danger for " + getTileName(tile.tile) + " discard.");
 	}
 
 	if (tile.danger > foldThreshold) {
@@ -755,8 +775,8 @@ function shouldRiichi(tilePrio) {
 		return true;
 	}
 
-	// Already large lead of more than 10000 points
-	if (isLastGame() && getDistanceToFirst() < -10000) {
+	// Decline if last game and first place (either with 10000 points advantage or with a closed yaku)
+	if (isLastGame() && (getDistanceToFirst() < -10000 || (tilePrio.yaku.closed >= 1 && getDistanceToFirst() < 0))) {
 		log("Decline Riichi because of huge lead in last game.");
 		return false;
 	}

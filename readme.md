@@ -26,6 +26,7 @@ There is a very simple GUI to control the Bot.
 ### Parameters
 The default parameters are usually fine. If you want to modify the behaviour of the bot (e.g. more aggressive playstyle) you can change some constants at the top of the script:
 
+* Performance Mode: Decides how accurate and fast the bot will play. 0 is the fastest mode with low accuracy, 4 is the slowest mode with high accuracy.
 * Defense Constants: Constants that modify the defensive playstyle.
 * Calls: Constants that modify how often the bot calls for tiles.
 * Hand Evaluation Constants: Constants that modify how the value of hands is calculated. Influences if the bot goes for fast or expensive hands.
@@ -45,7 +46,8 @@ The project contains a testclass with simple "Nani Kiru?" testcases.
 
 ## Known Problems
 
-- Sometimes the game disconnects you for AFK. This usually happens if the window is minimized or you switch to another tab for a while (not having focus is fine, as long as the window is open). If that happens the bot will try to reconnect by reloading the page.
+- Sometimes the game disconnects you for AFK. This usually happens if the window is minimized or you switch to another tab for a while (not having focus is fine, as long as the window is open). If that happens the bot will try to reconnect by reloading the page.  
+- If the bot is not able to play fast enough try lowering the Performance Mode (see parameters) or use a different browser (Firefox seems to be fastest).
 
 ## Disclaimer
 

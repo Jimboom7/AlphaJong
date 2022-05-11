@@ -269,8 +269,12 @@ function isPlayerTenpai(player) {
 		return 1;
 	}
 
+	if (getPlayerLinkState(player) == 0) { //disconnect
+		return 0;
+	}
+
 	//Based on: https://pathofhouou.blogspot.com/2021/04/analysis-tenpai-chance-by-tedashis-and.html
-	//TODO: Include the more specific lists for Dama hands
+	//This is only accurate for high level games!
 	var tenpaiChanceList = [[], [], [], []];
 	tenpaiChanceList[0] = [0, 0.1, 0.2, 0.5, 1, 1.8, 2.8, 4.2, 5.8, 7.6, 9.5, 11.5, 13.5, 15.5, 17.5, 19.5, 21.7, 23.9, 25, 27, 29, 31, 33, 35, 37];
 	tenpaiChanceList[1] = [0.2, 0.9, 2.3, 4.7, 8.3, 12.7, 17.9, 23.5, 29.2, 34.7, 39.7, 43.9, 47.4, 50.3, 52.9, 55.2, 57.1, 59, 61, 63, 65, 67, 69];
@@ -278,9 +282,6 @@ function isPlayerTenpai(player) {
 	tenpaiChanceList[3] = [0, 0, 41.9, 54.1, 63.7, 70.9, 76, 79.9, 83, 85.1, 86.7, 87.9, 88.7, 89.2, 89.5, 89.4, 89.3, 89.2, 89.2, 89.2, 90, 90, 90];
 
 	var numberOfDiscards = discards[player].length;
-	if (numberOfDiscards > 20) {
-		numberOfDiscards = 20;
-	}
 	for (var i = 0; i < getNumberOfPlayers(); i++) {
 		if (i == player) {
 			continue;
@@ -292,7 +293,16 @@ function isPlayerTenpai(player) {
 		}
 	}
 
-	var tenpaiChance = tenpaiChanceList[numberOfCalls][numberOfDiscards] / 100;
+	if (numberOfDiscards > 20) {
+		numberOfDiscards = 20;
+	}
+
+	try {
+		var tenpaiChance = tenpaiChanceList[numberOfCalls][numberOfDiscards] / 100;
+	}
+	catch {
+		var tenpaiChance = 0.5;
+	}
 
 	tenpaiChance *= 1 + (isPlayerPushing(player) / 5);
 
@@ -305,6 +315,11 @@ function isPlayerTenpai(player) {
 	}
 	if ((isDoingHonitsu(player, 2) && discards[player].slice(10).filter(tile => tile.type == 2).length > 0)) {
 		tenpaiChance *= 1 + (isDoingHonitsu(player, 2) / 1.5);
+	}
+
+	var room = getCurrentRoom();
+	if (room < 4 && room > 0) { //Below Jade Room: Less likely to be tenpai
+		tenpaiChance *= 1 - ((4 - room) * 0.15); //15% less likely for every rank lower than jade to be tenpai
 	}
 
 	if (tenpaiChance > 1) {
@@ -526,7 +541,7 @@ function getSakigiriValue(hand, tile) {
 			}
 		}
 
-		var saki = (3 - safeTiles) * (SAKIGIRI * 3);
+		var saki = (3 - safeTiles) * (SAKIGIRI * 4);
 		if (saki <= 0) { // 3 or more safe tiles: Sakigiri not necessary
 			continue;
 		}

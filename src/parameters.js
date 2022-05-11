@@ -3,6 +3,14 @@
 // Contains Parameters to change the playstile of the bot. Usually no need to change anything.
 //################################
 
+/* PERFORMANCE MODE
+* Range 0 to 4. Decrease calculation time at the cost of efficiency (2 equals the time of ai version 1.2.1 and before).
+* 0 = Highest Precision and Calculation Time. 4 = Lowest Precision and Calculation Time.
+* Note: The bot will automatically decrease the performance mode when it approaches the time limit.
+* Note 2: Firefox is usually able to run the script faster than Chrome.
+*/
+var PERFORMANCE_MODE = 4;
+
 //HAND EVALUATION CONSTANTS
 var EFFICIENCY = 1.0; // Lower: Slower and more expensive hands. Higher: Faster and cheaper hands. Default: 1.0, Minimum: 0
 var SAFETY = 1.0; // Lower: The bot will not pay much attention to safety. Higher: The bot will try to play safer. Default: 1.0, Minimum: 0
@@ -21,13 +29,12 @@ var KEEP_SAFETILE = false; //If set to true the bot will keep 1 safetile
 //MISC
 var LOG_AMOUNT = 3; //Amount of Messages to log for Tile Priorities
 var DEBUG_BUTTON = false; //Display a Debug Button in the GUI
-var LOW_SPEC_MODE = 0; //Range 0 to 3. Decrease calculation time at the cost of efficiency. 0 = Highest Calculation Time. 3 = Lowest Calculation Time
-
 
 
 
 //### GLOBAL VARIABLES DO NOT CHANGE ###
 var run = false; //Is the bot running
+var threadIsRunning = false;
 const STRATEGIES = { //ENUM of strategies
 	GENERAL: 'General',
 	CHIITOITSU: 'Chiitoitsu',
