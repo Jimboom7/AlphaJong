@@ -737,7 +737,7 @@ function shouldFold(tile, verbose = false) {
 
 	if (tile.danger > foldThreshold) {
 		if (verbose) {
-			log("Tile Danger " + Number(tile.danger).toFixed(2) + " of " + getTileName(tile.tile) + " is too dangerous.");
+			log("Tile Danger " + Number(tile.danger).toFixed(2) + " of " + getTileName(tile.tile, false) + " is too dangerous.");
 		}
 		strategyAllowsCalls = false; //Don't set the strategy to full fold, but prevent calls
 		return true;
@@ -864,4 +864,34 @@ function isWinningHand(numberOfTriples, numberOfPairs) {
 		return numberOfPairs == 7;
 	}
 	return numberOfTriples == 4 && numberOfPairs == 1;
+}
+
+function getCallNameByType(type) {
+	switch (type) {
+		case 1: return "discard";
+		case 2: return "chi";
+		case 3: return "pon";
+		case 4: return "kan(ankan)";
+		case 5: return "kan(daiminkan)";
+		case 6: return "kan(shouminkan)";
+		case 7: return "riichi";
+		case 8: return "tsumo";
+		case 9: return "ron";
+		case 10: return "kyuushu kyuuhai";
+		case 11: return "kita";
+		default: return type;
+	}
+}
+
+function getTileEmoji(tileType, tileIdx, dora) {
+	if (dora) {
+		tileIdx = 0;
+	}
+	return tileEmojiList[tileType][tileIdx];
+}
+
+//Get Emoji str by tile name
+function getTileEmojiByName(name) {
+	let tile = getTileFromString(name);
+	return getTileEmoji(tile.type, tile.index, tile.dora);
 }

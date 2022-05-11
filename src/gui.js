@@ -6,6 +6,7 @@
 var guiDiv = document.createElement("div");
 var guiSpan = document.createElement("span");
 var startButton = document.createElement("button");
+var aimodeCombobox = document.createElement("select");
 var autorunCheckbox = document.createElement("input");
 var roomCombobox = document.createElement("select");
 var currentActionOutput = document.createElement("input");
@@ -39,6 +40,13 @@ function initGui() {
 	};
 	guiSpan.appendChild(startButton);
 
+	refreshAIMode();
+	aimodeCombobox.style.marginRight = "15px";
+	aimodeCombobox.onchange = function() {
+		aiModeChange();
+	};
+	guiSpan.appendChild(aimodeCombobox);
+
 	autorunCheckbox.type = "checkbox";
 	autorunCheckbox.id = "autorun";
 	autorunCheckbox.onclick = function () {
@@ -50,8 +58,8 @@ function initGui() {
 	guiSpan.appendChild(autorunCheckbox);
 	var checkboxLabel = document.createElement("label");
 	checkboxLabel.htmlFor = "autorun";
-	checkboxLabel.appendChild(document.createTextNode('Autostart new Game in'));
-	checkboxLabel.style.marginRight = "5px";
+	checkboxLabel.appendChild(document.createTextNode('Autostart'));
+	checkboxLabel.style.marginRight = "15px";
 	guiSpan.appendChild(checkboxLabel);
 
 	refreshRoomSelection();
@@ -69,9 +77,9 @@ function initGui() {
 	currentActionOutput.readOnly = "true";
 	currentActionOutput.size = "20";
 	currentActionOutput.style.marginRight = "15px";
-	currentActionOutput.value = "Bot is not running.";
+	showCrtActionMsg("Bot is not running.");
 	if (window.localStorage.getItem("alphajongAutorun") == "true") {
-		currentActionOutput.value = "Bot started.";
+		showCrtActionMsg("Bot started.");
 	}
 	guiSpan.appendChild(currentActionOutput);
 
@@ -107,8 +115,15 @@ function showDebugString() {
 	alert("If you notice a bug while playing please go to the correct turn in the replay (before the bad discard), press this button, copy the Debug String from the textbox and include it in your issue on github.");
 	if (isInGame()) {
 		setData();
-		currentActionOutput.value = getDebugString();
+		showCrtActionMsg(getDebugString());
 	}
+}
+
+function aiModeChange() {
+	window.localStorage.setItem("alphajongAIMode", aimodeCombobox.value);
+	MODE = parseInt(aimodeCombobox.value);
+
+	setAutoCallWin(MODE === AIMODE.AUTO);
 }
 
 function roomChange() {
@@ -133,6 +148,18 @@ function autorunCheckboxClick() {
 	}
 }
 
+// Refresh the AI mode
+function refreshAIMode() {
+	aimodeCombobox.innerHTML = AIMODE_NAME[MODE];
+	for (let i = 0; i < AIMODE_NAME.length; i++) {
+		var option = document.createElement("option");
+		option.text = AIMODE_NAME[i];
+		option.value = i;
+		aimodeCombobox.appendChild(option);
+	}
+	aimodeCombobox.value = MODE;
+}
+
 // Refresh the contents of the Room Selection Combobox with values appropiate for the rank
 function refreshRoomSelection() {
 	roomCombobox.innerHTML = ""; // Clear old entries
@@ -145,4 +172,22 @@ function refreshRoomSelection() {
 		}
 	});
 	roomCombobox.value = ROOM;
+}
+
+// Show msg to currentActionOutput
+function showCrtActionMsg(msg) {
+	if (!showingStrategy) {
+		currentActionOutput.value =  msg;
+	}
+}
+
+// Apend msg to currentActionOutput
+function showCrtStrategyMsg(msg) {
+	showingStrategy = true;
+	currentActionOutput.value = msg;
+}
+
+function clearCrtStrategyMsg() {
+	showingStrategy = false;
+	currentActionOutput.value = "";
 }

@@ -29,12 +29,22 @@ var KEEP_SAFETILE = false; //If set to true the bot will keep 1 safetile
 //MISC
 var LOG_AMOUNT = 3; //Amount of Messages to log for Tile Priorities
 var DEBUG_BUTTON = false; //Display a Debug Button in the GUI
+var USE_EMOJI = true; //use EMOJI to show tile
+var CHANGE_RECOMMEND_TILE_COLOR = true; // change current recommend tile color
 
 
 
 //### GLOBAL VARIABLES DO NOT CHANGE ###
 var run = false; //Is the bot running
 var threadIsRunning = false;
+const AIMODE = { //ENUM of AI mode
+	AUTO: 0,
+	HELP: 1,
+}
+const AIMODE_NAME = [ //Name of AI mode
+	"Auto",
+	"Help",
+]
 const STRATEGIES = { //ENUM of strategies
 	GENERAL: 'General',
 	CHIITOITSU: 'Chiitoitsu',
@@ -61,8 +71,21 @@ var functionsExtended = false;
 var playerDiscardSafetyList = [[], [], [], []];
 var totalPossibleWaits = {};
 var timeSave = 0;
+var showingStrategy = false; //Current in own turn?
+
+// Display
+var tileEmojiList = [
+	["red🀝" ,"🀙" ,"🀚" ,"🀛" ,"🀜" ,"🀝" ,"🀞" ,"🀟" ,"🀠" ,"🀡"],
+	["red🀋" ,"🀇" ,"🀈" ,"🀉" ,"🀊" ,"🀋" ,"🀌" ,"🀍" ,"🀎" ,"🀏"],
+	["red🀔" ,"🀐" ,"🀑" ,"🀒" ,"🀓" ,"🀔" ,"🀕" ,"🀖" ,"🀗" ,"🀘"],
+	["", "🀀" ,"🀁" ,"🀂" ,"🀃" ,"🀆" ,"🀅" ,"🀄"]];
+
 
 //LOCAL STORAGE
 var AUTORUN = window.localStorage.getItem("alphajongAutorun") == "true";
 var ROOM = window.localStorage.getItem("alphajongRoom");
+
 ROOM = ROOM == null ? 2 : ROOM
+
+var MODE = window.localStorage.getItem("alphajongAIMode")
+MODE = MODE == null ? AIMODE.AUTO : parseInt(MODE);

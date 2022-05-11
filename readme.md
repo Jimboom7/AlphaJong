@@ -16,9 +16,12 @@ Compatible with both 3 and 4 player mode.
 * Detailed logging is output to the browser console ([F12] in most browsers)
 
 ### GUI
-![GUI](https://i.imgur.com/6PnXb3T.png)
+![GUI](./doc/img/gui.png)
 There is a very simple GUI to control the Bot.  
 * Left Button: Start or Stop the Bot.
+* ComboBox: AI mode, there are two AI modes.
+  * AUTO: which automatically helps the player to operate
+  * HELP: only gives hints and does not operate
 * Checkbox: Enable Autorun mode. The bot will automatically reload the site and search for a new game after the previous one is finished. The Room can be chosen in the ComboBox next to it.
 * Output Field: Simple Logging what the bot is currently doing or waiting for.
 * Right Button: Hide the GUI. You can re-show it by pressing + on the Numpad.

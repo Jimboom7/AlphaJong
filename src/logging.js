@@ -41,7 +41,7 @@ function getStringForTiles(tiles) {
 
 //Print tile name
 function printTile(tile) {
-	log(getTileName(tile));
+	log(getTileName(tile, false));
 }
 
 //Print given tile priorities
@@ -51,7 +51,7 @@ function printTilePriority(tiles) {
 		"> Riichi Value: <" + Number(tiles[0].score.riichi).toFixed(0) +
 		"> Shanten: <" + Number(tiles[0].shanten).toFixed(0) + ">");
 	for (var i = 0; i < tiles.length && i < LOG_AMOUNT; i++) {
-		log(getTileName(tiles[i].tile) +
+		log(getTileName(tiles[i].tile, false) +
 			": Priority: <" + Number(tiles[i].priority).toFixed(3) +
 			"> Efficiency: <" + Number(tiles[i].efficiency).toFixed(3) +
 			"> Yaku Open: <" + Number(tiles[i].yaku.open).toFixed(3) +
@@ -131,11 +131,19 @@ function getTileFromString(inputString) {
 }
 
 //Returns the name for a tile
-function getTileName(tile) {
+function getTileName(tile, useRaw = true) {
+	let name = "";
 	if (tile.dora == true) {
-		return "0" + getNameForType(tile.type);
+		name =  "0" + getNameForType(tile.type);
+	} else {
+		name = tile.index + getNameForType(tile.type);
 	}
-	return tile.index + getNameForType(tile.type);
+
+	if (!useRaw && USE_EMOJI) {
+		return `${getTileEmoji(tile.type, tile.index, tile.dora)}: ${name}`;
+	} else {
+		return name;
+	}
 }
 
 //Returns the corresponding char for a type

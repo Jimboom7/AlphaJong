@@ -113,6 +113,9 @@ function getRoundWind() {
 }
 
 function setAutoCallWin(win) {
+	if (!isInGame())
+		return;
+
 	view.DesktopMgr.Inst.setAutoHule(win);
 	//view.DesktopMgr.Inst.setAutoNoFulu(true) //Auto No Chi/Pon/Kan
 	try {
@@ -133,49 +136,86 @@ function getTileForCall() {
 }
 
 function makeCall(type) {
-	app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { type: type, index: 0, timeuse: 2 });
-	view.DesktopMgr.Inst.WhenDoOperation();
+	if (MODE === AIMODE.AUTO) {
+		app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { type: type, index: 0, timeuse: Math.random() * 2 + 1 });
+		view.DesktopMgr.Inst.WhenDoOperation();
+	} else {
+		showCrtStrategyMsg(`Accept: Call ${getCallNameByType(type)};`);
+	}
 }
 
 function makeCallWithOption(type, option) {
-	app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { type: type, index: option, timeuse: 2 });
-	view.DesktopMgr.Inst.WhenDoOperation();
+	if (MODE === AIMODE.AUTO) {
+		app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { type: type, index: option, timeuse: Math.random() * 2 + 1 });
+		view.DesktopMgr.Inst.WhenDoOperation();
+	} else {
+		showCrtStrategyMsg(`Accept ${option}: Call ${getCallNameByType(type)};`);
+	}
 }
 
 function declineCall(operation) {
-	try {
-		if (operation == getOperationList()[getOperationList().length - 1].type) { //Is last operation -> Send decline Command
-			app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { cancel_operation: true, timeuse: 2 });
-			view.DesktopMgr.Inst.WhenDoOperation();
-		}
-	}
-	catch {
-		log("Failed to decline the Call. Maybe someone else was faster?");
+	if (MODE === AIMODE.AUTO) {
+    try {
+      if (operation == getOperationList()[getOperationList().length - 1].type) { //Is last operation -> Send decline Command
+        app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { cancel_operation: true, timeuse: 2 });
+        view.DesktopMgr.Inst.WhenDoOperation();
+      }
+    }
+    catch {
+      log("Failed to decline the Call. Maybe someone else was faster?");
+    }
+	} else {
+		showCrtStrategyMsg(`Decline: Call ${getCallNameByType(operation)};`);
 	}
 }
 
 function sendRiichiCall(tile, moqie) {
-	app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.liqi, tile: tile, moqie: moqie, timeuse: 2 }); //Moqie: Throwing last drawn tile (Riichi -> false)
+	if (MODE === AIMODE.AUTO) {
+		app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.liqi, tile: tile, moqie: moqie, timeuse: Math.random() * 2 + 1 }); //Moqie: Throwing last drawn tile (Riichi -> false)
+	} else {
+		let tileName = getTileEmojiByName(tile);
+		showCrtStrategyMsg(`Riichi: ${tileName};`);
+	}
 }
 
 function sendKitaCall() {
-	var moqie = view.DesktopMgr.Inst.mainrole.last_tile.val.toString() == "4z";
-	app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.babei, moqie: moqie, timeuse: 2 });
-	view.DesktopMgr.Inst.WhenDoOperation();
+	if (MODE === AIMODE.AUTO) {
+		var moqie = view.DesktopMgr.Inst.mainrole.last_tile.val.toString() == "4z";
+		app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.babei, moqie: moqie, timeuse: Math.random() * 2 + 1 });
+		view.DesktopMgr.Inst.WhenDoOperation();
+	} else {
+		showCrtStrategyMsg(`Accept: Kita;`);
+	}
 }
 
 function sendAbortiveDrawCall() {
-	app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.jiuzhongjiupai, index: 0, timeuse: 2 });
-	view.DesktopMgr.Inst.WhenDoOperation();
+	if (MODE === AIMODE.AUTO) {
+		app.NetAgent.sendReq2MJ('FastTest', 'inputOperation', { type: mjcore.E_PlayOperation.jiuzhongjiupai, index: 0, timeuse: Math.random() * 2 + 1 });
+		view.DesktopMgr.Inst.WhenDoOperation();
+	} else {
+		showCrtStrategyMsg(`Accept: Kyuushu Kyuuhai;`);
+	}
 }
 
 function callDiscard(tileNumber) {
-	try {
-		view.DesktopMgr.Inst.players[0]._choose_pai = view.DesktopMgr.Inst.players[0].hand[tileNumber];
-		view.DesktopMgr.Inst.players[0].DoDiscardTile();
-	}
-	catch {
-		log("Failed to decline the discard.");
+	if (MODE === AIMODE.AUTO) {
+		try {
+      view.DesktopMgr.Inst.players[0]._choose_pai = view.DesktopMgr.Inst.players[0].hand[tileNumber];
+      view.DesktopMgr.Inst.players[0].DoDiscardTile();
+    }
+    catch {
+      log("Failed to decline the discard.");
+    }
+	} else {
+		let tileID = ownHand[tileNumber];
+		let tileName = getTileName(tileID, false);
+		showCrtStrategyMsg(`Discard: ${tileName};`);
+		if (CHANGE_RECOMMEND_TILE_COLOR) {
+			view.DesktopMgr.Inst.mainrole.hand.forEach(
+				tile => tile.val.toString() == tileID ? 
+					tile._SetColor(new Laya.Vector4(0.5, 0.8, 0.9, 1)) 
+					: tile._SetColor(new Laya.Vector4(1, 1, 1, 1)));
+		}
 	}
 }
 

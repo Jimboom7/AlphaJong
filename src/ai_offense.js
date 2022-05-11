@@ -163,7 +163,9 @@ async function callTriple(combinations, operation) {
 	}
 
 	makeCallWithOption(operation, comb);
-	isClosed = false;
+	if (MODE === AIMODE.AUTO) {
+		isClosed = false; // help mode just check every time
+	}
 	return true;
 
 }
