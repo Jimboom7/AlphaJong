@@ -60,6 +60,7 @@ var riichiTiles = [null, null, null, null]; // Track players discarded tiles on 
 var functionsExtended = false;
 var playerDiscardSafetyList = [[], [], [], []];
 var totalPossibleWaits = {};
+var timeSave = 0;
 
 //LOCAL STORAGE
 var AUTORUN = window.localStorage.getItem("alphajongAutorun") == "true";

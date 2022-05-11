@@ -177,7 +177,19 @@ async function mainOwnTurn() {
 
 	log(" ");
 	currentActionOutput.value = "Own turn completed.";
+
+	if ((getOverallTimeLeft() < 8 && getLastTurnTimeLeft() - getOverallTimeLeft() <= 0) || //Not much overall time left and last turn took longer than the 5 second increment
+		(getOverallTimeLeft() < 4 && getLastTurnTimeLeft() - getOverallTimeLeft() <= 1)) {
+		timeSave++;
+		log("Low performance! Activating time save mode level: " + timeSave);
+	}
+	if (getOverallTimeLeft() > 15) { //Much time left (new round)
+		timeSave = 0;
+	}
+
+	threadIsRunning = false;
 	setTimeout(main, 1000);
+
 }
 
 //Set Data from real Game

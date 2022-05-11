@@ -289,6 +289,26 @@ function getRoomName(room) {
 	return room["room_name_" + getLanguage()] + " (" + game.Tools.room_mode_desc(room.mode) + ")";
 }
 
+//How much seconds left for a turn (base value, 20 at start)
+function getOverallTimeLeft() {
+	try {
+		return uiscript.UI_DesktopInfo.Inst._timecd._add;
+	}
+	catch {
+		return 20;
+	}
+}
+
+//How much time was left in the last turn?
+function getLastTurnTimeLeft() {
+	try {
+		return uiscript.UI_DesktopInfo.Inst._timecd._pre_sec;
+	}
+	catch {
+		return 25;
+	}
+}
+
 // Extend some internal MJSoul functions with additional code
 function extendMJSoulFunctions() {
 	if (functionsExtended) {
