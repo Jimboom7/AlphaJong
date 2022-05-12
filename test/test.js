@@ -226,6 +226,12 @@ function runEfficiencyTestcase() {
 			expected = ["1s"];
 			break;
 
+		case 17:
+			logTestcase("Keep Kanchan over Penchan");
+			ownHand = getTilesFromString("124m233678p11368s");
+			expected = ["1m"];
+			break;
+
 		default:
 			nextTestcase();
 			return;
@@ -716,6 +722,12 @@ function runExampleTestcase() {
 			logTestcase("Example 6");
 			ownHand = getTilesFromString("1237m4569p1267s33z");
 			expected = ["9p"];
+			break;
+
+		case 7:
+			logTestcase("Example 7");
+			ownHand = getTilesFromString("112668m5p4479s245z");
+			expected = ["2z", "4z", "5z"];
 			break;
 
 		default:

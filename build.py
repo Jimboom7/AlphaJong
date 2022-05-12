@@ -6,7 +6,7 @@ import os
 def addFileToString(inputString, filename):
     inputString += "\n\n"
     
-    with open('src/' + filename) as fp:
+    with open('src/' + filename, encoding="utf-8") as fp:
         inputString += fp.read()
         
     return inputString

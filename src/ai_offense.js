@@ -98,7 +98,7 @@ async function callTriple(combinations, operation) {
 	}
 
 	if (newHandValue.yaku.open < 0.15 && //Yaku chance is too bad
-		newHandTriples.pairs.filter(t => isValueTile(t)).length < 2) { //And no value honor pair
+		newHandTriples.pairs.filter(t => isValueTile(t) && getNumberOfTilesAvailable(t.index, t.type) >= 2).length < 2) { //And no value honor pair
 		log("Not enough Yaku! Declined! " + newHandValue.yaku.open + " < 0.15");
 		declineCall(operation);
 		return false;
@@ -110,7 +110,9 @@ async function callTriple(combinations, operation) {
 		return false;
 	}
 
-	if (parseInt(currentHandTriples.triples.length / 3) == 3 && parseInt(currentHandTriples.pairs.length / 2) == 1) { //New Triple destroys the last pair
+	if (parseInt(currentHandTriples.triples.length / 3) == 3 &&
+		parseInt(currentHandTriples.pairs.length / 2) == 1 && //New Triple destroys the last pair
+		(handValue.yaku.open >= 1 || newHandValue.yaku.open < 1)) { //And this call does not add the necessary yaku
 		log("Call would destroy last pair! Declined!");
 		declineCall(operation);
 		return false;
@@ -128,6 +130,9 @@ async function callTriple(combinations, operation) {
 		return false;
 	}
 
+	var isBadWait = (newTriple[0].index == newTriple[1].index || Math.abs(newTriple[0].index - newTriple[1].index) == 2 || // Pon or Kanchan
+		newTriple[0].index >= 8 && newTriple[1].index >= 8 || newTriple[0].index <= 2 && newTriple[1].index <= 2); //Penchan
+
 	if (handValue.shanten >= 5 - CALL_PON_CHI && seatWind == 1) { //Very slow hand & dealer? -> Go for a fast win
 		log("Call accepted because of slow hand and dealer position!");
 	}
@@ -144,16 +149,15 @@ async function callTriple(combinations, operation) {
 		log("Call accepted because it boosts the value of the hand!");
 	}
 	else if (newHandValue.shanten < handValue.shanten && //Call reduces shanten
-		newHandValue.score.open > handValue.score.open * 0.9 && //And loses not much values
-		newHandValue.score.open > handValue.score.closed * 0.7 &&
+		newHandValue.score.open > handValue.score.open * 0.9 && //And loses not much value
+		newHandValue.score.open > handValue.score.closed * 0.7 && isBadWait && //And is a bad wait
 		((newHandValue.score.open >= 1000 - (CALL_PON_CHI * 100) - ((3 - newHandValue.shanten) * 100)) || //And hand is not extremely cheap
 			newHandTriples.pairs.filter(t => t.type == 3).length >= 4) && //Or multiple honor pairs
 		(newHandTriples.pairs.filter(t => isValueTile(t))).length >= 2) {//And would open hand anyway with honor call
 		log("Call accepted because it reduces shanten!");
 	}
-	else if (newHandValue.shanten == 0 && newHandValue.score.open > handValue.score.closed * 0.9 && newHandValue.waits > 2 && // Make hand ready and eliminate a bad wait
-		(newTriple[0].index == newTriple[1].index || Math.abs(newTriple[0].index - newTriple[1].index) == 2 || // Pon or Kanchan
-			newTriple[0].index >= 8 && newTriple[1].index >= 8 || newTriple[0].index <= 2 && newTriple[1].index <= 2)) { //Penchan
+	else if (newHandValue.shanten == 0 && newHandValue.score.open > handValue.score.closed * 0.9 &&
+		newHandValue.waits > 2 && isBadWait) {// Make hand ready and eliminate a bad wait
 		log("Call accepted because it eliminates a bad wait and makes the hand ready!");
 	}
 	else { //Decline
@@ -638,8 +642,8 @@ function getHandValues(hand, discardedTile) {
 					var numberOfDoubles = getDoubles(removeTilesFromTileArray(hand, triples3.concat(pairs3))).length;
 					var numberOfPairs = pairs3.length;
 					thisShanten = calculateShanten(parseInt(triples3.length / 3) + callTriples, parseInt(numberOfPairs / 2), parseInt(numberOfDoubles / 2)) - baseShanten;
-					if (thisShanten == -1) { //Give less prio to tile combinations that only improve the hand by 1 shanten in two turns.
-						thisShanten = calculateShanten(parseInt(triples3.length / 3) + callTriples, parseInt(numberOfPairs / 2), parseInt((numberOfDoubles - 1) / 2)) - baseShanten;
+					if (thisShanten == -1) {  //Give less prio to tile combinations that only improve the hand by 1 shanten in two turns.
+						thisShanten = -0.5;
 					}
 				}
 			}
@@ -729,7 +733,13 @@ function calculateTilePriority(efficiency, expectedScore, danger) {
 	var weightedEfficiency = Math.pow(Math.abs(efficiency), 0.3 + EFFICIENCY * placementFactor);
 	weightedEfficiency = efficiency < 0 ? -weightedEfficiency : weightedEfficiency;
 
-	return weightedEfficiency * (score - (danger * 2 * SAFETY));
+	score -= (danger * 2 * SAFETY);
+
+	if (weightedEfficiency < 0 && score < 0) {
+		weightedEfficiency *= -1;
+	}
+
+	return weightedEfficiency * score;
 }
 
 //Get Chiitoitsu Priorities -> Look for Pairs
@@ -765,7 +775,7 @@ function chiitoitsuPriorities() {
 				var currentHand = [...handWithoutPairs];
 				currentHand.push(tile);
 				var numberOfTiles = getNumberOfNonFuritenTilesAvailable(tile.index, tile.type);
-				var chance = numberOfTiles / availableTiles.length;
+				var chance = (numberOfTiles + (getWaitQuality(tile) / 10)) / availableTiles.length;
 				var pairs2 = getPairsAsArray(currentHand);
 				if (pairs2.length > 0) { //If the tiles improves the hand: Calculate the expected values
 					shanten += ((6 - (pairsValue + (pairs2.length / 2))) - baseShanten) * chance;
@@ -1012,7 +1022,7 @@ function getDiscardTile(tiles) {
 	var highestYaku = -1;
 	for (let t of tiles) {
 		var foldThreshold = getFoldThreshold(t, ownHand);
-		if (t.yaku.open > highestYaku + 0.01 && t.yaku.open / 3 > highestYaku && t.danger <= foldThreshold) {
+		if (t.yaku.open > highestYaku + 0.01 && t.yaku.open / 3.5 > highestYaku && t.danger <= foldThreshold) {
 			tile = t.tile;
 			highestYaku = t.yaku.open;
 			if (t.yaku.open >= 1) {

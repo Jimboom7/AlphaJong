@@ -79,27 +79,19 @@ function getPairsAsArray(tiles) {
 
 //Return doubles in tiles
 function getDoubles(tiles) {
+	tiles = sortTiles(tiles);
 	var doubles = [];
-	tiles.forEach(function (tile) {
-		if (isDouble(tiles, tile)) {
-			doubles.push(tile);
+	for (let i = 0; i < tiles.length - 1; i++) {
+		if (tiles[i].type == tiles[i + 1].type && (
+			tiles[i].index == tiles[i + 1].index ||
+			(tiles[i].type != 3 &&
+				tiles[i].index + 2 >= tiles[i + 1].index))) {
+			doubles.push(tiles[i]);
+			doubles.push(tiles[i + 1]);
+			i++;
 		}
-	});
-	return doubles;
-}
-
-
-//Tile twice or 2 sequence or "bridge". Might even be triple
-function isDouble(tiles, tile) {
-	var tileNumber = getNumberOfTilesInTileArray(tiles, tile.index, tile.type);
-	if (tile.type == 3) {
-		return tileNumber == 2;
 	}
-	return ((tileNumber == 2) ||
-		(((getNumberOfTilesInTileArray(tiles, tile.index - 1, tile.type) >= 1) ||
-			(getNumberOfTilesInTileArray(tiles, tile.index + 1, tile.type) >= 1) ||
-			(getNumberOfTilesInTileArray(tiles, tile.index - 2, tile.type) >= 1) ||
-			(getNumberOfTilesInTileArray(tiles, tile.index + 2, tile.type) >= 1)) && tileNumber >= 1));
+	return doubles;
 }
 
 //Return all triplets/3-sequences and pairs as a tile array
@@ -224,8 +216,11 @@ function getBestCombinationOfTiles(inputTiles, possibleCombinations, chosenCombi
 			}
 
 			var anotherChoice = getBestCombinationOfTiles(hand, possibleCombinations.slice(i + 1), cs);
-			if (anotherChoice.shanten < chosenCombinations.shanten || (anotherChoice.shanten == chosenCombinations.shanten &&
-				(anotherChoice.pairs.length > chosenCombinations.pairs.length ||
+			if (anotherChoice.shanten < chosenCombinations.shanten || anotherChoice.shanten == chosenCombinations.shanten && (anotherChoice.triples.length > chosenCombinations.triples.length ||
+				(anotherChoice.triples.length == chosenCombinations.triples.length &&
+					anotherChoice.pairs.length > chosenCombinations.pairs.length) ||
+				(anotherChoice.triples.length == chosenCombinations.triples.length &&
+					anotherChoice.pairs.length == chosenCombinations.pairs.length &&
 					getNumberOfDoras(anotherChoice.triples.concat(anotherChoice.pairs)) > getNumberOfDoras(chosenCombinations.triples.concat(chosenCombinations.pairs))))) {
 				chosenCombinations = anotherChoice;
 			}
@@ -510,7 +505,7 @@ function isTerminalOrHonor(tile) {
 
 // Returns a number how "good" the wait is. An average wait is 1, a bad wait (like a middle tile) is lower, a good wait (like an honor tile) is higher.
 function getWaitQuality(tile) {
-	return 1.5 - (getDealInChanceForTileAndPlayer(0, tile, 1) * 7);
+	return 1.3 - (getDealInChanceForTileAndPlayer(0, tile, 1) * 5);
 }
 
 //Calculate the shanten number. Based on this: https://www.youtube.com/watch?v=69Xhu-OzwHM
@@ -668,7 +663,7 @@ function getFoldThreshold(tilePrio, hand) {
 	// Formulas are based on this table: https://docs.google.com/spreadsheets/d/172LFySNLUtboZUiDguf8I3QpmFT-TApUfjOs5iRy3os/edit#gid=212618921
 	// TODO: Maybe switch to this: https://riichi-mahjong.com/2020/01/28/mahjong-strategy-push-or-fold-4-maximizing-game-ev/
 	if (tilePrio.shanten == 0) {
-		var foldValue = waits * handScore / 40;
+		var foldValue = waits * handScore / 38;
 		if (tilesLeft < 8) { //Try to avoid no ten penalty
 			foldValue += 200 - (parseInt(tilesLeft / 4) * 100);
 		}
@@ -676,7 +671,7 @@ function getFoldThreshold(tilePrio, hand) {
 	else if (tilePrio.shanten == 1 && strategy == STRATEGIES.GENERAL) {
 		waits = waits < 0.4 ? waits = 0.4 : waits;
 		waits = waits > 2 ? waits = 2 : waits;
-		var foldValue = waits * handScore / 40;
+		var foldValue = waits * handScore / 45;
 	}
 	else {
 		if (getCurrentDangerLevel() > 3000 && strategy == STRATEGIES.GENERAL) {

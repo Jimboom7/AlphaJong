@@ -318,8 +318,8 @@ function isPlayerTenpai(player) {
 	}
 
 	var room = getCurrentRoom();
-	if (room < 4 && room > 0) { //Below Jade Room: Less likely to be tenpai
-		tenpaiChance *= 1 - ((4 - room) * 0.15); //15% less likely for every rank lower than jade to be tenpai
+	if (room < 5 && room > 0) { //Below Throne Room: Less likely to be tenpai
+		tenpaiChance *= 1 - ((5 - room) * 0.1); //10% less likely for every rank lower than throne room to be tenpai
 	}
 
 	if (tenpaiChance > 1) {
