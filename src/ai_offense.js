@@ -603,7 +603,7 @@ function getHandValues(hand, discardedTile) {
 
 			if (!isClosed && (!winning || tile2Furiten) &&
 				getNumberOfTilesInTileArray(triples3, tile2.index, tile2.type) == 3) {
-				numberOfTiles2 *= 2; //More value to possible triples when hand is open (can call pons from all players)
+				combFactor *= 2; //More value to possible triples when hand is open (can call pons from all players)
 			}
 
 			if (winning && !tile2Furiten) { //If this tile combination wins in 2 turns: calculate waits etc.
@@ -686,9 +686,6 @@ function getHandValues(hand, discardedTile) {
 	if (originalShanten == 0) { //Already in Tenpai: Look at waits instead
 		efficiency = waits / 10;
 	}
-	if (originalShanten == 1) { //1 Shanten: Look at a combination of efficiency and expected waits instead
-		efficiency = efficiency + (waits / 5);
-	}
 
 	if (baseShanten > 0) { //When not tenpai
 		expectedScore.riichi = calculateScore(0, yaku.closed + doraValue + 1 + 0.2 + getUradoraChance());
@@ -702,7 +699,7 @@ function getHandValues(hand, discardedTile) {
 	var danger = 0;
 	var sakigiri = 0;
 	if (typeof discardedTile != 'undefined') { //When deciding whether to call for a tile there is no discarded tile in the evaluation
-		danger = getTileDanger(discardedTile, hand);
+		danger = getTileDanger(discardedTile);
 		sakigiri = getSakigiriValue(hand, discardedTile);
 	}
 
@@ -808,7 +805,7 @@ function chiitoitsuPriorities() {
 		if (originalShanten == 0) { //Already in Tenpai: Look at waits instead
 			efficiency = waits / 10;
 		}
-		var danger = getTileDanger(ownHand[i], newHand);
+		var danger = getTileDanger(ownHand[i]);
 
 		var sakigiri = getSakigiriValue(newHand, ownHand[i]);
 
@@ -866,7 +863,7 @@ function thirteenOrphansPriorities() {
 		}
 
 		var efficiency = shanten == originalShanten ? 1 : 0;
-		var danger = getTileDanger(ownHand[i], hand);
+		var danger = getTileDanger(ownHand[i]);
 		var sakigiri = getSakigiriValue(hand, ownHand[i], danger);
 		var yakuman = calculateScore(0, 13);
 		var expectedScore = { open: 0, closed: yakuman, riichi: yakuman };

@@ -213,7 +213,7 @@ function runDefenseBenchmark() {
 		riichiTiles = data[2];
 
 		for (let tile of tileset) {
-			tile.danger = getTileDanger(tile, ownHand);
+			tile.danger = getTileDanger(tile);
 		}
 
 		tileset.sort(function (p1, p2) {

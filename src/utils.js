@@ -746,6 +746,11 @@ function shouldRiichi(tilePrio) {
 	var badWait = tilePrio.waits < 6 - RIICHI;
 	var lotsOfDoraIndicators = tilePrio.dora.length >= 3;
 
+	//Chiitoitsu
+	if (strategy == STRATEGIES.CHIITOITSU) {
+		badWait = tilePrio.waits < 3 - RIICHI;
+	}
+
 	//Thirteen Orphans
 	if (strategy == STRATEGIES.THIRTEEN_ORPHANS) {
 		log("Decline Riichi because of Thirteen Orphan strategy.");

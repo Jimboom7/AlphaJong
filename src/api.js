@@ -155,15 +155,15 @@ function makeCallWithOption(type, option) {
 
 function declineCall(operation) {
 	if (MODE === AIMODE.AUTO) {
-    try {
-      if (operation == getOperationList()[getOperationList().length - 1].type) { //Is last operation -> Send decline Command
-        app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { cancel_operation: true, timeuse: 2 });
-        view.DesktopMgr.Inst.WhenDoOperation();
-      }
-    }
-    catch {
-      log("Failed to decline the Call. Maybe someone else was faster?");
-    }
+		try {
+			if (operation == getOperationList()[getOperationList().length - 1].type) { //Is last operation -> Send decline Command
+				app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { cancel_operation: true, timeuse: 2 });
+				view.DesktopMgr.Inst.WhenDoOperation();
+			}
+		}
+		catch {
+			log("Failed to decline the Call. Maybe someone else was faster?");
+		}
 	} else {
 		showCrtStrategyMsg(`Decline: Call ${getCallNameByType(operation)};`);
 	}
@@ -200,20 +200,20 @@ function sendAbortiveDrawCall() {
 function callDiscard(tileNumber) {
 	if (MODE === AIMODE.AUTO) {
 		try {
-      view.DesktopMgr.Inst.players[0]._choose_pai = view.DesktopMgr.Inst.players[0].hand[tileNumber];
-      view.DesktopMgr.Inst.players[0].DoDiscardTile();
-    }
-    catch {
-      log("Failed to decline the discard.");
-    }
+			view.DesktopMgr.Inst.players[0]._choose_pai = view.DesktopMgr.Inst.players[0].hand[tileNumber];
+			view.DesktopMgr.Inst.players[0].DoDiscardTile();
+		}
+		catch {
+			log("Failed to decline the discard.");
+		}
 	} else {
 		let tileID = ownHand[tileNumber];
 		let tileName = getTileName(tileID, false);
 		showCrtStrategyMsg(`Discard: ${tileName};`);
 		if (CHANGE_RECOMMEND_TILE_COLOR) {
 			view.DesktopMgr.Inst.mainrole.hand.forEach(
-				tile => tile.val.toString() == tileID ? 
-					tile._SetColor(new Laya.Vector4(0.5, 0.8, 0.9, 1)) 
+				tile => tile.val.toString() == tileID ?
+					tile._SetColor(new Laya.Vector4(0.5, 0.8, 0.9, 1))
 					: tile._SetColor(new Laya.Vector4(1, 1, 1, 1)));
 		}
 	}
@@ -369,7 +369,7 @@ function trackDiscardTiles() {
 				}
 				setData(false);
 				visibleTiles.push(arguments[0]);
-				var danger = getTileDanger(arguments[0], null, seat2LocalPosition(this.player.seat));
+				var danger = getTileDanger(arguments[0], seat2LocalPosition(this.player.seat));
 				if (arguments[2] && danger < 0.01) { // Ignore Tsumogiri of a safetile, set it to average danger
 					danger = 0.05;
 				}

@@ -6,7 +6,7 @@
 //Returns danger of tile for all players (from a specific players perspective, see second param) as a number from 0-100+
 //Takes into account Genbutsu (Furiten for opponents), Suji, Walls and general knowledge about remaining tiles.
 //From the perspective of playerPerspective parameter
-function getTileDanger(tile, hand, playerPerspective = 0) {
+function getTileDanger(tile, playerPerspective = 0) {
 	var dangerPerPlayer = [0, 0, 0, 0];
 	for (var player = 0; player < getNumberOfPlayers(); player++) { //Foreach Player
 		if (player == playerPerspective) {
@@ -23,8 +23,8 @@ function getTileDanger(tile, hand, playerPerspective = 0) {
 
 	var danger = dangerPerPlayer[0] + dangerPerPlayer[1] + dangerPerPlayer[2] + dangerPerPlayer[3];
 
-	if (getCurrentDangerLevel() < 1500) { //Scale it down for low danger levels
-		danger *= 1 - ((1500 - getCurrentDangerLevel()) / 1500);
+	if (getCurrentDangerLevel() < 2000) { //Scale it down for low danger levels
+		danger *= 1 - ((2000 - getCurrentDangerLevel()) / 2000);
 	}
 
 	return danger;
