@@ -5,7 +5,7 @@
 
 /* PERFORMANCE MODE
 * Range 0 to 4. Decrease calculation time at the cost of efficiency (2 equals the time of ai version 1.2.1 and before).
-* 0 = Highest Precision and Calculation Time. 4 = Lowest Precision and Calculation Time.
+* 4 = Highest Precision and Calculation Time. 0 = Lowest Precision and Calculation Time.
 * Note: The bot will automatically decrease the performance mode when it approaches the time limit.
 * Note 2: Firefox is usually able to run the script faster than Chrome.
 */
