@@ -49,7 +49,8 @@ The project contains a testclass with simple "Nani Kiru?" testcases.
 
 ## Known Problems
 
-- Sometimes the game disconnects you for AFK. This usually happens if the window is minimized or you switch to another tab for a while (not having focus is fine, as long as the window is open). If that happens the bot will try to reconnect by reloading the page.  
+- While the game does not need focus (=you can use other programs while the bot is running), it's not possible to have it in the background. That means if the browser is minimized or you switch to another tab for a while you will get disconnected for AFK. Most modern browsers also check if the window is hidden behind other windows and will drastically reduce the performance then. This behavior can be turned off in the settings, if needed you can set `chrome://flags/#calculate-native-win-occlusion` to disabled (Chrome) or go to `about:config` in Firefox and set `widget.windows.window_occlusion_tracking.enabled` to false.
+   - When there is a disconnection the bot will try to solve it by reloading the page.
 - If the bot is not able to play fast enough try lowering the Performance Mode (see parameters) or use a different browser (Firefox seems to be fastest).
 
 ## Disclaimer
