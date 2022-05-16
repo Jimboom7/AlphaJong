@@ -33,6 +33,12 @@ function determineStrategy() {
 //combination example: Array ["6s|7s", "7s|9s"]
 async function callTriple(combinations, operation) {
 
+	if (!strategyAllowsCalls) { //No Calls allowed
+		log("Strategy allows no calls! Declined!");
+		declineCall(operation);
+		return false;
+	}
+
 	log("Consider call on " + getTileName(getTileForCall()));
 
 	var handValue = getHandValues(ownHand);
@@ -79,12 +85,6 @@ async function callTriple(combinations, operation) {
 		}
 	}
 
-	if (!strategyAllowsCalls) { //No Calls allowed
-		log("Strategy allows no calls! Declined!");
-		declineCall(operation);
-		return false;
-	}
-
 	if (comb == -1) {
 		log("Could not find combination. Call declined!");
 		declineCall(operation);
@@ -124,7 +124,7 @@ async function callTriple(combinations, operation) {
 		return false;
 	}
 
-	if (isClosed && newHandValue.score.open < 1000 + (CALL_PON_CHI * 500) && newHandValue.shanten >= 4 - CALL_PON_CHI && seatWind != 1) { // Hand is worthless and slow and not dealer. Should prevent cheap yakuhai or tanyao calls
+	if (isClosed && newHandValue.score.open < 1500 - (CALL_PON_CHI * 200) && newHandValue.shanten >= 2 + CALL_PON_CHI && seatWind != 1) { // Hand is worthless and slow and not dealer. Should prevent cheap yakuhai or tanyao calls
 		log("Hand is cheap and slow! Declined!");
 		declineCall(operation);
 		return false;
@@ -144,14 +144,14 @@ async function callTriple(combinations, operation) {
 		log("Call accepted because of high value hand!");
 	}
 	else if (newHandValue.score.open >= handValue.score.closed * 1.75 && //Call gives additional value to hand
-		((newHandValue.score.open >= 2000 - (CALL_PON_CHI * 200) - ((3 - newHandValue.shanten) * 200)) || //And either hand is not extremely cheap...
+		((newHandValue.score.open >= (2000 - (CALL_PON_CHI * 200) - ((3 - newHandValue.shanten) * 200))) / (seatWind == 1 ? 1.5 : 1) || //And either hand is not extremely cheap...
 			newHandTriples.pairs.filter(t => t.type == 3).length >= 2)) { //Or there are some honor pairs in hand (=can be called easily or act as safe discards)
 		log("Call accepted because it boosts the value of the hand!");
 	}
 	else if (newHandValue.shanten < handValue.shanten && //Call reduces shanten
 		newHandValue.score.open > handValue.score.open * 0.9 && //And loses not much value
 		newHandValue.score.open > handValue.score.closed * 0.7 && isBadWait && //And is a bad wait
-		((newHandValue.score.open >= 1000 - (CALL_PON_CHI * 100) - ((3 - newHandValue.shanten) * 100)) || //And hand is not extremely cheap
+		((newHandValue.score.open >= (1000 - (CALL_PON_CHI * 100) - ((3 - newHandValue.shanten) * 100)) / (seatWind == 1 ? 1.5 : 1)) || // And hand is not extremely cheap
 			newHandTriples.pairs.filter(t => t.type == 3).length >= 4) && //Or multiple honor pairs
 		(newHandTriples.pairs.filter(t => isValueTile(t))).length >= 2) {//And would open hand anyway with honor call
 		log("Call accepted because it reduces shanten!");
@@ -766,28 +766,23 @@ function chiitoitsuPriorities() {
 		var yaku = { open: 0, closed: 0 };
 
 		//Possible Value, Yaku and Dora after Draw
-		var oldTile = { index: 9, type: 9, dora: false };
-		availableTiles.forEach(function (tile) {
-			if (tile.index != oldTile.index || tile.type != oldTile.type) {
-				var currentHand = [...handWithoutPairs];
-				currentHand.push(tile);
-				var numberOfTiles = getNumberOfNonFuritenTilesAvailable(tile.index, tile.type);
-				var chance = (numberOfTiles + (getWaitQuality(tile) / 10)) / availableTiles.length;
-				var pairs2 = getPairsAsArray(currentHand);
-				if (pairs2.length > 0) { //If the tiles improves the hand: Calculate the expected values
-					shanten += ((6 - (pairsValue + (pairs2.length / 2))) - baseShanten) * chance;
-					doraValue += (getNumberOfDoras(pairs2) - baseDora) * chance;
-					var y2 = getYaku(newHand, calls[0]);
-					yaku.open += (y2.open - baseYaku.open) * chance;
-					yaku.closed += (y2.closed - baseYaku.closed) * chance;
-					if (pairsValue + (pairs2.length / 2) == 7) { //Winning hand
-						waits = numberOfTiles * getWaitQuality(tile); //Factor waits by "uselessness" for opponents
-						yaku = getYaku(newHand, calls[0]);
-						doraValue = getNumberOfDoras(newHand); //When Tenpai: The Dora/Yaku for the specific waits needs to be calculated seperately
-					}
+		handWithoutPairs.forEach(function (tile) {
+			var currentHand = [...handWithoutPairs];
+			currentHand.push(tile);
+			var numberOfTiles = getNumberOfNonFuritenTilesAvailable(tile.index, tile.type);
+			var chance = (numberOfTiles + (getWaitQuality(tile) / 10)) / availableTiles.length;
+			var pairs2 = getPairsAsArray(currentHand);
+			if (pairs2.length > 0) { //If the tiles improves the hand: Calculate the expected values
+				shanten += ((6 - (pairsValue + (pairs2.length / 2))) - baseShanten) * chance;
+				doraValue += (getNumberOfDoras(pairs2) - baseDora) * chance;
+				var y2 = getYaku(newHand, calls[0]);
+				yaku.open += (y2.open - baseYaku.open) * chance;
+				yaku.closed += (y2.closed - baseYaku.closed) * chance;
+				if (pairsValue + (pairs2.length / 2) == 7) { //Winning hand
+					waits = numberOfTiles * getWaitQuality(tile);
+					doraValue = getNumberOfDoras(newHand) - baseDora;
 				}
 			}
-			oldTile = tile;
 		});
 		doraValue += baseDora;
 		yaku.open += baseYaku.open;

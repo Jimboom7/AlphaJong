@@ -23,8 +23,8 @@ function getTileDanger(tile, playerPerspective = 0) {
 
 	var danger = dangerPerPlayer[0] + dangerPerPlayer[1] + dangerPerPlayer[2] + dangerPerPlayer[3];
 
-	if (getCurrentDangerLevel() < 2000) { //Scale it down for low danger levels
-		danger *= 1 - ((2000 - getCurrentDangerLevel()) / 2000);
+	if (getCurrentDangerLevel() < 2500) { //Scale it down for low danger levels
+		danger *= 1 - ((2500 - getCurrentDangerLevel()) / 2500);
 	}
 
 	return danger;
@@ -371,7 +371,7 @@ function isDoingHonitsu(player, type) {
 		return 1;
 	}
 	var percentageOfDiscards = discards[player].slice(0, 10).filter(tile => tile.type == type).length / discards[player].slice(0, 10).length;
-	if (percentageOfDiscards > 0.2) {
+	if (percentageOfDiscards > 0.2 || discards[player].slice(0, 10).length == 0) {
 		return 0;
 	}
 	var confidence = (Math.pow(parseInt(calls[player].length / 3), 2) / 10) - percentageOfDiscards + 0.1;

@@ -505,7 +505,9 @@ function isTerminalOrHonor(tile) {
 
 // Returns a number how "good" the wait is. An average wait is 1, a bad wait (like a middle tile) is lower, a good wait (like an honor tile) is higher.
 function getWaitQuality(tile) {
-	return 1.3 - (getDealInChanceForTileAndPlayer(0, tile, 1) * 5);
+	var quality = 1.3 - (getDealInChanceForTileAndPlayer(0, tile, 1) * 5);
+	quality = quality < 0.7 ? 0.7 : quality;
+	return quality;
 }
 
 //Calculate the shanten number. Based on this: https://www.youtube.com/watch?v=69Xhu-OzwHM
@@ -653,7 +655,7 @@ function isValueTile(tile) {
 
 //Return a danger value which is the threshold for folding (danger higher than this value -> fold)
 function getFoldThreshold(tilePrio, hand) {
-	var handScore = tilePrio.score.open;
+	var handScore = tilePrio.score.open * 1.3; // Raise this value a bit so open hands dont get folded too quickly
 	if (isClosed) {
 		handScore = tilePrio.score.riichi;
 	}
@@ -788,7 +790,7 @@ function shouldRiichi(tilePrio) {
 	}
 
 	// High Danger and hand not worth much or bad wait
-	if (getCurrentDangerLevel() > 4000 && (tilePrio.score.riichi < 5000 - (RIICHI * 1000) || badWait)) {
+	if (getCurrentDangerLevel() > 5000 && (tilePrio.score.riichi < 5000 - (RIICHI * 1000) || badWait)) {
 		log("Decline Riichi because of worthless hand and high danger.");
 		return false;
 	}
