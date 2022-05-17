@@ -25,7 +25,7 @@ function hasFinishedMainLobbyLoading() {
 	if (typeof GameMgr == 'undefined') {
 		return false;
 	}
-	return GameMgr.Inst.login_loading_end;
+	return GameMgr.Inst.login_loading_end || isInGame();
 }
 
 function searchForGame() {
@@ -155,9 +155,14 @@ function makeCallWithOption(type, option) {
 
 function declineCall(operation) {
 	if (MODE === AIMODE.AUTO) {
-		if (operation == getOperationList()[getOperationList().length - 1].type) { //Is last operation -> Send decline Command
-			app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { cancel_operation: true, timeuse: Math.random() * 2 + 1 });
-			view.DesktopMgr.Inst.WhenDoOperation();
+		try {
+			if (operation == getOperationList()[getOperationList().length - 1].type) { //Is last operation -> Send decline Command
+				app.NetAgent.sendReq2MJ('FastTest', 'inputChiPengGang', { cancel_operation: true, timeuse: 2 });
+				view.DesktopMgr.Inst.WhenDoOperation();
+			}
+		}
+		catch {
+			log("Failed to decline the Call. Maybe someone else was faster?");
 		}
 	} else {
 		showCrtStrategyMsg(`Decline: Call ${getCallNameByType(operation)};`);
@@ -194,16 +199,21 @@ function sendAbortiveDrawCall() {
 
 function callDiscard(tileNumber) {
 	if (MODE === AIMODE.AUTO) {
-		view.DesktopMgr.Inst.players[0]._choose_pai = view.DesktopMgr.Inst.players[0].hand[tileNumber];
-		view.DesktopMgr.Inst.players[0].DoDiscardTile();
+		try {
+			view.DesktopMgr.Inst.players[0]._choose_pai = view.DesktopMgr.Inst.players[0].hand[tileNumber];
+			view.DesktopMgr.Inst.players[0].DoDiscardTile();
+		}
+		catch {
+			log("Failed to decline the discard.");
+		}
 	} else {
 		let tileID = ownHand[tileNumber];
 		let tileName = getTileName(tileID, false);
 		showCrtStrategyMsg(`Discard: ${tileName};`);
 		if (CHANGE_RECOMMEND_TILE_COLOR) {
 			view.DesktopMgr.Inst.mainrole.hand.forEach(
-				tile => tile.val.toString() == tileID ? 
-					tile._SetColor(new Laya.Vector4(0.5, 0.8, 0.9, 1)) 
+				tile => tile.val.toString() == tileID ?
+					tile._SetColor(new Laya.Vector4(0.5, 0.8, 0.9, 1))
 					: tile._SetColor(new Laya.Vector4(1, 1, 1, 1)));
 		}
 	}
@@ -214,7 +224,7 @@ function getPlayerLinkState(player) {
 	return view.DesktopMgr.player_link_state[localPosition2Seat(player)];
 }
 
-function getNumberOfPlayerHand(player) {
+function getNumberOfTilesInHand(player) {
 	player = getCorrectPlayerNumber(player);
 	return view.DesktopMgr.Inst.players[player].hand.length;
 }
@@ -245,7 +255,7 @@ function isInGame() {
 }
 
 function doesPlayerExist(player) {
-	return view.DesktopMgr.Inst.players[player].hand != undefined;
+	return typeof view.DesktopMgr.Inst.players[player].hand != 'undefined' && view.DesktopMgr.Inst.players[player].hand != null;
 }
 
 function getPlayerScore(player) {
@@ -284,7 +294,7 @@ function isInRank(room) {
 		return (roomData.room == 100) || (roomData.level_limit <= rank && roomData.level_limit_ceil >= rank); // room 100 is casual mode
 	}
 	catch {
-		return roomData.room == 100;
+		return roomData.room == 100 || roomData.level_limit > 0; // Display the Casual Rooms and all ranked rooms (no special rooms)
 	}
 }
 
@@ -298,7 +308,18 @@ function getRooms() {
 	}
 }
 
-// Client language
+// Returns the room of the current game as a number: Bronze = 1, Silver = 2 etc.
+function getCurrentRoom() {
+	try {
+		var currentRoom = view.DesktopMgr.Inst.game_config.meta.mode_id;
+		return getRooms().map_[currentRoom].room;
+	}
+	catch {
+		return 0;
+	}
+}
+
+// Client language: ["chs", "chs_t", "en", "jp"]
 function getLanguage() {
 	return GameMgr.client_language;
 }
@@ -308,25 +329,51 @@ function getRoomName(room) {
 	return room["room_name_" + getLanguage()] + " (" + game.Tools.room_mode_desc(room.mode) + ")";
 }
 
+//How much seconds left for a turn (base value, 20 at start)
+function getOverallTimeLeft() {
+	try {
+		return uiscript.UI_DesktopInfo.Inst._timecd._add;
+	}
+	catch {
+		return 20;
+	}
+}
+
+//How much time was left in the last turn?
+function getLastTurnTimeLeft() {
+	try {
+		return uiscript.UI_DesktopInfo.Inst._timecd._pre_sec;
+	}
+	catch {
+		return 25;
+	}
+}
+
 // Extend some internal MJSoul functions with additional code
 function extendMJSoulFunctions() {
 	if (functionsExtended) {
 		return;
 	}
-	trackRiichiDiscardTile();
+	trackDiscardTiles();
 	functionsExtended = true;
 }
 
-// Track which tile the players discarded on their riichi turn
-function trackRiichiDiscardTile() {
+// Track which tiles the players discarded (for push/fold judgement and tracking the riichi tile)
+function trackDiscardTiles() {
 	for (var i = 1; i < getNumberOfPlayers(); i++) {
 		var player = getCorrectPlayerNumber(i);
 		view.DesktopMgr.Inst.players[player].container_qipai.AddQiPai = (function (_super) { // Extend the MJ-Soul Discard function
 			return function () {
 				if (arguments[1]) { // Contains true when Riichi
 					riichiTiles[seat2LocalPosition(this.player.seat)] = arguments[0]; // Track tile in riichiTiles Variable
-					log("Riichi Discard: " + arguments[0].toString());
 				}
+				setData(false);
+				visibleTiles.push(arguments[0]);
+				var danger = getTileDanger(arguments[0], seat2LocalPosition(this.player.seat));
+				if (arguments[2] && danger < 0.01) { // Ignore Tsumogiri of a safetile, set it to average danger
+					danger = 0.05;
+				}
+				playerDiscardSafetyList[seat2LocalPosition(this.player.seat)].push(danger);
 				return _super.apply(this, arguments); // Call original function
 			};
 		})(view.DesktopMgr.Inst.players[player].container_qipai.AddQiPai);

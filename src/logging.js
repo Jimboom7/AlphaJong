@@ -46,8 +46,19 @@ function printTile(tile) {
 
 //Print given tile priorities
 function printTilePriority(tiles) {
+	log("Overall: Value Open: <" + Number(tiles[0].score.open).toFixed(0) +
+		"> Closed Value: <" + Number(tiles[0].score.closed).toFixed(0) +
+		"> Riichi Value: <" + Number(tiles[0].score.riichi).toFixed(0) +
+		"> Shanten: <" + Number(tiles[0].shanten).toFixed(0) + ">");
 	for (var i = 0; i < tiles.length && i < LOG_AMOUNT; i++) {
-		log(getTileName(tiles[i].tile, false) + ": Priority: <" + Number(tiles[i].priority).toFixed(3) + "> Efficiency: <" + Number(tiles[i].efficiency).toFixed(3) + "> Yaku Open: <" + Number(tiles[i].yaku.open).toFixed(3) + "> Yaku Closed: <" + Number(tiles[i].yaku.closed).toFixed(3) + "> Dora: <" + Number(tiles[i].dora).toFixed(3) + "> Waits: <" + Number(tiles[i].waits).toFixed(3) + "> Safety: " + Number(tiles[i].safety).toFixed(2));
+		log(getTileName(tiles[i].tile, false) +
+			": Priority: <" + Number(tiles[i].priority).toFixed(3) +
+			"> Efficiency: <" + Number(tiles[i].efficiency).toFixed(3) +
+			"> Yaku Open: <" + Number(tiles[i].yaku.open).toFixed(3) +
+			"> Yaku Closed: <" + Number(tiles[i].yaku.closed).toFixed(3) +
+			"> Dora: <" + Number(tiles[i].dora).toFixed(3) +
+			"> Waits: <" + Number(tiles[i].waits).toFixed(3) +
+			"> Danger: <" + Number(tiles[i].danger).toFixed(2) + ">");
 	}
 }
 

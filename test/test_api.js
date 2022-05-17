@@ -96,7 +96,7 @@ function getPlayerLinkState(player) {
 	return 1;
 }
 
-function getNumberOfPlayerHand(player) {
+function getNumberOfTilesInHand(player) {
 	return testPlayerHand[player];
 }
 
@@ -134,6 +134,19 @@ function rememberPlayerHand(player) {
 
 function isEastRound() {
 	return true;
+}
+
+
+function isInRank(room) {
+
+}
+
+function getRooms() {
+
+}
+
+function getCurrentRoom() {
+	return 4;
 }
 
 function extendMJSoulFunctions() {
