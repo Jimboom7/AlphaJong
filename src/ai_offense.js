@@ -774,13 +774,13 @@ function chiitoitsuPriorities() {
 			var pairs2 = getPairsAsArray(currentHand);
 			if (pairs2.length > 0) { //If the tiles improves the hand: Calculate the expected values
 				shanten += ((6 - (pairsValue + (pairs2.length / 2))) - baseShanten) * chance;
-				doraValue += (getNumberOfDoras(pairs2) - baseDora) * chance;
-				var y2 = getYaku(newHand, calls[0]);
+				doraValue += getNumberOfDoras(pairs2) * chance;
+				var y2 = getYaku(currentHand.concat(pairs), calls[0]);
 				yaku.open += (y2.open - baseYaku.open) * chance;
 				yaku.closed += (y2.closed - baseYaku.closed) * chance;
 				if (pairsValue + (pairs2.length / 2) == 7) { //Winning hand
 					waits = numberOfTiles * getWaitQuality(tile);
-					doraValue = getNumberOfDoras(newHand) - baseDora;
+					doraValue = getNumberOfDoras(pairs2);
 				}
 			}
 		});
@@ -958,12 +958,12 @@ async function discard() {
 function sortOutUnsafeTiles(tiles) {
 	for (let tile of tiles) {
 		if (tile == tiles[0]) {
-			var verbose = true;
+			var highestPrio = true;
 		}
 		else {
-			var verbose = false;
+			var highestPrio = false;
 		}
-		if (shouldFold(tile, verbose)) {
+		if (shouldFold(tile, highestPrio)) {
 			tile.safe = 0;
 		}
 		else {

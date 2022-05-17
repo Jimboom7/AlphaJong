@@ -9,7 +9,7 @@
 * Note: The bot will automatically decrease the performance mode when it approaches the time limit.
 * Note 2: Firefox is usually able to run the script faster than Chrome.
 */
-var PERFORMANCE_MODE = 4;
+var PERFORMANCE_MODE = 3;
 
 //HAND EVALUATION CONSTANTS
 var EFFICIENCY = 1.0; // Lower: Slower and more expensive hands. Higher: Faster and cheaper hands. Default: 1.0, Minimum: 0

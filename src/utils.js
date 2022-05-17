@@ -717,26 +717,26 @@ function getFoldThreshold(tilePrio, hand) {
 }
 
 //Return true if danger is too high in relation to the value of the hand
-function shouldFold(tile, verbose = false) {
+function shouldFold(tile, highestPrio = false) {
 	if (tile.shanten > 0 && tile.shanten * 4 >= tilesLeft) {
-		if (verbose) {
+		if (highestPrio) {
 			log("Hand is too far from tenpai before end of game. Fold!");
+			strategy = STRATEGIES.FOLD;
+			strategyAllowsCalls = false;
 		}
-		strategy = STRATEGIES.FOLD;
-		strategyAllowsCalls = false;
 		return true;
 	}
 
 	var foldThreshold = getFoldThreshold(tile, ownHand);
-	if (verbose) {
+	if (highestPrio) {
 		log("Would fold this hand above " + foldThreshold + " danger for " + getTileName(tile.tile) + " discard.");
 	}
 
 	if (tile.danger > foldThreshold) {
-		if (verbose) {
+		if (highestPrio) {
 			log("Tile Danger " + Number(tile.danger).toFixed(2) + " of " + getTileName(tile.tile, false) + " is too dangerous.");
+			strategyAllowsCalls = false; //Don't set the strategy to full fold, but prevent calls
 		}
-		strategyAllowsCalls = false; //Don't set the strategy to full fold, but prevent calls
 		return true;
 	}
 	return false;
