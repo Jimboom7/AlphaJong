@@ -87,7 +87,7 @@ function main() {
 	if (operations == null || operations.length == 0) {
 		errorCounter++;
 		if (getTilesLeft() == lastTilesLeft) { //1 minute no tile drawn
-			if (errorCounter > 60) {
+			if (errorCounter > 120) {
 				goToLobby();
 			}
 		}
@@ -95,21 +95,19 @@ function main() {
 			lastTilesLeft = getTilesLeft();
 			errorCounter = 0;
 		}
-		log("Waiting for own turn, sleep 1 second.");
 		clearCrtStrategyMsg();
 		showCrtActionMsg("Waiting for own turn.");
-		setTimeout(main, 1000);
+		setTimeout(main, 500);
 
 		if (MODE === AIMODE.HELP) {
 			oldOps = [];
 		}
-
 		return;
 	}
 
 	showCrtActionMsg("Calculating best move...");
 
-	setTimeout(mainOwnTurn, 500 + (Math.random() * 500));
+	setTimeout(mainOwnTurn, 200 + (Math.random() * 200));
 }
 
 var oldOps = []
@@ -137,11 +135,17 @@ function checkPlayerOpChanged() {
 	return false;
 }
 
-function mainOwnTurn() {
+async function mainOwnTurn() {
+  if (threadIsRunning) {
+		return;
+	}
+  threadIsRunning = true;
+	
 	//HELP MODE, if player not operate, just skip
 	if (MODE === AIMODE.HELP) {
 		if (!checkPlayerOpChanged()) {
 			setTimeout(main, 1000);
+      threadIsRunning = false;
 			return;
 		} else {
 			recordPlayerOps();
@@ -154,7 +158,15 @@ function mainOwnTurn() {
 
 	log("##### OWN TURN #####");
 	log("Debug String: " + getDebugString());
-	log("Current Danger Level: " + getCurrentDangerLevel());
+	if (getNumberOfPlayers() == 3) {
+		log("Right Player Tenpai Chance: " + Number(isPlayerTenpai(1) * 100).toFixed(1) + "%, Expected Hand Value: " + Number(getExpectedHandValue(1).toFixed(0)));
+		log("Left Player Tenpai Chance: " + Number(isPlayerTenpai(2) * 100).toFixed(1) + "%, Expected Hand Value: " + Number(getExpectedHandValue(2).toFixed(0)));
+	}
+	else {
+		log("Shimocha Tenpai Chance: " + Number(isPlayerTenpai(1) * 100).toFixed(1) + "%, Expected Hand Value: " + Number(getExpectedHandValue(1).toFixed(0)));
+		log("Toimen Tenpai Chance: " + Number(isPlayerTenpai(2) * 100).toFixed(1) + "%, Expected Hand Value: " + Number(getExpectedHandValue(2).toFixed(0)));
+		log("Kamicha Tenpai Chance: " + Number(isPlayerTenpai(3) * 100).toFixed(1) + "%, Expected Hand Value: " + Number(getExpectedHandValue(3).toFixed(0)));
+	}
 
 	determineStrategy(); //Get the Strategy for the current situation. After calls so it does not reset folds
 
@@ -178,6 +190,7 @@ function mainOwnTurn() {
 				break;
 			case getOperations().babei:
 				if (callKita()) {
+					threadIsRunning = false;
 					setTimeout(main, 1000);
 					return;
 				}
@@ -195,13 +208,13 @@ function mainOwnTurn() {
 		switch (operation.type) {
 			case getOperations().dapai:
 				isConsideringCall = false;
-				discard();
+				await discard();
 				break;
 			case getOperations().eat:
-				callTriple(operation.combination, getOperations().eat);
+				await callTriple(operation.combination, getOperations().eat);
 				break;
 			case getOperations().peng:
-				callTriple(operation.combination, getOperations().peng);
+				await callTriple(operation.combination, getOperations().peng);
 				break;
 			case getOperations().ming_gang: //From others
 				callDaiminkan();
@@ -210,14 +223,28 @@ function mainOwnTurn() {
 	}
 
 	log(" ");
+
 	if (MODE === AIMODE.AUTO) {
 		showCrtActionMsg("Own turn completed.");
 	}
+
+	if ((getOverallTimeLeft() < 8 && getLastTurnTimeLeft() - getOverallTimeLeft() <= 0) || //Not much overall time left and last turn took longer than the 5 second increment
+		(getOverallTimeLeft() < 4 && getLastTurnTimeLeft() - getOverallTimeLeft() <= 1)) {
+		timeSave++;
+		log("Low performance! Activating time save mode level: " + timeSave);
+	}
+	if (getOverallTimeLeft() > 15) { //Much time left (new round)
+		timeSave = 0;
+	}
+
+	threadIsRunning = false;
+
 	setTimeout(main, 1000);
+
 }
 
 //Set Data from real Game
-function setData() {
+function setData(mainUpdate = true) {
 
 	dora = getDora();
 
@@ -237,7 +264,9 @@ function setData() {
 		}
 		discards.push(temp_discards);
 	}
-	updateDiscardedTilesSafety();
+	if (mainUpdate) {
+		updateDiscardedTilesSafety();
+	}
 
 	calls = [];
 	for (var j = 0; j < getNumberOfPlayers(); j++) { //Get Calls for all Players
@@ -259,6 +288,7 @@ function setData() {
 		strategyAllowsCalls = true;
 		initialDiscardedTilesSafety();
 		riichiTiles = [null, null, null, null];
+		playerDiscardSafetyList = [[], [], [], []];
 		extendMJSoulFunctions();
 	}
 

@@ -58,7 +58,7 @@ uiscript contains lots of different UI elements which are again singletons. They
 **uiscript.UI_Lobby.Inst.me.in.play(speed, loop)** - Play animation for character appearing in the main lobby (out() for disappearing).  
 **uiscript.UI_Lobby.Inst.say("lobby_playerlogin")** - Let character in the main lobby say something (only existing texts work)  
 **uiscript.UI_Hanguplogout.Inst** - When disconnected.  
-
+**uiscript.UI_DesktopInfo.Inst._timecd** - Contains data about how much time is left in a turn (_pre_sec: used time in last turn, _add: overall time, _fix: time increase per turn)  
 
 ## app.NetAgent
 Can be used to directly communicate with the server.  

@@ -6,12 +6,12 @@ import os
 def addFileToString(inputString, filename):
     inputString += "\n\n"
     
-    with open('src/' + filename) as fp:
+    with open('src/' + filename, encoding="utf-8") as fp:
         inputString += fp.read()
         
     return inputString
     
-VERSION = "1.2.2"
+VERSION = "1.3.0"
 
 data = f"""// ==UserScript==
 // @name         AlphaJong
