@@ -30,9 +30,12 @@ function getCorrectPlayerNumber(player) {
 	return player;
 }
 
-function isSameTile(tile1, tile2) {
+function isSameTile(tile1, tile2, checkDora = false) {
 	if (typeof tile1 == 'undefined' || typeof tile2 == 'undefined') {
 		return false;
+	}
+	if (checkDora) {
+		return tile1.index == tile2.index && tile1.type == tile2.type && tile1.dora == tile2.dora;
 	}
 	return tile1.index == tile2.index && tile1.type == tile2.type;
 }
