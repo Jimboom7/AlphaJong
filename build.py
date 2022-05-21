@@ -11,7 +11,7 @@ def addFileToString(inputString, filename):
         
     return inputString
     
-VERSION = "1.3.0"
+VERSION = "1.3.1_beta"
 
 data = f"""// ==UserScript==
 // @name         AlphaJong

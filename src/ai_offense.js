@@ -348,6 +348,10 @@ async function getTilePriorities(inputHand) {
 			var hand = [...inputHand];
 			hand.splice(i, 1);
 
+			if (tiles.filter(t => isSameTile(t.tile, inputHand[i], true)).length > 0) { //Skip same tiles in hand
+				continue;
+			}
+
 			tiles.push(getHandValues(hand, inputHand[i]));
 
 			await new Promise(r => setTimeout(r, 10)); //Sleep a short amount of time to not completely block the browser
