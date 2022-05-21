@@ -987,7 +987,7 @@ function keepSafetile(tiles) {
 	}
 	var safeTiles = 0;
 	for (let t of tiles) {
-		if (isSafeTile(1, t.tile) && isSafeTile(2, t.tile) && isSafeTile(3, t.tile)) {
+		if (isSafeTile(1, t.tile) && isSafeTile(2, t.tile) && (getNumberOfPlayers() == 3 || isSafeTile(3, t.tile))) {
 			safeTiles++;
 		}
 	}
@@ -995,9 +995,15 @@ function keepSafetile(tiles) {
 		return tiles;
 	}
 
-	var tilesSafety = tiles.map(t => getWaitScoreForTileAndPlayer(1, t.tile, false) +
-		getWaitScoreForTileAndPlayer(2, t.tile, false) +
-		getWaitScoreForTileAndPlayer(3, t.tile, false));
+	if (getNumberOfPlayers() == 3) {
+		var tilesSafety = tiles.map(t => getWaitScoreForTileAndPlayer(1, t.tile, false) +
+			getWaitScoreForTileAndPlayer(2, t.tile, false));
+	}
+	else {
+		var tilesSafety = tiles.map(t => getWaitScoreForTileAndPlayer(1, t.tile, false) +
+			getWaitScoreForTileAndPlayer(2, t.tile, false) +
+			getWaitScoreForTileAndPlayer(3, t.tile, false));
+	}
 
 	var safetileIndex = tilesSafety.indexOf(Math.min(...tilesSafety));
 
