@@ -725,7 +725,7 @@ function getFoldThreshold(tilePrio, hand) {
 
 //Return true if danger is too high in relation to the value of the hand
 function shouldFold(tile, highestPrio = false) {
-	if (tile.shanten > 0 && tile.shanten * 4 >= tilesLeft) {
+	if (tile.shanten * 4 > tilesLeft) {
 		if (highestPrio) {
 			log("Hand is too far from tenpai before end of game. Fold!");
 			strategy = STRATEGIES.FOLD;
