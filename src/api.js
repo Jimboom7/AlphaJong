@@ -205,11 +205,13 @@ function sendAbortiveDrawCall() {
 function callDiscard(tileNumber) {
 	if (MODE === AIMODE.AUTO) {
 		try {
-			view.DesktopMgr.Inst.players[0]._choose_pai = view.DesktopMgr.Inst.players[0].hand[tileNumber];
-			view.DesktopMgr.Inst.players[0].DoDiscardTile();
+			if (view.DesktopMgr.Inst.players[0].hand[tileNumber].valid) {
+				view.DesktopMgr.Inst.players[0]._choose_pai = view.DesktopMgr.Inst.players[0].hand[tileNumber];
+				view.DesktopMgr.Inst.players[0].DoDiscardTile();
+			}
 		}
 		catch {
-			log("Failed to decline the discard.");
+			log("Failed to discard the tile.");
 		}
 	} else {
 		let tileID = ownHand[tileNumber];

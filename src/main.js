@@ -113,9 +113,9 @@ function main() {
 var oldOps = []
 function recordPlayerOps() {
 	oldOps = []
-	
+
 	let ops = getOperationList();
-	for (let op of ops) { 
+	for (let op of ops) {
 		oldOps.push(op.type)
 	}
 }
@@ -136,16 +136,16 @@ function checkPlayerOpChanged() {
 }
 
 async function mainOwnTurn() {
-  if (threadIsRunning) {
+	if (threadIsRunning) {
 		return;
 	}
-  threadIsRunning = true;
-	
+	threadIsRunning = true;
+
 	//HELP MODE, if player not operate, just skip
 	if (MODE === AIMODE.HELP) {
 		if (!checkPlayerOpChanged()) {
 			setTimeout(main, 1000);
-      threadIsRunning = false;
+			threadIsRunning = false;
 			return;
 		} else {
 			recordPlayerOps();
@@ -249,8 +249,9 @@ function setData(mainUpdate = true) {
 	dora = getDora();
 
 	ownHand = [];
-	for (let hand of getPlayerHand()) { //Get own Hand
-		ownHand.push(hand.val);
+	for (let tile of getPlayerHand()) { //Get own Hand
+		ownHand.push(tile.val);
+		ownHand[ownHand.length - 1].valid = tile.valid; //Is valid discard
 	}
 
 	discards = [];
