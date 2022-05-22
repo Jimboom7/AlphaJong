@@ -78,7 +78,7 @@ async function runOffense() {
 	}
 
 	log("<h2>No Ten</h2>");
-	var value = getTilePriorities(ownHand);
+	var value = await getTilePriorities(ownHand);
 	winValues.push({ time: 0, value: (value[0].dora + value[0].yaku.closed) });
 	currentTest += 50 - (currentTest % 50);
 	runOffenseBenchmark();
