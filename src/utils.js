@@ -564,6 +564,10 @@ function calculateScore(player, han, fu = 30) {
 		score *= 1.5;
 	}
 
+	if (getNumberOfPlayers() == 3) {
+		score *= 0.75;
+	}
+
 	return score;
 }
 
