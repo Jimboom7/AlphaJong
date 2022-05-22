@@ -101,7 +101,12 @@ function getCurrentPlayer() {
 }
 
 function getSeatWind(player) {
-	return ((4 + localPosition2Seat(player) - view.DesktopMgr.Inst.index_ju) % 4) + 1;
+	if (getNumberOfPlayers() == 3) {
+		return ((3 + localPosition2Seat(player) - view.DesktopMgr.Inst.index_ju) % 3) + 1;
+	}
+	else {
+		return ((4 + localPosition2Seat(player) - view.DesktopMgr.Inst.index_ju) % 4) + 1;
+	}
 }
 
 function getRound() {

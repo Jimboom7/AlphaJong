@@ -203,7 +203,7 @@ function callKan(operation, tileForCall) {
 
 	if (isPlayerRiichi(0) ||
 		(strategyAllowsCalls &&
-			tiles.shanten <= (tilesLeft / 35) + CALL_KAN &&
+			tiles.shanten <= (tilesLeft / (getWallSize() / 2)) + CALL_KAN &&
 			getCurrentDangerLevel() < 1000 + (CALL_KAN * 500) &&
 			tiles.shanten <= newTiles.shanten &&
 			tiles.efficiency * 0.9 <= newTiles.efficiency)) {
