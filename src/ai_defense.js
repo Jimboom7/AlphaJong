@@ -60,14 +60,14 @@ function getTileDangerForPlayer(tile, player, playerPerspective = 0) {
 	var honitsuChance = isDoingHonitsu(player, tile.type);
 	var otherHonitsu = Math.max(isDoingHonitsu(player, 0) || isDoingHonitsu(player, 1) || isDoingHonitsu(player, 2));
 	if (honitsuChance > 0) {
-		danger *= 1 + (honitsuChance / 3);
+		danger *= 1 + honitsuChance;
 	}
 	else if (otherHonitsu > 0) { //Is the player going for any other flush?
 		if (tile.type == 3) {
-			danger *= 1 + (otherHonitsu / 3); //Honor tiles are also dangerous
+			danger *= 1 + otherHonitsu; //Honor tiles are also dangerous
 		}
 		else {
-			danger /= 1 + (otherHonitsu / 3); //Other tiles are less dangerous
+			danger *= 1 - otherHonitsu; //Other tiles are less dangerous
 		}
 	}
 
