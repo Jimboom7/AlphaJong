@@ -74,7 +74,7 @@ async function callTriple(combinations, operation) {
 	calls[0].push(callTiles[1]);
 	calls[0].push(getTileForCall());
 	isClosed = false;
-	newHand = removeTilesFromTileArray(ownHand, [callTiles[0], callTiles[1]]); //Remove called tiles from hand
+	newHand = removeTilesFromTileArray(ownHand, callTiles); //Remove called tiles from hand
 	var tilePrios = await getTilePriorities(newHand);
 	tilePrios = sortOutUnsafeTiles(tilePrios);
 	var nextDiscard = getDiscardTile(tilePrios); //Calculate next discard
@@ -162,9 +162,9 @@ async function callTriple(combinations, operation) {
 		else if (newHandValue.score.open > handValue.score.open * 0.9 && //Call loses not much value
 			newHandValue.score.open > handValue.score.closed * 0.7 &&
 			((isBadWait && (newHandValue.score.open >= (1000 - (CALL_PON_CHI * 100) - ((3 - newHandValue.shanten) * 100)) / (seatWind == 1 ? 1.5 : 1))) || // And it's a bad wait while the hand is not extremely cheap
-				(!isBadWait && (newHandValue.score.open >= (2000 - (CALL_PON_CHI * 200) - ((3 - newHandValue.shanten) * 200)) / (seatWind == 1 ? 1.5 : 1))) || //Or it was a good wait and the hand is at least a bit
+				(!isBadWait && (newHandValue.score.open >= (2000 - (CALL_PON_CHI * 200) - ((3 - newHandValue.shanten) * 200)) / (seatWind == 1 ? 1.5 : 1))) || //Or it was a good wait and the hand is at least a bit valuable
 				newHandTriples.pairs.filter(t => t.type == 3).length >= 4) && //Or multiple honor pairs
-			((newHandTriples.pairs.filter(t => isValueTile(t) && getNumberOfTilesAvailable(t.index, t.type) >= 1)).length >= 2)) {//And would open hand anyway with honor call
+			((newHandTriples.pairs.filter(t => isValueTile(t) && getNumberOfTilesAvailable(t.index, t.type) >= 1)).length >= 2 && (newHandTriples.pairs.length >= 4 || newHandValue.shanten > 1))) {//And would open hand anyway with honor call
 			log("Call accepted because it reduces shanten!");
 		}
 		else if (newHandValue.shanten == 0 && newHandValue.score.open > handValue.score.closed * 0.9 &&
