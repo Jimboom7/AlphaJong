@@ -203,7 +203,7 @@ function callKan(operation, tileForCall) {
 
 	if (isPlayerRiichi(0) ||
 		(strategyAllowsCalls &&
-			tiles.shanten <= (tilesLeft / 35) + CALL_KAN &&
+			tiles.shanten <= (tilesLeft / (getWallSize() / 2)) + CALL_KAN &&
 			getCurrentDangerLevel() < 1000 + (CALL_KAN * 500) &&
 			tiles.shanten <= newTiles.shanten &&
 			tiles.efficiency * 0.9 <= newTiles.efficiency)) {
@@ -408,6 +408,11 @@ function getHandValues(hand, discardedTile) {
 	var waits = 0; //Waits when in Tenpai (Or fractions of it when 1 shanten)
 	var fu = 0;
 
+	var kita = 0;
+	if (getNumberOfPlayers() == 3) {
+		kita = getNumberOfKitaOfPlayer(0) * getTileDoraValue({ index: 4, type: 3 });
+	}
+
 	var waitTiles = [];
 	var tileCombinations = []; //List of combinations for second step to save calculation time
 
@@ -559,12 +564,12 @@ function getHandValues(hand, discardedTile) {
 				doraValue += thisDora * factor;
 				yaku.open += thisYaku.open * factor;
 				yaku.closed += thisYaku.closed * factor;
-				expectedScore.open += calculateScore(0, thisYaku.open + thisDora, thisFu) * factor;
-				expectedScore.closed += calculateScore(0, thisYaku.closed + thisDora, thisFu) * factor;
+				expectedScore.open += calculateScore(0, thisYaku.open + thisDora + kita, thisFu) * factor;
+				expectedScore.closed += calculateScore(0, thisYaku.closed + thisDora + kita, thisFu) * factor;
 				numberOfTotalCombinations += factor;
 			}
 
-			expectedScore.riichi += calculateScore(0, thisYaku.closed + thisDora + 1 + 0.2 + getUradoraChance(), thisFu) * thisWait * factor;
+			expectedScore.riichi += calculateScore(0, thisYaku.closed + thisDora + kita + 1 + 0.2 + getUradoraChance(), thisFu) * thisWait * factor;
 			numberOfTotalWaitCombinations += factor * thisWait;
 			if (!tile1Furiten) {
 				hand.pop();
@@ -657,8 +662,8 @@ function getHandValues(hand, discardedTile) {
 				doraValue += thisDora * combFactor;
 				yaku.open += thisYaku.open * combFactor;
 				yaku.closed += thisYaku.closed * combFactor;
-				expectedScore.open += calculateScore(0, thisYaku.open + thisDora) * combFactor;
-				expectedScore.closed += calculateScore(0, thisYaku.closed + thisDora) * combFactor;
+				expectedScore.open += calculateScore(0, thisYaku.open + thisDora + kita) * combFactor;
+				expectedScore.closed += calculateScore(0, thisYaku.closed + thisDora + kita) * combFactor;
 				numberOfTotalCombinations += combFactor;
 			}
 
@@ -692,12 +697,7 @@ function getHandValues(hand, discardedTile) {
 	}
 
 	if (baseShanten > 0) { //When not tenpai
-		expectedScore.riichi = calculateScore(0, yaku.closed + doraValue + 1 + 0.2 + getUradoraChance());
-	}
-
-	if (getNumberOfPlayers() == 3) {
-		var kita = getNumberOfKitaOfPlayer(0) * getTileDoraValue({ index: 4, type: 3 });
-		doraValue += kita;
+		expectedScore.riichi = calculateScore(0, yaku.closed + doraValue + kita + 1 + 0.2 + getUradoraChance());
 	}
 
 	var danger = 0;
@@ -987,7 +987,7 @@ function keepSafetile(tiles) {
 	}
 	var safeTiles = 0;
 	for (let t of tiles) {
-		if (isSafeTile(1, t.tile) && isSafeTile(2, t.tile) && isSafeTile(3, t.tile)) {
+		if (isSafeTile(1, t.tile) && isSafeTile(2, t.tile) && (getNumberOfPlayers() == 3 || isSafeTile(3, t.tile))) {
 			safeTiles++;
 		}
 	}
@@ -995,9 +995,15 @@ function keepSafetile(tiles) {
 		return tiles;
 	}
 
-	var tilesSafety = tiles.map(t => getWaitScoreForTileAndPlayer(1, t.tile, false) +
-		getWaitScoreForTileAndPlayer(2, t.tile, false) +
-		getWaitScoreForTileAndPlayer(3, t.tile, false));
+	if (getNumberOfPlayers() == 3) {
+		var tilesSafety = tiles.map(t => getWaitScoreForTileAndPlayer(1, t.tile, false) +
+			getWaitScoreForTileAndPlayer(2, t.tile, false));
+	}
+	else {
+		var tilesSafety = tiles.map(t => getWaitScoreForTileAndPlayer(1, t.tile, false) +
+			getWaitScoreForTileAndPlayer(2, t.tile, false) +
+			getWaitScoreForTileAndPlayer(3, t.tile, false));
+	}
 
 	var safetileIndex = tilesSafety.indexOf(Math.min(...tilesSafety));
 

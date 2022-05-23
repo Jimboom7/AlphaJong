@@ -564,6 +564,10 @@ function calculateScore(player, han, fu = 30) {
 		score *= 1.5;
 	}
 
+	if (getNumberOfPlayers() == 3) {
+		score *= 0.75;
+	}
+
 	return score;
 }
 
@@ -695,7 +699,7 @@ function getFoldThreshold(tilePrio, hand) {
 		}
 	}
 
-	foldValue *= 1 - ((35 - tilesLeft) / (35 * 4)); // up to 25% more/less fold when early/lategame.
+	foldValue *= 1 - (((getWallSize() / 2) - tilesLeft) / (getWallSize() * 2)); // up to 25% more/less fold when early/lategame.
 
 	foldValue *= seatWind == 1 ? 1.2 : 1; //Push more as dealer (it's already in the handScore, but because of Tsumo Malus pushing is even better)
 
@@ -869,6 +873,16 @@ function isWinningHand(numberOfTriples, numberOfPairs) {
 		return numberOfPairs == 7;
 	}
 	return numberOfTriples == 4 && numberOfPairs == 1;
+}
+
+//Return the number of tiles in the wall at the start of the round
+function getWallSize() {
+	if (getNumberOfPlayers() == 3) {
+		return 55;
+	}
+	else {
+		return 70;
+	}
 }
 
 function getCallNameByType(type) {
