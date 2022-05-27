@@ -236,6 +236,13 @@ function callTsumo() {
 
 function callKita() { // 3 player only
 	if (strategy != STRATEGIES.THIRTEEN_ORPHANS && strategy != STRATEGIES.FOLD) {
+		if (getNumberOfTilesInTileArray(ownHand, 4, 3) > 1) { //More than one north tile: Check if it's okay to call kita
+			var handValue = getHandValues(ownHand);
+			var newHandValue = getHandValues(removeTilesFromTileArray(ownHand, [{ index: 4, type: 3, dora: false }]));
+			if (handValue.shanten <= 1 && newHandValue.shanten > handValue.shanten) {
+				return false;
+			}
+		}
 		sendKitaCall();
 		return true;
 	}
