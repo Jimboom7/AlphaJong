@@ -754,8 +754,8 @@ function calculateTilePriority(efficiency, expectedScore, danger) {
 
 	score -= (danger * 2 * SAFETY);
 
-	if (weightedEfficiency < 0 && score < 0) {
-		weightedEfficiency *= -1;
+	if (weightedEfficiency < 0) { //Hotfix for negative efficiency (increasing shanten)
+		score = 50000 - score;
 	}
 
 	return weightedEfficiency * score;
