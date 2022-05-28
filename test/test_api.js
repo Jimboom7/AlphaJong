@@ -36,6 +36,10 @@ function getCallsOfPlayer(player) {
 
 }
 
+function getNumberOfKitaOfPlayer(player) {
+	return 0;
+}
+
 function getTilesLeft() {
 
 }
