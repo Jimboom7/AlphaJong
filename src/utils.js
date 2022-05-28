@@ -862,9 +862,9 @@ function getDistanceToPlayer(player) {
 //Check if "All Last"
 function isLastGame() {
 	if (isEastRound()) {
-		return getRound() == 3 || getRoundWind() > 1; //East 4 or South X
+		return getRound() == getNumberOfPlayers() || getRoundWind() > 1; //East 4(3) or South X
 	}
-	return (getRound() == 2 && getRoundWind() > 1) || getRoundWind() > 2; //South 3 or West X
+	return (getRound() == getNumberOfPlayers() && getRoundWind() == 2) || getRoundWind() > 2; //South 4(3) or West X
 }
 
 //Check if Hand is complete
