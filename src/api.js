@@ -110,7 +110,7 @@ function getSeatWind(player) {
 }
 
 function getRound() {
-	return view.DesktopMgr.Inst.index_ju;
+	return view.DesktopMgr.Inst.index_ju + 1;
 }
 
 function getRoundWind() {
@@ -290,7 +290,7 @@ function rememberPlayerHand(player) {
 }
 
 function isEastRound() {
-	return view.DesktopMgr.Inst.game_config.mode.mode == 1;
+	return view.DesktopMgr.Inst.game_config.mode.mode % 10 == 1;
 }
 
 // Is the player able to join a given room
