@@ -440,7 +440,8 @@ function getHandValues(hand, discardedTile) {
 	var expectedScore = { open: 0, closed: 0, riichi: 0 }; //For the expected score (only looking at hands that improve the current hand)
 	var yaku = { open: 0, closed: 0 }; //Expected Yaku
 	var doraValue = 0; //Expected Dora
-	var waits = 0; //Waits when in Tenpai (Or fractions of it when 1 shanten)
+	var waits = 0; //Waits when in Tenpai
+	var shape = 0; //When 1 shanten: Contains a value that indicates how good the shape of the hand is
 	var fu = 0;
 
 	var kita = 0;
@@ -553,7 +554,7 @@ function getHandValues(hand, discardedTile) {
 		var triples2 = triplesAndPairs2.triples;
 		var pairs2 = triplesAndPairs2.pairs;
 
-		if (!isClosed && (!tileCombination.winning || tile1Furiten) &&
+		if (!isClosed && (!tileCombination.winning) &&
 			getNumberOfTilesInTileArray(triples2, tile1.index, tile1.type) == 3) {
 			numberOfTiles1 *= 2; //More value to possible triples when hand is open (can call pons from all players)
 		}
@@ -576,7 +577,7 @@ function getHandValues(hand, discardedTile) {
 				return pv + getNumberOfTilesAvailable(cv.tile2.index, cv.tile2.type);
 			}, 0));
 			if (tile1Furiten) {
-				thisShanten = (0 - baseShanten);
+				thisShanten = 0 - baseShanten;
 			}
 			else {
 				thisShanten = (calculateShanten(parseInt(triples2.length / 3) + callTriples, parseInt(pairs2.length / 2), parseInt(doubles2.length / 2)) - baseShanten);
@@ -590,7 +591,10 @@ function getHandValues(hand, discardedTile) {
 			var thisYaku = getYaku(hand, calls[0], triplesAndPairs2);
 			var thisWait = numberOfTiles1 * getWaitQuality(tile1);
 			var thisFu = calculateFu(triples2, calls[0], pairs2, removeTilesFromTileArray(hand, triples.concat(pairs).concat(tile1)), tile1);
-			if (!tile1Furiten && (isClosed || thisYaku.open >= 1 || tilesLeft <= 4)) {
+			if (isClosed || thisYaku.open >= 1 || tilesLeft <= 4) {
+				if (tile1Furiten) {
+					thisWait = numberOfTiles1 / 6;
+				}
 				waits += thisWait;
 				fu += thisFu * thisWait * factor;
 				if (thisFu == 30 && isClosed) {
@@ -650,14 +654,14 @@ function getHandValues(hand, discardedTile) {
 				combFactor *= 2; //More value to possible triples when hand is open (can call pons from all players)
 			}
 
-			if (winning && !tile2Furiten) { //If this tile combination wins in 2 turns: calculate waits etc.
+			if (winning && !tile2Furiten) { //If this tile combination wins in 2 turns: calculate shape etc.
 				thisShanten = -1 - baseShanten;
 				if (waitTiles.filter(t => isSameTile(t, tile2)).length == 0) {
-					var newWait = numberOfTiles2 * getWaitQuality(tile2) * ((numberOfTiles1) / availableTiles.length);
+					var newShape = numberOfTiles2 * getWaitQuality(tile2) * ((numberOfTiles1) / availableTiles.length);
 					if (tile2Data.duplicate) {
-						newWait += numberOfTiles1 * getWaitQuality(tile1) * ((numberOfTiles2) / availableTiles.length);
+						newShape += numberOfTiles1 * getWaitQuality(tile1) * ((numberOfTiles2) / availableTiles.length);
 					}
-					waits += newWait;
+					shape += newShape;
 				}
 
 				var secondDiscard = removeTilesFromTileArray(hand, triples3.concat(pairs3))[0];
@@ -722,13 +726,21 @@ function getHandValues(hand, discardedTile) {
 		expectedScore.riichi /= numberOfTotalWaitCombinations;
 		fu /= numberOfTotalWaitCombinations;
 	}
+	if (waitTiles.length > 0) {
+		waits *= (waitTiles.length * 0.3) + 0.5; //Waiting on multiple tiles is better
+	}
 
 	fu = fu <= 30 ? 30 : fu;
 	fu = fu > 110 ? 30 : fu;
 
 	var efficiency = (shanten + (baseShanten - originalShanten)) * -1; //Percent Number that indicates how big the chance is to improve the hand (in regards to efficiency). Negative for increasing shanten with the discard
 	if (originalShanten == 0) { //Already in Tenpai: Look at waits instead
-		efficiency = waits / 10;
+		if (baseShanten == 0) {
+			efficiency = (waits + shape) / 10;
+		}
+		else {
+			efficiency = ((shanten / 1.5) * -1);
+		}
 	}
 
 	if (baseShanten > 0) { //When not tenpai
@@ -743,9 +755,16 @@ function getHandValues(hand, discardedTile) {
 	}
 
 	var priority = calculateTilePriority(efficiency, expectedScore, danger - sakigiri);
+
+	var riichiPriority = 0;
+	if (originalShanten == 0) { //Already in Tenpai: Look at waits instead
+		riichiEfficiency = waits / 10;
+		riichiPriority = calculateTilePriority(riichiEfficiency, expectedScore, danger - sakigiri);
+	}
+
 	return {
-		tile: discardedTile, priority: priority, shanten: baseShanten, efficiency: efficiency,
-		score: expectedScore, dora: doraValue, yaku: yaku, waits: waits, danger: danger, fu: fu
+		tile: discardedTile, priority: priority, riichiPriority: riichiPriority, shanten: baseShanten, efficiency: efficiency,
+		score: expectedScore, dora: doraValue, yaku: yaku, waits: waits, shape: shape, danger: danger, fu: fu
 	};
 }
 
@@ -804,6 +823,8 @@ function chiitoitsuPriorities() {
 		var baseYaku = getYaku(newHand, calls[0]);
 		var yaku = { open: 0, closed: 0 };
 
+		var shape = 0;
+
 		//Possible Value, Yaku and Dora after Draw
 		handWithoutPairs.forEach(function (tile) {
 			var currentHand = [...handWithoutPairs];
@@ -820,6 +841,10 @@ function chiitoitsuPriorities() {
 				if (pairsValue + (pairs2.length / 2) == 7) { //Winning hand
 					waits = numberOfTiles * getWaitQuality(tile);
 					doraValue = getNumberOfDoras(pairs2);
+					if (tile.index < 3 || tile.index > 7 || tile.doraValue > 0 || getWaitQuality(tile) > 1.1 || //Good Wait
+						currentHand.filter(tile => tile.type == 3 || tile.index == 1 || tile.index == 9).length == 0) { //Or Tanyao
+						shape = 1;
+					}
 				}
 			}
 		});
@@ -845,8 +870,8 @@ function chiitoitsuPriorities() {
 
 		var priority = calculateTilePriority(efficiency, expectedScore, danger - sakigiri);
 		tiles.push({
-			tile: ownHand[i], priority: priority, shanten: baseShanten, efficiency: efficiency,
-			score: expectedScore, dora: doraValue, yaku: yaku, waits: waits, danger: danger, fu: 25
+			tile: ownHand[i], priority: priority, riichiPriority: priority, shanten: baseShanten, efficiency: efficiency,
+			score: expectedScore, dora: doraValue, yaku: yaku, waits: waits, shape: shape, danger: danger, fu: 25
 		});
 	}
 
@@ -904,8 +929,8 @@ function thirteenOrphansPriorities() {
 		var priority = calculateTilePriority(efficiency, expectedScore, danger - sakigiri);
 
 		tiles.push({
-			tile: ownHand[i], priority: priority, shanten: shanten, efficiency: efficiency,
-			score: expectedScore, dora: doraValue, yaku: yaku, waits: waits, danger: danger, fu: 30
+			tile: ownHand[i], priority: priority, riichiPriority: priority, shanten: shanten, efficiency: efficiency,
+			score: expectedScore, dora: doraValue, yaku: yaku, waits: waits, shape: 0, danger: danger, fu: 30
 		});
 
 	}

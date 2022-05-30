@@ -668,19 +668,20 @@ function getFoldThreshold(tilePrio, hand) {
 	}
 
 	var waits = tilePrio.waits;
+	var shape = tilePrio.shape;
 
 	// Formulas are based on this table: https://docs.google.com/spreadsheets/d/172LFySNLUtboZUiDguf8I3QpmFT-TApUfjOs5iRy3os/edit#gid=212618921
 	// TODO: Maybe switch to this: https://riichi-mahjong.com/2020/01/28/mahjong-strategy-push-or-fold-4-maximizing-game-ev/
 	if (tilePrio.shanten == 0) {
-		var foldValue = waits * handScore / 38;
+		var foldValue = (waits + shape) * handScore / 38;
 		if (tilesLeft < 8) { //Try to avoid no ten penalty
 			foldValue += 200 - (parseInt(tilesLeft / 4) * 100);
 		}
 	}
 	else if (tilePrio.shanten == 1 && strategy == STRATEGIES.GENERAL) {
-		waits = waits < 0.4 ? waits = 0.4 : waits;
-		waits = waits > 2 ? waits = 2 : waits;
-		var foldValue = waits * handScore / 45;
+		shape = shape < 0.4 ? shape = 0.4 : shape;
+		shape = shape > 2 ? shape = 2 : shape;
+		var foldValue = shape * handScore / 45;
 	}
 	else {
 		if (getCurrentDangerLevel() > 3000 && strategy == STRATEGIES.GENERAL) {
@@ -752,11 +753,15 @@ function shouldFold(tile, highestPrio = false) {
 //Decide whether to call Riichi
 //Based on: https://mahjong.guide/2018/01/28/mahjong-fundamentals-5-riichi/
 function shouldRiichi(tilePrio) {
-	var badWait = tilePrio.waits < 6 - RIICHI;
+	var badWait = tilePrio.waits < 5 - RIICHI;
 	var lotsOfDoraIndicators = tilePrio.dora.length >= 3;
 
 	//Chiitoitsu
 	if (strategy == STRATEGIES.CHIITOITSU) {
+		if (tilePrio.shape == 0) {
+			log("Decline Riichi because of chiitoitsu wait that can be improved!");
+			return false;
+		}
 		badWait = tilePrio.waits < 3 - RIICHI;
 	}
 
@@ -791,19 +796,19 @@ function shouldRiichi(tilePrio) {
 	}
 
 	// Not Dealer & bad Wait & Riichi is only yaku
-	if (seatWind != 1 && badWait && tilePrio.score.riichi < 4000 - (RIICHI * 1000) && !lotsOfDoraIndicators) {
+	if (seatWind != 1 && badWait && tilePrio.score.riichi < 4000 - (RIICHI * 1000) && !lotsOfDoraIndicators && tilePrio.shape > 0.4) {
 		log("Decline Riichi because of worthless hand, bad waits and not dealer.");
 		return false;
 	}
 
 	// High Danger and hand not worth much or bad wait
-	if (getCurrentDangerLevel() > 5000 && (tilePrio.score.riichi < 5000 - (RIICHI * 1000) || badWait)) {
+	if (tilePrio.score.riichi < (getCurrentDangerLevel() - (RIICHI * 1000)) * (1 + badWait)) {
 		log("Decline Riichi because of worthless hand and high danger.");
 		return false;
 	}
 
 	// Hand already has enough yaku and high value (Around 6000+ depending on the wait)
-	if (tilePrio.yaku.closed >= 1 && tilePrio.score.closed > 4000 + (RIICHI * 1000) + (tilePrio.waits * 500)) {
+	if (tilePrio.yaku.closed >= 1 && tilePrio.score.closed / (seatWind == 1 ? 1.5 : 1) > 4000 + (RIICHI * 1000) + (tilePrio.waits * 500)) {
 		log("Decline Riichi because of high value hand with enough yaku.");
 		return false;
 	}
