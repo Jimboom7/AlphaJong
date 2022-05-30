@@ -90,8 +90,8 @@ async function callTriple(combinations, operation) {
 	var newPairs = newHandTriples.pairs.length / 2;
 
 	if (isSameTile(nextDiscard, getTileForCall()) ||
-		(callTiles[0].index == getTileForCall() - 2 && isSameTile(nextDiscard, { index: callTiles[0].index - 1, type: callTiles[0].type })) ||
-		(callTiles[1].index == getTileForCall() + 2 && isSameTile(nextDiscard, { index: callTiles[1].index + 1, type: callTiles[1].type }))) {
+		(callTiles[0].index == getTileForCall().index - 2 && isSameTile(nextDiscard, { index: callTiles[0].index - 1, type: callTiles[0].type })) ||
+		(callTiles[1].index == getTileForCall().index + 2 && isSameTile(nextDiscard, { index: callTiles[1].index + 1, type: callTiles[1].type }))) {
 		declineCall(operation);
 		log("Next discard would be the same tile. Call declined!");
 		return false;
@@ -129,13 +129,19 @@ async function callTriple(combinations, operation) {
 		return false;
 	}
 
+	if (seatWind == 1) { //Remove dealer bonus for the following checks
+		handValue.score.closed /= 1.5;
+		handValue.score.open /= 1.5;
+		newHandValue.score.open /= 1.5;
+	}
+
 	if (newHandValue.shanten > handValue.shanten) { //Call would make shanten worse
 		log("Call would increase shanten! Declined!");
 		declineCall(operation);
 		return false;
 	}
 	else if (newHandValue.shanten == handValue.shanten) { //When it does not improve shanten
-		if (!isClosed && newHandValue.priority > handValue.priority * 1.1) { //When the call improves the hand
+		if (!isClosed && newHandValue.priority > handValue.priority * 1.3) { //When the call improves the hand
 			log("Call accepted because hand is already open and it improves the hand!");
 		}
 		else {
@@ -159,14 +165,14 @@ async function callTriple(combinations, operation) {
 			log("Call accepted because of high value hand!");
 		}
 		else if (newHandValue.score.open >= handValue.score.closed * 1.75 && //Call gives additional value to hand
-			((newHandValue.score.open >= (2000 - (CALL_PON_CHI * 200) - ((3 - newHandValue.shanten) * 200))) / (seatWind == 1 ? 1.5 : 1) || //And either hand is not extremely cheap...
+			((newHandValue.score.open >= (2000 - (CALL_PON_CHI * 200) - ((3 - newHandValue.shanten) * 200))) || //And either hand is not extremely cheap...
 				newHonorPairs >= 1)) { //Or there are some honor pairs in hand (=can be called easily or act as safe discards)
 			log("Call accepted because it boosts the value of the hand!");
 		}
 		else if (newHandValue.score.open > handValue.score.open * 0.9 && //Call loses not much value
 			newHandValue.score.open > handValue.score.closed * 0.7 &&
-			((isBadWait && (newHandValue.score.open >= (1000 - (CALL_PON_CHI * 100) - ((3 - newHandValue.shanten) * 100)) / (seatWind == 1 ? 1.5 : 1))) || // And it's a bad wait while the hand is not extremely cheap
-				(!isBadWait && (newHandValue.score.open >= (2000 - (CALL_PON_CHI * 200) - ((3 - newHandValue.shanten) * 200)) / (seatWind == 1 ? 1.5 : 1))) || //Or it was a good wait and the hand is at least a bit valuable
+			((isBadWait && (newHandValue.score.open >= (1000 - (CALL_PON_CHI * 100) - ((3 - newHandValue.shanten) * 100)))) || // And it's a bad wait while the hand is not extremely cheap
+				(!isBadWait && (newHandValue.score.open >= (2000 - (CALL_PON_CHI * 200) - ((3 - newHandValue.shanten) * 200)))) || //Or it was a good wait and the hand is at least a bit valuable
 				newHonorPairs >= 2) && //Or multiple honor pairs
 			((newHandTriples.pairs.filter(t => isValueTile(t) && getNumberOfTilesAvailable(t.index, t.type) >= 1)).length >= 2 && (newPairs >= 2 || newHandValue.shanten > 1))) {//And would open hand anyway with honor call
 			log("Call accepted because it reduces shanten!");
@@ -176,11 +182,11 @@ async function callTriple(combinations, operation) {
 			log("Call accepted because it eliminates a bad wait and makes the hand ready!");
 		}
 		else if ((0.5 - (tilesLeft / getWallSize())) +
-			(0.5 - (newHandValue.shanten / 2)) +
-			(((newPairs) - newHandValue.shanten - 0.5) / 4) +
-			((newHandValue.score.open / 1500) - 1) +
+			(0.25 - (newHandValue.shanten / 4)) +
+			(newHandValue.shanten > 0 ? ((newPairs - newHandValue.shanten - 0.5) / 2) : 0) +
+			((newHandValue.score.open / 3000) - 0.5) +
 			(((newHandValue.score.open / handValue.score.closed) / 2) - 0.5) +
-			(isBadWait - 0.5) >=
+			((isBadWait / 2) - 0.25) >=
 			1 - (CALL_PON_CHI / 2)) { //The call is good in multiple aspects
 			log("Call accepted because it's good in multiple aspects");
 		}
