@@ -292,20 +292,18 @@ function callRiichi(tiles) {
 					if (getTileName(tile.tile) == getTileName(ownHand[ownHand.length - 1])) { //Is last tile?
 						moqie = true;
 					}
-					log("Call Riichi!");
+					log("Discard: " + getTileName(tile.tile, false));
 					sendRiichiCall(comb, moqie);
-					return;
+					return true;
 				}
 				else {
-					log("Riichi declined!");
-					discardTile(tiles[0].tile);
-					return;
+					return false;
 				}
 			}
 		}
 	}
 	log("Riichi declined because Combination not found!");
-	discardTile(tiles[0].tile);
+	return false;
 }
 
 //Discard the safest tile, but consider slightly riskier tiles with same shanten
@@ -342,7 +340,7 @@ function discardTile(tile) {
 	if (!tile.valid) {
 		return;
 	}
-	log("Discard: " + getTileName(tile));
+	log("Discard: " + getTileName(tile, false));
 	for (var i = 0; i < ownHand.length; i++) {
 		if (ownHand[i].index == tile.index && ownHand[i].type == tile.type && ownHand[i].dora == tile.dora) {
 			discards[0].push(ownHand[i]);
@@ -362,7 +360,7 @@ function discardTile(tile) {
 async function getTilePriorities(inputHand) {
 
 	if (isDebug()) {
-		log("Dora: " + getTileName(dora[0]));
+		log("Dora: " + getTileName(dora[0], false));
 		printHand(inputHand);
 	}
 
@@ -979,10 +977,14 @@ async function discard() {
 
 	var tile = getDiscardTile(tiles);
 
+	var riichi = false;
 	if (canRiichi()) {
-		callRiichi(tiles);
+		tiles.sort(function (p1, p2) {
+			return p2.riichiPriority - p1.riichiPriority;
+		});
+		riichi = callRiichi(tiles);
 	}
-	else {
+	if (!riichi) {
 		discardTile(tile);
 	}
 
