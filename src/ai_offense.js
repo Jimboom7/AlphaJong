@@ -232,7 +232,7 @@ function callKan(operation, tileForCall) {
 		(strategyAllowsCalls &&
 			tiles.shanten <= (tilesLeft / (getWallSize() / 2)) + CALL_KAN &&
 			getCurrentDangerLevel() < 1000 + (CALL_KAN * 500) &&
-			tiles.shanten <= newTiles.shanten &&
+			tiles.shanten >= newTiles.shanten &&
 			tiles.efficiency * 0.9 <= newTiles.efficiency)) {
 		makeCall(operation);
 		log("Kan accepted!");
