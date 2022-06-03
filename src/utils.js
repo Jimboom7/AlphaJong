@@ -259,7 +259,7 @@ function removeTilesFromTileArray(inputTiles, tiles) {
 
 	for (let tile of tiles) {
 		for (var j = 0; j < tileArray.length; j++) {
-			if (tile.index == tileArray[j].index && tile.type == tileArray[j].type && tile.dora == tileArray[j].dora) {
+			if (isSameTile(tile, tileArray[j])) {
 				tileArray.splice(j, 1);
 				break;
 			}

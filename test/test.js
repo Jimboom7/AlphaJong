@@ -654,6 +654,19 @@ async function runCallTestcase() {
 			}
 			break;
 
+		case 6:
+			logTestcase("Test Call with unsure Yaku");
+			ownHand = getTilesFromString("3m45p22345s77z");
+			calls[0] = getTilesFromString("999m");
+			isClosed = false;
+			updateAvailableTiles();
+			testCallTile = { index: 2, type: 2, dora: false, doraValue: 0 };
+			var callResult = await callTriple(["2s|2s"], 0);
+			expected = ["3m"];
+			if (callResult) { //Should decline
+				expected = ["0z"];
+			}
+			break;
 
 		default:
 			nextTestcase();
