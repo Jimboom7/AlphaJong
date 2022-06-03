@@ -141,7 +141,7 @@ async function callTriple(combinations, operation) {
 		return false;
 	}
 	else if (newHandValue.shanten == handValue.shanten) { //When it does not improve shanten
-		if (!isClosed && newHandValue.priority > handValue.priority * 1.3) { //When the call improves the hand
+		if (!isClosed && newHandValue.priority > handValue.priority * 1.5) { //When the call improves the hand
 			log("Call accepted because hand is already open and it improves the hand!");
 		}
 		else {
@@ -185,7 +185,7 @@ async function callTriple(combinations, operation) {
 			(0.25 - (newHandValue.shanten / 4)) +
 			(newHandValue.shanten > 0 ? ((newPairs - newHandValue.shanten - 0.5) / 2) : 0) +
 			((newHandValue.score.open / 3000) - 0.5) +
-			(((newHandValue.score.open / handValue.score.closed) / 2) - 0.5) +
+			(((newHandValue.score.open / handValue.score.closed) * 0.75) - 0.75) +
 			((isBadWait / 2) - 0.25) >=
 			1 - (CALL_PON_CHI / 2)) { //The call is good in multiple aspects
 			log("Call accepted because it's good in multiple aspects");
@@ -348,7 +348,7 @@ function discardTile(tile) {
 	}
 	log("Discard: " + getTileName(tile, false));
 	for (var i = 0; i < ownHand.length; i++) {
-		if (ownHand[i].index == tile.index && ownHand[i].type == tile.type && ownHand[i].dora == tile.dora) {
+		if (isSameTile(ownHand[i], tile, true)) {
 			discards[0].push(ownHand[i]);
 			if (!isDebug()) {
 				callDiscard(i);
@@ -592,7 +592,7 @@ function getHandValues(hand, discardedTile) {
 			var thisWait = numberOfTiles1 * getWaitQuality(tile1);
 			var thisFu = calculateFu(triples2, calls[0], pairs2, removeTilesFromTileArray(hand, triples.concat(pairs).concat(tile1)), tile1);
 			if (isClosed || thisYaku.open >= 1 || tilesLeft <= 4) {
-				if (tile1Furiten) {
+				if (tile1Furiten && tilesLeft > 4) {
 					thisWait = numberOfTiles1 / 6;
 				}
 				waits += thisWait;
@@ -727,7 +727,7 @@ function getHandValues(hand, discardedTile) {
 		fu /= numberOfTotalWaitCombinations;
 	}
 	if (waitTiles.length > 0) {
-		waits *= (waitTiles.length * 0.3) + 0.5; //Waiting on multiple tiles is better
+		waits *= (waitTiles.length * 0.15) + 0.75; //Waiting on multiple tiles is better
 	}
 
 	fu = fu <= 30 ? 30 : fu;
@@ -739,7 +739,7 @@ function getHandValues(hand, discardedTile) {
 			efficiency = (waits + shape) / 10;
 		}
 		else {
-			efficiency = ((shanten / 1.5) * -1);
+			efficiency = ((shanten / 1.7) * -1);
 		}
 	}
 
@@ -886,7 +886,7 @@ function thirteenOrphansPriorities() {
 	// Filter out all duplicate terminal/honors
 	var originalUniqueTerminalHonors = [];
 	originalOwnTerminalHonors.forEach(tile => {
-		if (!originalUniqueTerminalHonors.some(otherTile => tile.index == otherTile.index && tile.type == otherTile.type)) {
+		if (!originalUniqueTerminalHonors.some(otherTile => isSameTile(tile, otherTile))) {
 			originalUniqueTerminalHonors.push(tile);
 		}
 	});
@@ -905,7 +905,7 @@ function thirteenOrphansPriorities() {
 		// Filter out all duplicate terminal/honors
 		var uniqueTerminalHonors = [];
 		ownTerminalHonors.forEach(tile => {
-			if (!uniqueTerminalHonors.some(otherTile => tile.index == otherTile.index && tile.type == otherTile.type)) {
+			if (!uniqueTerminalHonors.some(otherTile => isSameTile(tile, otherTile))) {
 				uniqueTerminalHonors.push(tile);
 			}
 		});
@@ -954,7 +954,7 @@ function canDoThirteenOrphans() {
 	// Filter out all duplicate terminal/honors
 	var uniqueTerminalHonors = [];
 	ownTerminalHonors.forEach(tile => {
-		if (!uniqueTerminalHonors.some(otherTile => tile.index == otherTile.index && tile.type == otherTile.type)) {
+		if (!uniqueTerminalHonors.some(otherTile => isSameTile(tile, otherTile))) {
 			uniqueTerminalHonors.push(tile);
 		}
 	});
@@ -985,7 +985,7 @@ function canDoThirteenOrphans() {
 function getMissingTilesForThirteenOrphans(uniqueTerminalHonors) {
 	var thirteen_orphans_set = "19m19p19s1234567z";
 	var thirteenOrphansTiles = getTilesFromString(thirteen_orphans_set);
-	return thirteenOrphansTiles.filter(tile => !uniqueTerminalHonors.some(otherTile => tile.index == otherTile.index && tile.type == otherTile.type));
+	return thirteenOrphansTiles.filter(tile => !uniqueTerminalHonors.some(otherTile => isSameTile(tile, otherTile)));
 }
 
 
