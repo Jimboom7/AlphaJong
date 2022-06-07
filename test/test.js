@@ -73,7 +73,7 @@ async function runTestcase(testcase) {
 			runWaitsTestcase();
 			break;
 		case "Call":
-			runCallTestcase();
+			await runCallTestcase();
 			break;
 		case "Issue":
 			runIssueTestcase();
@@ -269,7 +269,7 @@ function runDefenseTestcase() {
 			logTestcase("Should Fold 3 Shanten");
 			dora = getTilesFromString("4z");
 			ownHand = getTilesFromString("369m2267p2469s111z");
-			discards = [[], getTilesFromString("5669m2p"), getTilesFromString("1999p4z"), getTilesFromString("14z")];
+			discards = [[], getTilesFromString("5669m2p"), getTilesFromString("23m99p4z"), getTilesFromString("578m14z")];
 			calls = [[], [], getTilesFromString("666z"), getTilesFromString("111444m777z")];
 			expected = ["1z"];
 			break;
@@ -589,14 +589,14 @@ function runWaitsTestcase() {
 	}
 }
 
-function runCallTestcase() {
+async function runCallTestcase() {
 	switch (currentTestStep) {
 		case 1:
 			logTestcase("Test Pon Call");
 			ownHand = getTilesFromString("222444m22678p367s");
 			updateAvailableTiles();
 			testCallTile = { index: 8, type: 0, dora: false, doraValue: 0 };
-			callTriple(["6p|7p"], 0);
+			var callResult = await callTriple(["6p|7p"], 0);
 			expected = ["3s"];
 			if (callResult) { //Should decline
 				expected = ["0z"];
@@ -608,7 +608,7 @@ function runCallTestcase() {
 			ownHand = getTilesFromString("222444m2223457p3s");
 			updateAvailableTiles();
 			testCallTile = { index: 4, type: 0, dora: false, doraValue: 0 };
-			callTriple(["2p|3p", "3p|5p"], 0);
+			var callResult = await callTriple(["2p|3p", "3p|5p"], 0);
 			expected = ["3s"];
 			if (callResult) { //Should decline
 				expected = ["0z"];
@@ -620,7 +620,7 @@ function runCallTestcase() {
 			readDebugString("6m|44789m2469p30s66z|||||22z9s44z|9m4z7s8m1z|1s1z65s6z|9s2z9m4p|0,0,0,0|1|1|51");
 			updateAvailableTiles();
 			testCallTile = { index: 6, type: 3, dora: false, doraValue: 0 };
-			var callResult = callTriple(["6z|6z"], 0);
+			var callResult = await callTriple(["6z|6z"], 0);
 			expected = ["9p"];
 			if (!callResult) { //Should accept
 				expected = ["0z"];
@@ -629,16 +629,44 @@ function runCallTestcase() {
 
 		case 4:
 			logTestcase("Test Shanten Reduce Call");
-			ownHand = getTilesFromString("1359m11p067s4466z");
+			ownHand = getTilesFromString("1359m11p067s4477z");
 			updateAvailableTiles();
 			testCallTile = { index: 1, type: 0, dora: false, doraValue: 0 };
-			var callResult = callTriple(["1p|1p"], 0);
-			expected = ["1p"];
+			var callResult = await callTriple(["1p|1p"], 0);
+			expected = ["9m"];
 			if (!callResult) { //Should accept
 				expected = ["0z"];
 			}
 			break;
 
+		case 5:
+			logTestcase("Test Call for Tenpai at end of game");
+			ownHand = getTilesFromString("123569m11p567s44z");
+			updateAvailableTiles();
+			testCallTile = { index: 1, type: 0, dora: false, doraValue: 0 };
+			strategyAllowsCalls = false;
+			tilesLeft = 3;
+			var callResult = await callTriple(["1p|1p"], 0);
+			ownHand = ownHand.concat(getTileFromString("1p"));
+			expected = ["9m"];
+			if (!callResult) { //Should accept
+				expected = ["0z"];
+			}
+			break;
+
+		case 6:
+			logTestcase("Test Call with unsure Yaku");
+			ownHand = getTilesFromString("3m45p22345s77z");
+			calls[0] = getTilesFromString("999m");
+			isClosed = false;
+			updateAvailableTiles();
+			testCallTile = { index: 2, type: 2, dora: false, doraValue: 0 };
+			var callResult = await callTriple(["2s|2s"], 0);
+			expected = ["3m"];
+			if (callResult) { //Should decline
+				expected = ["0z"];
+			}
+			break;
 
 		default:
 			nextTestcase();

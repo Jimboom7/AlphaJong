@@ -88,10 +88,10 @@ function getTilesFromString(inputString) {
 		if (type != "4") {
 			for (let number of numbers) {
 				if (parseInt(number) == 0) {
-					tiles.push({ index: 5, type: type, dora: true, doraValue: 1 });
+					tiles.push({ index: 5, type: type, dora: true, doraValue: 1, valid: true });
 				}
 				else {
-					tiles.push({ index: parseInt(number), type: type, dora: false, doraValue: 0 });
+					tiles.push({ index: parseInt(number), type: type, dora: false, doraValue: 0, valid: true });
 				}
 			}
 			numbers = [];
@@ -118,12 +118,13 @@ function getTileFromString(inputString) {
 			type = 3;
 			break;
 	}
+	var index = inputString[0];
 	if (inputString[0] == "0") {
-		inputString[0] = 5;
+		index = "5";
 		dr = true;
 	}
 	if (type != "4") {
-		var tile = { index: parseInt(inputString[0]), type: type, dora: dr };
+		var tile = { index: parseInt(index), type: type, dora: dr, valid: true };
 		tile.doraValue = getTileDoraValue(tile);
 		return tile;
 	}
@@ -134,7 +135,7 @@ function getTileFromString(inputString) {
 function getTileName(tile, useRaw = true) {
 	let name = "";
 	if (tile.dora == true) {
-		name =  "0" + getNameForType(tile.type);
+		name = "0" + getNameForType(tile.type);
 	} else {
 		name = tile.index + getNameForType(tile.type);
 	}

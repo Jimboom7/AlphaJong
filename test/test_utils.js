@@ -29,7 +29,7 @@ function resetGlobals() {
 function readDebugString(debugString) {
 	var debugArray = debugString.split("|");
 	if (debugArray.length == 12) {
-		read3PlayerDebugString(debugString);
+		return read3PlayerDebugString(debugString);
 	}
 	if (debugArray.length != 14) {
 		log("Failed to read debug String!");
@@ -56,10 +56,7 @@ function readDebugString(debugString) {
 //Reads a 3-player debugString and sets the game state accordingly
 function read3PlayerDebugString(debugString) {
 	var debugArray = debugString.split("|");
-	if (debugArray.length == 12) {
-		read3PlayerDebugString(debugString);
-	}
-	if (debugArray.length != 14) {
+	if (debugArray.length != 12) {
 		log("Failed to read debug String!");
 	}
 	dora = getTilesFromString(debugArray[0]);
