@@ -110,7 +110,7 @@ function getSeatWind(player) {
 }
 
 function getRound() {
-	return view.DesktopMgr.Inst.index_ju;
+	return view.DesktopMgr.Inst.index_ju + 1;
 }
 
 function getRoundWind() {
@@ -205,11 +205,13 @@ function sendAbortiveDrawCall() {
 function callDiscard(tileNumber) {
 	if (MODE === AIMODE.AUTO) {
 		try {
-			view.DesktopMgr.Inst.players[0]._choose_pai = view.DesktopMgr.Inst.players[0].hand[tileNumber];
-			view.DesktopMgr.Inst.players[0].DoDiscardTile();
+			if (view.DesktopMgr.Inst.players[0].hand[tileNumber].valid) {
+				view.DesktopMgr.Inst.players[0]._choose_pai = view.DesktopMgr.Inst.players[0].hand[tileNumber];
+				view.DesktopMgr.Inst.players[0].DoDiscardTile();
+			}
 		}
 		catch {
-			log("Failed to decline the discard.");
+			log("Failed to discard the tile.");
 		}
 	} else {
 		let tileID = ownHand[tileNumber];
@@ -288,7 +290,7 @@ function rememberPlayerHand(player) {
 }
 
 function isEastRound() {
-	return view.DesktopMgr.Inst.game_config.mode.mode == 1;
+	return view.DesktopMgr.Inst.game_config.mode.mode % 10 == 1;
 }
 
 // Is the player able to join a given room

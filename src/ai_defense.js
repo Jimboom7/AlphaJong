@@ -239,7 +239,7 @@ function getMostRecentDiscardDanger(tile, player, includeOthers) {
 //Returns the position of a tile in discards
 function getLastTileInDiscard(player, tile) {
 	for (var i = discards[player].length - 1; i >= 0; i--) {
-		if (discards[player][i].index == tile.index && discards[player][i].type == tile.type) {
+		if (isSameTile(discards[player][i], tile)) {
 			return discards[player][i];
 		}
 	}
@@ -253,7 +253,7 @@ function wasTileCalledFromOtherPlayers(player, tile) {
 			continue;
 		}
 		for (let t of calls[i]) { //Look through all melds and check where the tile came from
-			if (t.from == localPosition2Seat(player) && tile.index == t.index && tile.type == t.type) {
+			if (t.from == localPosition2Seat(player) && isSameTile(tile, t)) {
 				t.numberOfPlayerHandChanges = [10, 10, 10, 10];
 				return t;
 			}
