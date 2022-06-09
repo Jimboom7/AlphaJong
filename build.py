@@ -22,6 +22,7 @@ data = f"""// ==UserScript==
 // @match        https://mahjongsoul.game.yo-star.com/*
 // @match        https://majsoul.com/*
 // @match        https://game.maj-soul.com/*
+// @match        https://game.maj-soul.net/*
 // @match        https://majsoul.union-game.com/*
 // @match        https://game.mahjongsoul.com/*
 // ==/UserScript==
