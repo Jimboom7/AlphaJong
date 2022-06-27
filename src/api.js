@@ -380,6 +380,7 @@ function trackDiscardTiles() {
 				if (arguments[2] && danger < 0.01) { // Ignore Tsumogiri of a safetile, set it to average danger
 					danger = 0.05;
 				}
+				arguments[0].tsumogiri = arguments[2];
 				playerDiscardSafetyList[seat2LocalPosition(this.player.seat)].push(danger);
 				return _super.apply(this, arguments); // Call original function
 			};

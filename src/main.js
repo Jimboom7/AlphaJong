@@ -254,6 +254,15 @@ function setData(mainUpdate = true) {
 		ownHand[ownHand.length - 1].valid = tile.valid; //Is valid discard
 	}
 
+	if (MARK_TSUMOGIRI) {
+		for (var j = 1; j < getNumberOfPlayers(); j++) {
+			if (getDiscardsOfPlayer(j).last_pai != null && getDiscardsOfPlayer(j).last_pai.val.tsumogiri) {
+				getDiscardsOfPlayer(j).last_pai.GetDefaultColor = function () { return new Laya.Vector4(0.85, 0.85, 0.85, 1); }
+				getDiscardsOfPlayer(j).last_pai.ResetShow();
+			}
+		}
+	}
+
 	discards = [];
 	for (var j = 0; j < getNumberOfPlayers(); j++) { //Get Discards for all Players
 		var temp_discards = [];
