@@ -347,7 +347,7 @@ function discardTile(tile) {
 		return;
 	}
 	log("Discard: " + getTileName(tile, false));
-	for (var i = 0; i < ownHand.length; i++) {
+	for (var i = ownHand.length - 1; i >= 0; i--) {
 		if (isSameTile(ownHand[i], tile, true)) {
 			discards[0].push(ownHand[i]);
 			if (!isDebug()) {

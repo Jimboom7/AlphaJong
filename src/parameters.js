@@ -27,10 +27,11 @@ var THIRTEEN_ORPHANS = 10; //Number of Honor/Terminals in hand to go for 13 orph
 var KEEP_SAFETILE = false; //If set to true the bot will keep 1 safetile
 
 //MISC
+var MARK_TSUMOGIRI = false; // Mark the tsumogiri tiles of opponents with grey color
+var CHANGE_RECOMMEND_TILE_COLOR = true; // change recommended tile color in help mode
+var USE_EMOJI = true; //use EMOJI to show tile
 var LOG_AMOUNT = 3; //Amount of Messages to log for Tile Priorities
 var DEBUG_BUTTON = false; //Display a Debug Button in the GUI
-var USE_EMOJI = true; //use EMOJI to show tile
-var CHANGE_RECOMMEND_TILE_COLOR = true; // change current recommend tile color
 
 
 
@@ -75,10 +76,10 @@ var showingStrategy = false; //Current in own turn?
 
 // Display
 var tileEmojiList = [
-	["red🀝" ,"🀙" ,"🀚" ,"🀛" ,"🀜" ,"🀝" ,"🀞" ,"🀟" ,"🀠" ,"🀡"],
-	["red🀋" ,"🀇" ,"🀈" ,"🀉" ,"🀊" ,"🀋" ,"🀌" ,"🀍" ,"🀎" ,"🀏"],
-	["red🀔" ,"🀐" ,"🀑" ,"🀒" ,"🀓" ,"🀔" ,"🀕" ,"🀖" ,"🀗" ,"🀘"],
-	["", "🀀" ,"🀁" ,"🀂" ,"🀃" ,"🀆" ,"🀅" ,"🀄"]];
+	["red🀝", "🀙", "🀚", "🀛", "🀜", "🀝", "🀞", "🀟", "🀠", "🀡"],
+	["red🀋", "🀇", "🀈", "🀉", "🀊", "🀋", "🀌", "🀍", "🀎", "🀏"],
+	["red🀔", "🀐", "🀑", "🀒", "🀓", "🀔", "🀕", "🀖", "🀗", "🀘"],
+	["", "🀀", "🀁", "🀂", "🀃", "🀆", "🀅", "🀄"]];
 
 
 //LOCAL STORAGE

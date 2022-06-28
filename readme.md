@@ -1,3 +1,8 @@
+### Notice Regarding Bans
+As of 28. June 2022 there have been reports of players being banned for using this script!  
+It is not safe anymore to use this script, please be careful!
+
+
 ## About The Project
 
 This project is a Mahjong AI for [Mahjong Soul](https://mahjongsoul.game.yo-star.com/) that runs directly in any browser. Everything was written from scratch in native JavaScript without any libraries.  
@@ -55,4 +60,4 @@ The project contains a testclass with simple "Nani Kiru?" testcases.
 
 ## Disclaimer
 
-Bots are a violation of Mahjong Soul's Terms of Service. This means you can theoretically get banned for using this script. There have been no reports of any bans yet, but you need to be aware that this is on your own risk and the creator of the bot is not responsible for your actions.
+Bots are a violation of Mahjong Soul's Terms of Service. This means you can get banned for using this script. Using this bot is on your own risk and the creator is not responsible for your actions.
