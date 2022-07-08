@@ -310,7 +310,8 @@ function getDaisangen(hand) {
 
 //Chanta
 function getChanta(triplets, sequences, pairs) {
-	if ((triplets.concat(pairs)).filter(tile => tile.type == 3 || tile.index == 1 || tile.index == 9).length +
+	if ((sequences.filter(tile => tile.index == 1 || tile.index == 9).length * 3) == sequences.length &&
+		(triplets.concat(pairs)).filter(tile => tile.type == 3 || tile.index == 1 || tile.index == 9).length +
 		(sequences.filter(tile => tile.index == 1 || tile.index == 9).length * 3) >= 13) {
 		return { open: 1, closed: 2 };
 	}
@@ -327,7 +328,8 @@ function getHonrou(triplets) {
 
 //Junchan
 function getJunchan(triplets, sequences, pairs) {
-	if ((triplets.concat(pairs)).filter(tile => tile.type != 3 && (tile.index == 1 || tile.index == 9)).length +
+	if ((sequences.filter(tile => tile.index == 1 || tile.index == 9).length * 3) == sequences.length &&
+		(triplets.concat(pairs)).filter(tile => tile.type != 3 && (tile.index == 1 || tile.index == 9)).length +
 		(sequences.filter(tile => tile.index == 1 || tile.index == 9).length * 3) >= 13) {
 		return { open: 1, closed: 1 }; // - Added to Chanta
 	}

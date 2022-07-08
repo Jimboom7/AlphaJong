@@ -668,6 +668,19 @@ async function runCallTestcase() {
 			}
 			break;
 
+		case 7:
+			logTestcase("Test Call with Chanta Yaku");
+			ownHand = getTilesFromString("3406m237899p789s");
+			isClosed = true;
+			updateAvailableTiles();
+			testCallTile = { index: 9, type: 0, dora: false, doraValue: 0 };
+			var callResult = await callTriple(["7p|8p","9p|9p"], 0);
+			expected = ["9p"];
+			if (callResult) { //Should decline
+				expected = ["0z"];
+			}
+			break;
+
 		default:
 			nextTestcase();
 			return;
