@@ -1,8 +1,3 @@
-### Notice Regarding Bans
-As of 28. June 2022 there have been reports of players being banned for using this script!  
-It is not safe anymore to use this script, please be careful!
-
-
 ## About The Project
 
 This project is a Mahjong AI for [Mahjong Soul](https://mahjongsoul.game.yo-star.com/) that runs directly in any browser. Everything was written from scratch in native JavaScript without any libraries.  
@@ -19,6 +14,27 @@ Compatible with both 3 and 4 player mode.
 * Go into a game and click "Start Bot" in the GUI at the top.
 * You can check "Autostart" to let the bot automatically start new games.
 * Detailed logging is output to the browser console ([F12] in most browsers)
+
+### How to avoid bans
+
+There is a high risk of getting banned when using this script without further preparation. Fortunately [the MajSoul Mod Plus project on GitHub](https://github.com/Avenshy/majsoul_mod_plus) is offering a way to avoid bans. They provide a "safe code" file which is the same as the official code of the game but the cheat detection is disabled. Here is how you can use it:  
+1. Install the [Header Editor](https://he.firefoxcn.net/en/) plugin.
+2. Open the plugin and go to the `Export and Import` tab.
+3. Fill in `https://cdn.jsdelivr.net/gh/Avenshy/majsoul_mod_plus/header%20editor.json` as Download Rule and press the Download button on the right.
+4. Pick `Suggested Group` and click save.
+5. **Make sure that Tampermonkey is turned off** and open the Mahjong Soul game webpage.
+6. Clear your browser cache (see image below). Press F12 to open the browser console and go to the `Application` tab. Choose `Storage` and tick the box `Cache storage`. Then click the button `Clear site data`.
+7. Refresh (F5) the webpage and check the browser console output. At the top it should display "CODE.JS替换成功！", which means the code was successfully replaced.
+8. You can now turn on Tampermonkey and use this bot without getting banned.
+
+![clear_cache](https://raw.githubusercontent.com/Jimboom7/AlphaJong/master/doc/img/clear_cache.png)
+
+**Note**: When the game updates to a new version and the safe code doesn't work anymore, first try cleaning the cache again (as seen in the image above). If that doesn't work the safe code needs to be updated:
+1. Check if the [safe_code.js file on MajSoul Mod Plus](https://github.com/Avenshy/majsoul_mod_plus) has been updated for the new version yet.
+2. If it has been updated click this link: [jsdelivr_purge_cache](https://purge.jsdelivr.net/gh/Avenshy/majsoul_mod_plus/safe_code.js) to refresh the code. If you see `"status": "finished"` it was successfull.
+3. Open Mahjong Soul, clear your browser cache and refresh the page.
+
+If you have problems with the above steps please try opening an issue on [MajSoul Mod Plus](https://github.com/Avenshy/majsoul_mod_plus).
 
 ### GUI
 ![GUI](./doc/img/gui.png)
@@ -60,4 +76,4 @@ The project contains a testclass with simple "Nani Kiru?" testcases.
 
 ## Disclaimer
 
-Bots are a violation of Mahjong Soul's Terms of Service. This means you can get banned for using this script. Using this bot is on your own risk and the creator is not responsible for your actions.
+Bots are a violation of Mahjong Soul's Terms of Service. Using this bot is on your own risk and the creator is not responsible for your actions.
